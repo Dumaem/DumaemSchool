@@ -2,15 +2,17 @@ using DumaemSchool.BlazorWeb.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using MudBlazor.Services;
+using Radzen;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddMudServices();
-
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
+
+builder.Services.AddMudServices();
+builder.Services.AddRadzenComponents();
 
 var app = builder.Build();
 
