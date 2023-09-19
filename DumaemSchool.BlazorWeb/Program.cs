@@ -1,6 +1,7 @@
 using DumaemSchool.BlazorWeb.Data;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
+using DumaemSchool.Core;
+using DumaemSchool.Database;
+using DumaemSchool.Migrator;
 using MudBlazor.Services;
 using Radzen;
 
@@ -13,6 +14,10 @@ builder.Services.AddSingleton<WeatherForecastService>();
 
 builder.Services.AddMudServices();
 builder.Services.AddRadzenComponents();
+builder.Services
+    .AddCore()
+    .AddDatabase(builder.Configuration)
+    .AddMigrations(builder.Configuration);
 
 var app = builder.Build();
 

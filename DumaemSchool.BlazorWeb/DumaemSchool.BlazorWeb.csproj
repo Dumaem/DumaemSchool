@@ -11,4 +11,10 @@
     <PackageReference Include="Radzen.Blazor" Version="4.15.11" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DumaemSchool.Core\DumaemSchool.Core.csproj" />
+    <ProjectReference Include="..\DumaemSchool.Database\DumaemSchool.Database.csproj" />
+    <ProjectReference Include="..\DumaemSchool.Migrator\DumaemSchool.Migrator.csproj" />
+  </ItemGroup>
+
 </Project>
