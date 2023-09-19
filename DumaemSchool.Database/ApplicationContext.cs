@@ -1,5 +1,4 @@
-﻿using DumaemSchool.Database.Entities;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace DumaemSchool.Database;
 

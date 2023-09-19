@@ -17,4 +17,7 @@
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.Design" Version="1.1.0" />
     </ItemGroup>
 
+    <ItemGroup>
+        <Using Include="DumaemSchool.Database.Entities"/>
+    </ItemGroup>
 </Project>
