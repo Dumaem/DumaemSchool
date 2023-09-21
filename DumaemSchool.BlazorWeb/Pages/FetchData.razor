@@ -1,8 +1,12 @@
 ﻿@page "/fetchdata"
 @using DumaemSchool.BlazorWeb.Data
 @using DumaemSchool.BlazorWeb.Middleware
+@using Microsoft.AspNetCore.Identity
+@using DumaemSchool.Auth.Models
+@using DumaemSchool.Auth.Managers
 @inject WeatherForecastService ForecastService
 @inject NavigationManager NavigationManager
+@inject SchoolSignInManager SignInManager
 
 <PageTitle>Weather forecast</PageTitle>
 
@@ -47,8 +51,9 @@ else
         forecasts = await ForecastService.GetForecastAsync(DateOnly.FromDateTime(DateTime.Now));
     }
 
-    private void LogIn()
+    private async Task LogIn()
     {
+        var res = await SignInManager.CanSignInAsync(new SchoolUser() { UserName = "WingiM"});
         var key = Guid.NewGuid();
         AuthenticationMiddleware.Logins[key] = new LoginCredentials() { Email = "WingiM", Password = "kredit200", RememberMe = true};
         NavigationManager.NavigateTo($"/login?key={key}", true);

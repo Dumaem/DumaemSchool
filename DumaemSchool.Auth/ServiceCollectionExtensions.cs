@@ -1,4 +1,6 @@
-﻿using DumaemSchool.Auth.Models;
+﻿using DumaemSchool.Auth.Managers;
+using DumaemSchool.Auth.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,7 +29,8 @@ public static class ServiceCollectionExtensions
                 options.Password.RequireNonAlphanumeric = false;
             })
             .AddRoles<SchoolRole>()
-            .AddEntityFrameworkStores<SchoolIdentityContext>();
+            .AddEntityFrameworkStores<SchoolIdentityContext>()
+            .AddSignInManager<SchoolSignInManager>();
         return services;
     }
 }
