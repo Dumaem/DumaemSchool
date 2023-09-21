@@ -3,7 +3,7 @@
 <PageTitle>DumaemSchool.BlazorWeb</PageTitle>
 
 
-<MudThemeProvider Theme="new MudTheme { Palette = new Palette {Primary = _primaryColor, Secondary = _secondaryColor}}" />
+<MudThemeProvider Theme="@_theme" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
@@ -21,6 +21,15 @@
 
 @code
 {
-    private string _primaryColor = "#FAF1E4";
-    private string _secondaryColor = "#9EB384";
+    private readonly MudTheme _theme = new()
+    {
+        Palette = new Palette
+        {
+            Primary = "#5D9C59",
+            Secondary = "#C7E8CA",
+            AppbarBackground = "#5D9C59",
+            AppbarText = "#FFFFFF",
+            TableHover = "#C7E8CA"
+        }
+    };
 }
