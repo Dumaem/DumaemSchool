@@ -12,8 +12,11 @@ public static class ServiceCollectionExtensions
         services.AddDbContext<SchoolIdentityContext>(options =>
         {
             options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")!,
-                npgsqlOptions => { npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery); });
+            options.UseNpgsql(configuration.GetConnectionString("Default")!,
+                npgsqlOptions =>
+                {
+                    npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                });
         });
         services.AddIdentity<SchoolUser, SchoolRole>(options =>
             {

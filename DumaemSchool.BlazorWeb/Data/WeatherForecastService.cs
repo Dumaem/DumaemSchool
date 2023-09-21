@@ -19,22 +19,14 @@ namespace DumaemSchool.BlazorWeb.Data
             _userManager = userManager;
         }
 
-        public async Task<WeatherForecast[]> GetForecastAsync(DateOnly startDate)
+        public Task<WeatherForecast[]> GetForecastAsync(DateOnly startDate)
         {
-            var user = new SchoolUser()
-            {
-                Email = "wingimobile@gmail.com",
-                UserName = "WingiM"
-            };
-            await _userManager.CreateAsync(user);
-            await _userManager.AddPasswordAsync(user, "kredit200");
-            await _signInManager.SignInAsync(user, true);
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            return Task.FromResult(Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
                 Date = startDate.AddDays(index),
                 TemperatureC = Random.Shared.Next(-20, 55),
                 Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            }).ToArray();
+            }).ToArray());
         }
     }
 }

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DumaemSchool.Auth;
 
-internal sealed class SchoolIdentityContext : IdentityDbContext<SchoolUser, SchoolRole, int>
+public sealed class SchoolIdentityContext : IdentityDbContext<SchoolUser, SchoolRole, int>
 {
     public SchoolIdentityContext(DbContextOptions options) : base(options)
     {
@@ -13,5 +13,6 @@ internal sealed class SchoolIdentityContext : IdentityDbContext<SchoolUser, Scho
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.HasDefaultSchema("identity");
+        base.OnModelCreating(builder);
     }
 }

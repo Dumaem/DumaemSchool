@@ -1,6 +1,7 @@
 using DumaemSchool.Auth;
 using DumaemSchool.Auth.Models;
 using DumaemSchool.BlazorWeb.Data;
+using DumaemSchool.BlazorWeb.Middleware;
 using DumaemSchool.Core;
 using DumaemSchool.Database;
 using DumaemSchool.Migrator;
@@ -34,6 +35,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseMiddleware<AuthenticationMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 

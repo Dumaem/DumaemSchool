@@ -1,13 +1,15 @@
 ﻿@page "/fetchdata"
 @using DumaemSchool.BlazorWeb.Data
+@using DumaemSchool.BlazorWeb.Middleware
 @inject WeatherForecastService ForecastService
+@inject NavigationManager NavigationManager
 
 <PageTitle>Weather forecast</PageTitle>
 
 <h1>Weather forecast</h1>
 
 <p>This component demonstrates fetching data from a service.</p>
-
+<button style="background-color: green; width: 20px; height: 20px;" onclick="@LogIn"></button>
 @if (forecasts == null)
 {
     <p><em>Loading...</em></p>
@@ -43,5 +45,12 @@ else
     protected override async Task OnInitializedAsync()
     {
         forecasts = await ForecastService.GetForecastAsync(DateOnly.FromDateTime(DateTime.Now));
+    }
+
+    private void LogIn()
+    {
+        var key = Guid.NewGuid();
+        AuthenticationMiddleware.Logins[key] = new LoginCredentials() { Email = "WingiM", Password = "kredit200", RememberMe = true};
+        NavigationManager.NavigateTo($"/login?key={key}", true);
     }
 }
