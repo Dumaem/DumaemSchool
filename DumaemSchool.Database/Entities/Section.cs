@@ -3,7 +3,7 @@
 /// <summary>
 /// Сущность Кружок
 /// </summary>
-public class Section
+public sealed class Section
 {
     public int Id { get; set; }
 
@@ -18,11 +18,11 @@ public class Section
 
     public DateOnly? DateDeleted { get; set; }
 
-    public virtual ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
+    public ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
 
-    public virtual ICollection<SectionStudent> SectionStudents { get; set; } = new List<SectionStudent>();
+    public ICollection<SectionStudent> SectionStudents { get; set; } = new List<SectionStudent>();
 
-    public virtual ICollection<SectionTeacher> SectionTeachers { get; set; } = new List<SectionTeacher>();
+    public ICollection<SectionTeacher> SectionTeachers { get; set; } = new List<SectionTeacher>();
 
-    public virtual SectionType SectionType { get; set; } = null!;
+    public SectionType SectionType { get; set; } = null!;
 }

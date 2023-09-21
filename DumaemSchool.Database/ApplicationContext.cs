@@ -2,38 +2,38 @@
 
 namespace DumaemSchool.Database;
 
-public class ApplicationContext : DbContext
+public sealed class ApplicationContext : DbContext
 {
     public ApplicationContext(DbContextOptions<ApplicationContext> options)
         : base(options)
     {
     }
 
-    public virtual DbSet<Activity> Activities { get; set; } = null!;
+    public DbSet<Activity> Activities { get; set; } = null!;
 
-    public virtual DbSet<Attendance> Attendances { get; set; } = null!;
+    public DbSet<Attendance> Attendances { get; set; } = null!;
 
-    public virtual DbSet<Lesson> Lessons { get; set; } = null!;
+    public DbSet<Lesson> Lessons { get; set; } = null!;
 
-    public virtual DbSet<Role> Roles { get; set; } = null!;
+    public DbSet<Role> Roles { get; set; } = null!;
 
-    public virtual DbSet<Schedule> Schedules { get; set; } = null!;
+    public DbSet<Schedule> Schedules { get; set; } = null!;
 
-    public virtual DbSet<Section> Sections { get; set; } = null!;
+    public DbSet<Section> Sections { get; set; } = null!;
 
-    public virtual DbSet<SectionStudent> SectionStudents { get; set; } = null!;
+    public DbSet<SectionStudent> SectionStudents { get; set; } = null!;
 
-    public virtual DbSet<SectionTeacher> SectionTeachers { get; set; } = null!;
+    public DbSet<SectionTeacher> SectionTeachers { get; set; } = null!;
 
-    public virtual DbSet<SectionType> SectionTypes { get; set; } = null!;
+    public DbSet<SectionType> SectionTypes { get; set; } = null!;
 
-    public virtual DbSet<Student> Students { get; set; } = null!;
+    public DbSet<Student> Students { get; set; } = null!;
 
-    public virtual DbSet<Teacher> Teachers { get; set; } = null!;
+    public DbSet<Teacher> Teachers { get; set; } = null!;
 
-    public virtual DbSet<TeacherLink> TeacherLinks { get; set; } = null!;
+    public DbSet<TeacherLink> TeacherLinks { get; set; } = null!;
 
-    public virtual DbSet<User> Users { get; set; } = null!;
+    public DbSet<User> Users { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -3,7 +3,7 @@
 /// <summary>
 /// Сущность Вид кружка
 /// </summary>
-public class SectionType
+public sealed class SectionType
 {
     public int Id { get; set; }
 
@@ -16,5 +16,5 @@ public class SectionType
 
     public DateOnly? DateDeleted { get; set; }
 
-    public virtual ICollection<Section> Sections { get; set; } = new List<Section>();
+    public ICollection<Section> Sections { get; set; } = new List<Section>();
 }

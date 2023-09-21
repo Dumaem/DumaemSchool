@@ -3,7 +3,7 @@
 /// <summary>
 /// Сущность Расписание
 /// </summary>
-public class Schedule
+public sealed class Schedule
 {
     public int Id { get; set; }
 
@@ -24,7 +24,7 @@ public class Schedule
     /// </summary>
     public int Cabinet { get; set; }
 
-    public virtual ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
+    public ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
 
-    public virtual Section Section { get; set; } = null!;
+    public Section Section { get; set; } = null!;
 }

@@ -3,7 +3,7 @@ using Npgsql;
 
 namespace DumaemSchool.Database;
 
-public class NpgsqlConnectionProvider
+public sealed class NpgsqlConnectionProvider
 {
     private readonly ApplicationContext _context;
 

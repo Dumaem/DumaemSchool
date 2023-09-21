@@ -3,7 +3,7 @@
 /// <summary>
 /// Сущность Учитель
 /// </summary>
-public class Teacher
+public sealed class Teacher
 {
     public int Id { get; set; }
 
@@ -16,9 +16,9 @@ public class Teacher
 
     public DateOnly? DateDeleted { get; set; }
 
-    public virtual ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
+    public ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
 
-    public virtual ICollection<SectionTeacher> SectionTeachers { get; set; } = new List<SectionTeacher>();
+    public ICollection<SectionTeacher> SectionTeachers { get; set; } = new List<SectionTeacher>();
 
-    public virtual ICollection<TeacherLink> TeacherLinks { get; set; } = new List<TeacherLink>();
+    public ICollection<TeacherLink> TeacherLinks { get; set; } = new List<TeacherLink>();
 }

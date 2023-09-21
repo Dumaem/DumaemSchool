@@ -3,7 +3,7 @@
 /// <summary>
 /// Связка кружка и учителя, который его проводит
 /// </summary>
-public class SectionTeacher
+public sealed class SectionTeacher
 {
     public int Id { get; set; }
 
@@ -16,7 +16,7 @@ public class SectionTeacher
     /// </summary>
     public bool? IsActual { get; set; }
 
-    public virtual Section Section { get; set; } = null!;
+    public Section Section { get; set; } = null!;
 
-    public virtual Teacher Teacher { get; set; } = null!;
+    public Teacher Teacher { get; set; } = null!;
 }

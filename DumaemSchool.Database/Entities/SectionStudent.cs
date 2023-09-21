@@ -3,7 +3,7 @@
 /// <summary>
 /// Связка кружка и ученика, который в нем занимается
 /// </summary>
-public class SectionStudent
+public sealed class SectionStudent
 {
     public int Id { get; set; }
 
@@ -11,7 +11,7 @@ public class SectionStudent
 
     public int StudentId { get; set; }
 
-    public virtual Section Section { get; set; } = null!;
+    public Section Section { get; set; } = null!;
 
-    public virtual Student Student { get; set; } = null!;
+    public Student Student { get; set; } = null!;
 }

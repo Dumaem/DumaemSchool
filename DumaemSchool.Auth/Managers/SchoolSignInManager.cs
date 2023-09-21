@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace DumaemSchool.Auth.Managers;
 
-public class SchoolSignInManager : SignInManager<SchoolUser>
+public sealed class SchoolSignInManager : SignInManager<SchoolUser>
 {
     public override async Task<bool> CanSignInAsync(SchoolUser user)
     {

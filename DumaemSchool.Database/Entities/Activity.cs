@@ -3,7 +3,7 @@
 /// <summary>
 /// Сущность Активность ученика
 /// </summary>
-public class Activity
+public sealed class Activity
 {
     public int Id { get; set; }
 
@@ -16,7 +16,7 @@ public class Activity
     /// </summary>
     public int Mark { get; set; }
 
-    public virtual Lesson Lesson { get; set; } = null!;
+    public Lesson Lesson { get; set; } = null!;
 
-    public virtual Student Student { get; set; } = null!;
+    public Student Student { get; set; } = null!;
 }

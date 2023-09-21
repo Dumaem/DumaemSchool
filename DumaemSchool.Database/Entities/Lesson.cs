@@ -3,7 +3,7 @@
 /// <summary>
 /// Сущность Занятие
 /// </summary>
-public class Lesson
+public sealed class Lesson
 {
     public int Id { get; set; }
 
@@ -21,11 +21,11 @@ public class Lesson
     /// </summary>
     public bool? IsConducted { get; set; }
 
-    public virtual ICollection<Activity> Activities { get; set; } = new List<Activity>();
+    public ICollection<Activity> Activities { get; set; } = new List<Activity>();
 
-    public virtual ICollection<Attendance> Attendances { get; set; } = new List<Attendance>();
+    public ICollection<Attendance> Attendances { get; set; } = new List<Attendance>();
 
-    public virtual Schedule Schedule { get; set; } = null!;
+    public Schedule Schedule { get; set; } = null!;
 
-    public virtual Teacher Teacher { get; set; } = null!;
+    public Teacher Teacher { get; set; } = null!;
 }
