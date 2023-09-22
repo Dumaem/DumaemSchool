@@ -1,5 +1,7 @@
-﻿using DumaemSchool.Auth.Managers;
+﻿using System.Reflection;
+using DumaemSchool.Auth.Managers;
 using DumaemSchool.Auth.Models;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -35,6 +37,12 @@ public static class ServiceCollectionExtensions
             .AddRoles<SchoolRole>()
             .AddEntityFrameworkStores<SchoolIdentityContext>()
             .AddSignInManager<SchoolSignInManager>();
+
+        services.AddMediatR(options =>
+        {
+            options.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+        });
+
         return services;
     }
 }

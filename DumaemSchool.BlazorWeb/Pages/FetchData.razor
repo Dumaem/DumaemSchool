@@ -4,10 +4,13 @@
 @using Microsoft.AspNetCore.Identity
 @using DumaemSchool.Auth.Models
 @using DumaemSchool.Auth.Managers
+@using DumaemSchool.Core.Commands
+@using DumaemSchool.Core.Models
+@using MediatR
 @inject WeatherForecastService ForecastService
 @inject NavigationManager NavigationManager
 @inject SchoolSignInManager SignInManager
-
+@inject ISender Sender;
 <PageTitle>Weather forecast</PageTitle>
 
 <h1>Weather forecast</h1>
@@ -53,9 +56,9 @@ else
 
     private async Task LogIn()
     {
-        var res = await SignInManager.CanSignInAsync(new SchoolUser() { UserName = "WingiM"});
-        var key = Guid.NewGuid();
-        AuthenticationMiddleware.Logins[key] = new LoginCredentials() { Email = "WingiM", Password = "kredit200", RememberMe = true};
-        NavigationManager.NavigateTo($"/login?key={key}", true);
+        var teacher = new Teacher() { Name = "Sasfasf" };
+        var register = new AddTeacherCommand(teacher, "bulat_sqwrwer1@mail.ru");
+        var res = await Sender.Send(register);
+        
     }
 }

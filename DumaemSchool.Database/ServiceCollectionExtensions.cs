@@ -1,4 +1,6 @@
 ﻿using System.Reflection;
+using DumaemSchool.Database.PipelineBehaviors;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,6 +33,7 @@ public static class ServiceCollectionExtensions
             options.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
         });
 
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactPipelineBehavior<,>));
         return services;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using MediatR.NotificationPublishers;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DumaemSchool.Core;
@@ -10,6 +11,7 @@ public static class ServiceCollectionExtensions
         services.AddMediatR(configuration =>
         {
             configuration.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+            configuration.NotificationPublisher = new TaskWhenAllPublisher();
         });
         return services;
     }
