@@ -7,13 +7,13 @@ public sealed class Teacher
 {
     public int Id { get; set; }
 
-    /// <summary>
-    /// Дата увольнения
-    /// </summary>
     public string Name { get; set; } = null!;
 
     public bool IsDeleted { get; set; }
 
+    /// <summary>
+    /// Дата увольнения
+    /// </summary>
     public DateOnly? DateDeleted { get; set; }
 
     public ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();

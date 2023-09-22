@@ -25,14 +25,18 @@ public class AuthenticationMiddleware
             var key = Guid.Parse(context.Request.Query["key"]!);
             var info = Logins[key];
 
-            var result = await signInManager.PasswordSignInAsync(info.Email, info.Password,
+            var user = await signInManager.UserManager.FindByEmailAsync(info.Email);
+            var result = await signInManager.PasswordSignInAsync(user!, info.Password,
                 info.RememberMe, lockoutOnFailure: false);
             info.Password = string.Empty;
-            if (result.Succeeded)
+            Logins.Remove(key);
+            if (!result.Succeeded)
             {
-                Logins.Remove(key);
-                context.Response.Redirect("/");
+                context.Response.Redirect("/login");
+                return;
             }
+
+            context.Response.Redirect("/");
         }
         else if (context.Request.Path == "/logout")
         {

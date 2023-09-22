@@ -27,6 +27,10 @@ public static class ServiceCollectionExtensions
                 options.Password.RequireLowercase = false;
                 options.Password.RequireUppercase = false;
                 options.Password.RequireNonAlphanumeric = false;
+                options.SignIn.RequireConfirmedAccount = false;
+                options.SignIn.RequireConfirmedEmail = false;
+                options.SignIn.RequireConfirmedPhoneNumber = false;
+                options.User.RequireUniqueEmail = true;
             })
             .AddRoles<SchoolRole>()
             .AddEntityFrameworkStores<SchoolIdentityContext>()
