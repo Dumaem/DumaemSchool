@@ -1,4 +1,4 @@
-﻿namespace DumaemSchool.Core.Models;
+﻿namespace DumaemSchool.Auth.Models;
 
 public static class UserClaims
 {
