@@ -18,6 +18,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Using Include="DumaemSchool.Database.Entities"/>
+        <Using Include="DumaemSchool.Database.Entities" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\DumaemSchool.Core\DumaemSchool.Core.csproj" />
     </ItemGroup>
 </Project>

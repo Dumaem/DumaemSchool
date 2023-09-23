@@ -1,4 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Reflection;
+using DumaemSchool.Core.Commands;
+using DumaemSchool.Database.PipelineBehaviors;
+using LanguageExt.Common;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -24,6 +29,14 @@ public static class ServiceCollectionExtensions
         });
 
         services.AddScoped<NpgsqlConnectionProvider>();
+
+        services.AddMediatR(options =>
+        {
+            options.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+            options
+                .AddBehavior<IPipelineBehavior<AddTeacherCommand, Result<Core.Models.Teacher>>,
+                    TransactPipelineBehavior<AddTeacherCommand, Core.Models.Teacher>>();
+        });
 
         return services;
     }

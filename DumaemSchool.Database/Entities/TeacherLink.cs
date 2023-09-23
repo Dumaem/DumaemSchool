@@ -3,7 +3,7 @@
 /// <summary>
 /// Связка между пользователем учителя и бизнес-сущностью
 /// </summary>
-public class TeacherLink
+public sealed class TeacherLink
 {
     public int Id { get; set; }
 
@@ -11,7 +11,7 @@ public class TeacherLink
 
     public int TeacherId { get; set; }
 
-    public virtual Teacher Teacher { get; set; } = null!;
+    public Teacher Teacher { get; set; } = null!;
 
-    public virtual User User { get; set; } = null!;
+    public User User { get; set; } = null!;
 }

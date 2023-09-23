@@ -1,38 +1,49 @@
 ﻿@page "/fetchdata"
 @using DumaemSchool.BlazorWeb.Data
+@using DumaemSchool.BlazorWeb.Middleware
+@using Microsoft.AspNetCore.Identity
+@using DumaemSchool.Auth.Models
+@using DumaemSchool.Auth.Managers
+@using DumaemSchool.Core.Commands
+@using DumaemSchool.Core.Models
+@using MediatR
 @inject WeatherForecastService ForecastService
-
+@inject NavigationManager NavigationManager
+@inject SchoolSignInManager SignInManager
+@inject ISender Sender;
 <PageTitle>Weather forecast</PageTitle>
 
 <h1>Weather forecast</h1>
 
 <p>This component demonstrates fetching data from a service.</p>
-
+<button style="background-color: green; width: 20px; height: 20px;" onclick="@LogIn"></button>
 @if (forecasts == null)
 {
-    <p><em>Loading...</em></p>
+    <p>
+        <em>Loading...</em>
+    </p>
 }
 else
 {
     <table class="table">
         <thead>
-            <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
+        <tr>
+            <th>Date</th>
+            <th>Temp. (C)</th>
+            <th>Temp. (F)</th>
+            <th>Summary</th>
+        </tr>
         </thead>
         <tbody>
-            @foreach (var forecast in forecasts)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            }
+        @foreach (var forecast in forecasts)
+        {
+            <tr>
+                <td>@forecast.Date.ToShortDateString()</td>
+                <td>@forecast.TemperatureC</td>
+                <td>@forecast.TemperatureF</td>
+                <td>@forecast.Summary</td>
+            </tr>
+        }
         </tbody>
     </table>
 }
@@ -44,4 +55,15 @@ else
     {
         forecasts = await ForecastService.GetForecastAsync(DateOnly.FromDateTime(DateTime.Now));
     }
+
+    private async Task LogIn()
+    {
+        var teacher = new Teacher() { Name = "Sasfasf" };
+        var register = new AddTeacherCommand(teacher, "bulat_sqwrwer1@mail.ru");
+        var res = await Sender.Send(register);
+        var message = res.Match(
+            succ => "Success",
+            err => err.Message);
+    }
+
 }
