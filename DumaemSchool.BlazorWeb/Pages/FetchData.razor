@@ -19,29 +19,31 @@
 <button style="background-color: green; width: 20px; height: 20px;" onclick="@LogIn"></button>
 @if (forecasts == null)
 {
-    <p><em>Loading...</em></p>
+    <p>
+        <em>Loading...</em>
+    </p>
 }
 else
 {
     <table class="table">
         <thead>
-            <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
+        <tr>
+            <th>Date</th>
+            <th>Temp. (C)</th>
+            <th>Temp. (F)</th>
+            <th>Summary</th>
+        </tr>
         </thead>
         <tbody>
-            @foreach (var forecast in forecasts)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            }
+        @foreach (var forecast in forecasts)
+        {
+            <tr>
+                <td>@forecast.Date.ToShortDateString()</td>
+                <td>@forecast.TemperatureC</td>
+                <td>@forecast.TemperatureF</td>
+                <td>@forecast.Summary</td>
+            </tr>
+        }
         </tbody>
     </table>
 }
@@ -59,6 +61,9 @@ else
         var teacher = new Teacher() { Name = "Sasfasf" };
         var register = new AddTeacherCommand(teacher, "bulat_sqwrwer1@mail.ru");
         var res = await Sender.Send(register);
-        
+        var message = res.Match(
+            succ => "Success",
+            err => err.Message);
     }
+
 }

@@ -1,9 +1,11 @@
 ﻿using DumaemSchool.Core.Commands.Base;
+using DumaemSchool.Core.Exceptions;
+using LanguageExt.Common;
 using MediatR;
 
 namespace DumaemSchool.Database.PipelineBehaviors;
 
-public class TransactPipelineBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+public class TransactPipelineBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, Result<TResponse>>
     where TRequest : ITransactRequest
 {
     private readonly ApplicationContext _context;
@@ -13,7 +15,7 @@ public class TransactPipelineBehavior<TRequest, TResponse> : IPipelineBehavior<T
         _context = context;
     }
 
-    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next,
+    public async Task<Result<TResponse>> Handle(TRequest request, RequestHandlerDelegate<Result<TResponse>> next,
         CancellationToken cancellationToken)
     {
         await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
@@ -23,10 +25,14 @@ public class TransactPipelineBehavior<TRequest, TResponse> : IPipelineBehavior<T
             await transaction.CommitAsync(cancellationToken);
             return result;
         }
+        catch (InformationException ie)
+        {
+            return new Result<TResponse>(ie);
+        }
         catch (Exception)
         {
             await transaction.RollbackAsync(cancellationToken);
-            return default;
+            throw;
         }
     }
 }

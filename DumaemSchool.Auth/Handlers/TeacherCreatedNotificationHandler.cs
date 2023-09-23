@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using DumaemSchool.Auth.Models;
+using DumaemSchool.Core.Exceptions;
 using DumaemSchool.Core.Models;
 using DumaemSchool.Core.Notifications;
 using MediatR;
@@ -26,7 +27,7 @@ internal sealed class TeacherCreatedNotificationHandler : INotificationHandler<T
         {
             if (await _userManager.FindByEmailAsync(notification.Email) is not null)
             {
-                throw new Exception("User with this email already exists");
+                throw new TeacherCreationException("User with this email already exists");
             }
 
             var user = new SchoolUser { Email = notification.Email, UserName = notification.Email };
@@ -36,7 +37,7 @@ internal sealed class TeacherCreatedNotificationHandler : INotificationHandler<T
             var res = await _userManager.CreateAsync(user, password);
             if (!res.Succeeded)
             {
-                throw new Exception("Could not create a user");
+                throw new TeacherCreationException($"Could not create a user: {string.Join("; ", res.Errors.Select(x => $"{x.Code} - {x.Description}"))}");
             }
 
             await _userManager.AddToRoleAsync(user, Role.Teacher);

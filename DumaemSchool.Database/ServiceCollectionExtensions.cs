@@ -1,5 +1,7 @@
 ﻿using System.Reflection;
+using DumaemSchool.Core.Commands;
 using DumaemSchool.Database.PipelineBehaviors;
+using LanguageExt.Common;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -31,9 +33,11 @@ public static class ServiceCollectionExtensions
         services.AddMediatR(options =>
         {
             options.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+            options
+                .AddBehavior<IPipelineBehavior<AddTeacherCommand, Result<Core.Models.Teacher>>,
+                    TransactPipelineBehavior<AddTeacherCommand, Core.Models.Teacher>>();
         });
 
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactPipelineBehavior<,>));
         return services;
     }
 }

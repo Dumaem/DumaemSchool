@@ -1,12 +1,13 @@
 ﻿using DumaemSchool.Core.Commands;
 using DumaemSchool.Core.Notifications;
 using DumaemSchool.Database.Mappers;
+using LanguageExt.Common;
 using MediatR;
 using Teacher = DumaemSchool.Core.Models.Teacher;
 
 namespace DumaemSchool.Database.Handlers;
 
-public sealed class AddTeacherCommandHandler : IRequestHandler<AddTeacherCommand, Teacher?>
+public sealed class AddTeacherCommandHandler : IRequestHandler<AddTeacherCommand, Result<Teacher>>
 {
     private readonly ApplicationContext _context;
     private readonly IPublisher _publisher;
@@ -17,7 +18,7 @@ public sealed class AddTeacherCommandHandler : IRequestHandler<AddTeacherCommand
         _publisher = publisher;
     }
 
-    public async Task<Teacher?> Handle(AddTeacherCommand request, 
+    public async Task<Result<Teacher>> Handle(AddTeacherCommand request, 
         CancellationToken cancellationToken)
     {
         var mapper = new DatabaseMapper();
