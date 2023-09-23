@@ -27,6 +27,7 @@ public class TransactPipelineBehavior<TRequest, TResponse> : IPipelineBehavior<T
         }
         catch (InformationException ie)
         {
+            await transaction.RollbackAsync(cancellationToken);
             return new Result<TResponse>(ie);
         }
         catch (Exception)
