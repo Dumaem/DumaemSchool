@@ -8,9 +8,46 @@
 @inject UserManager<SchoolUser> UserManager
 @inject SchoolSignInManager SignInManager;
 @inject NavigationManager NavigationManager;
-<h3>LoginPage</h3>
+@inject ISnackbar Snackbar;
 
-@code {
+
+<MudForm @ref="@_form" @onsubmit="@(() => LogInAsync())">
+    <MudContainer Class="d-flex align-center justify-center mud-width-full"  style="height:70vh;">
+        <MudGrid>
+            <MudItem xs="12" sm="12" lg="12">
+                <MudCard>
+                    <MudCardHeader><h2>Авторизация</h2></MudCardHeader>
+                    <MudCardContent>
+
+                        <MudTextField Label="Почта" Class="mt-3" Required="true"
+                        @bind-Value="_model.Email" InputType="InputType.Email" Immediate For="@(() => _model.Email)" />
+
+                         <MudTextField Label="Пароль" Class="mt-3"
+                         @bind-Value="_model.Password" Immediate For="@(() => _model.Password)" 
+                         Required="true" InputType="InputType.Password" />
+
+                     </MudCardContent>
+                     <MudCardActions>
+                         <MudButton Disabled="@(!IsFormFilled())" ButtonType="MudBlazor.ButtonType.Submit" 
+                         Variant="MudBlazor.Variant.Filled" Color="Color.Primary" Class="ml-auto">Войти</MudButton>
+                     </MudCardActions>
+                 </MudCard>
+             </MudItem>
+         </MudGrid>
+     </MudContainer>
+ </MudForm>
+
+ @code {
+    MudForm? _form;
+
+    private bool IsFormFilled()
+    {
+        if(_model.Email == "" || _model.Password == "")
+        {
+            return false;
+        }
+        return true;
+    }
 
     private readonly LoginCredentials _model = new() { Email = "wingimobile@gmail.com", Password = "kredit200"};
 
@@ -19,21 +56,24 @@
         var user = await UserManager.FindByEmailAsync(_model.Email);
         if (user is null)
         {
-            // TODO: пользователь не существует
-            throw new NotImplementedException();
+            Snackbar.Add("Пользователь отсутствует в системе", Severity.Error, config => { config.VisibleStateDuration = 1000; });
+            // // TODO: пользователь не существует
+            // throw new NotImplementedException();
         }
 
         if (!await SignInManager.CanSignInAsync(user))
         {
-            // TODO: учитель уволен (удален)
-            throw new NotImplementedException();
+            Snackbar.Add("Пользователь более не имеет доступа к системе", Severity.Error, config => { config.VisibleStateDuration = 1000; });
+            // // TODO: учитель уволен (удален)
+            // throw new NotImplementedException();
         }
 
         var result = await SignInManager.CheckPasswordSignInAsync(user, _model.Password, false);
         if (!result.Succeeded)
         {
-            // TODO: неверный пароль
-            throw new NotImplementedException();
+            Snackbar.Add("Неверный пароль", Severity.Error, config => { config.VisibleStateDuration = 1000; });
+            // // TODO: неверный пароль
+            // throw new NotImplementedException();
         }
 
         var key = Guid.NewGuid();
