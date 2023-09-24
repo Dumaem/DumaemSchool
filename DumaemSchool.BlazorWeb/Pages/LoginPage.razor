@@ -5,7 +5,7 @@
 @using DumaemSchool.Auth.Managers
 @using DumaemSchool.BlazorWeb.Middleware
 
-@inject UserManager<SchoolUser> UserManager
+@inject UserManager<SchoolUser> UserManager;
 @inject SchoolSignInManager SignInManager;
 @inject NavigationManager NavigationManager;
 @inject ISnackbar Snackbar;
@@ -40,16 +40,16 @@
  @code {
     MudForm? _form;
 
+    private readonly LoginCredentials _model = new() { Email = "wingimobile@gmail.com", Password = "kredit200"};
+
     private bool IsFormFilled()
     {
-        if(_model.Email == "" || _model.Password == "")
+        if (_model.Email == "" || _model.Password == "")
         {
             return false;
         }
         return true;
     }
-
-    private readonly LoginCredentials _model = new() { Email = "wingimobile@gmail.com", Password = "kredit200"};
 
     private async Task LogInAsync()
     {
@@ -57,6 +57,7 @@
         if (user is null)
         {
             Snackbar.Add("Пользователь отсутствует в системе", Severity.Error, config => { config.VisibleStateDuration = 1000; });
+            return;
             // // TODO: пользователь не существует
             // throw new NotImplementedException();
         }
@@ -64,6 +65,7 @@
         if (!await SignInManager.CanSignInAsync(user))
         {
             Snackbar.Add("Пользователь более не имеет доступа к системе", Severity.Error, config => { config.VisibleStateDuration = 1000; });
+            return;
             // // TODO: учитель уволен (удален)
             // throw new NotImplementedException();
         }
@@ -72,6 +74,7 @@
         if (!result.Succeeded)
         {
             Snackbar.Add("Неверный пароль", Severity.Error, config => { config.VisibleStateDuration = 1000; });
+            return;
             // // TODO: неверный пароль
             // throw new NotImplementedException();
         }
