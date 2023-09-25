@@ -10,6 +10,8 @@ internal sealed class SchoolIdentityContext : IdentityDbContext<SchoolUser, Scho
     {
     }
 
+    public DbSet<RestorationCode> RestorationCodes { get; set; } = null!;
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.HasDefaultSchema("identity");
@@ -24,7 +26,7 @@ internal sealed class SchoolIdentityContext : IdentityDbContext<SchoolUser, Scho
             .WithOne()
             .HasForeignKey(x => x.UserId)
             .IsRequired();
-            
+
         base.OnModelCreating(builder);
     }
 }

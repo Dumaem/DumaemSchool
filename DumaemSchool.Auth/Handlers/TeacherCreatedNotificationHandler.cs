@@ -1,7 +1,6 @@
 ﻿using System.Security.Claims;
 using DumaemSchool.Auth.Models;
 using DumaemSchool.Core.Exceptions;
-using DumaemSchool.Core.Models;
 using DumaemSchool.Core.Notifications;
 using MediatR;
 using Microsoft.AspNetCore.Identity;

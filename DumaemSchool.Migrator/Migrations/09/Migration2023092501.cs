@@ -38,9 +38,8 @@ public sealed class Migration2023092501 : BaseMigration
             .WithDefaultValue("now()");
 
         table
-            .WithColumn("is_used")
-            .AsBoolean()
-            .NotNullable()
-            .WithDefaultValue("false");
+            .WithColumn("session_id")
+            .AsGuid()
+            .NotNullable();
     }
 }

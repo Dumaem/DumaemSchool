@@ -1,5 +1,5 @@
 ﻿using MediatR;
 
-namespace DumaemSchool.SMTP.Commands;
+namespace DumaemSchool.Core.Commands.SMTP;
 
 public sealed record SendRestorationCodeEmailCommand(string Email, int RestorationCode) : IRequest<bool>;

@@ -1,4 +1,4 @@
-﻿using DumaemSchool.SMTP.Commands;
+﻿using DumaemSchool.Core.Commands.SMTP;
 using DumaemSchool.SMTP.Models;
 using DumaemSchool.SMTP.Services;
 using MediatR;

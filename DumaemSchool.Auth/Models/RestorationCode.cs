@@ -10,5 +10,5 @@ public sealed class RestorationCode
 
     public DateTime? DateCreated { get; set; }
     
-    public bool IsUsed { get; set; }
+    public Guid SessionId { get; set; }
 }
