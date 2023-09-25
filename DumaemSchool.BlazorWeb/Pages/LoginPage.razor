@@ -29,7 +29,8 @@
                      </MudCardContent>
                      <MudCardActions>
                          <MudButton Disabled="@(!IsFormFilled())" ButtonType="MudBlazor.ButtonType.Submit" 
-                         Variant="MudBlazor.Variant.Filled" Color="Color.Primary" Class="ml-auto">Войти</MudButton>
+                         Variant="MudBlazor.Variant.Filled" Color="Color.Primary" Class="ml-auto" Style="width:12%"
+                                    Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.VisibilityOff" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="Показать пароль">Войти</MudButton>
                      </MudCardActions>
                  </MudCard>
              </MudItem>
@@ -40,7 +41,7 @@
  @code {
     MudForm? _form;
 
-    private readonly LoginCredentials _model = new() { Email = "wingimobile@gmail.com", Password = "kredit200"};
+    private readonly LoginCredentials _model = new();
 
     private bool IsFormFilled()
     {
@@ -84,4 +85,23 @@
         NavigationManager.NavigateTo($"/login?key={key}", true);
     }
 
+    bool isShow;
+    InputType PasswordInput = InputType.Password;
+    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+
+    void ButtonTestClick()
+    {
+        @if (isShow)
+        {
+            isShow = false;
+            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+            PasswordInput = InputType.Password;
+        }
+        else
+        {
+            isShow = true;
+            PasswordInputIcon = Icons.Material.Filled.Visibility;
+            PasswordInput = InputType.Text;
+        }
+    }
 }
