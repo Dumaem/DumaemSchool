@@ -12,44 +12,38 @@
 
 
 <MudForm @ref="@_form" @onsubmit="@(() => LogInAsync())">
-    <MudContainer Class="d-flex align-center justify-center mud-width-full"  style="height:70vh;">
+    <MudContainer Class="d-flex align-center justify-center mud-width-full" style="height:70vh;">
         <MudGrid>
             <MudItem xs="12" sm="12" lg="12">
-                <MudCard>
-                    <MudCardHeader><h2>Авторизация</h2></MudCardHeader>
-                    <MudCardContent>
+                @if (_isLoginWithPassword)
+                {
+                    <PasswordLoginForm Model="@_model"/>
+                }
+                else
+                {
+                    <EmailLoginForm Model="_model"/>
+                }
+                <MudLink OnClick="@ChangeLoginForm" Underline="Underline.Always" Style="text-align: center;
+                                                                                            display: block;
+                                                                                            margin: 0 auto;"
+                         Class="mt-3">
+                    @(_isLoginWithPassword ? "Забыли пароль?" : "Войти по паролю")
+                </MudLink>
+            </MudItem>
+        </MudGrid>
+    </MudContainer>
+</MudForm>
 
-                        <MudTextField Label="Почта" Class="mt-3" Required="true"
-                        @bind-Value="_model.Email" InputType="InputType.Email" Immediate For="@(() => _model.Email)" />
-
-                         <MudTextField Label="Пароль" Class="mt-3"
-                         @bind-Value="_model.Password" Immediate For="@(() => _model.Password)" 
-                         Required="true" InputType="InputType.Password" />
-
-                     </MudCardContent>
-                     <MudCardActions>
-                         <MudButton Disabled="@(!IsFormFilled())" ButtonType="MudBlazor.ButtonType.Submit" 
-                         Variant="MudBlazor.Variant.Filled" Color="Color.Primary" Class="ml-auto" Style="width:12%"
-                                    Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.VisibilityOff" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="Показать пароль">Войти</MudButton>
-                     </MudCardActions>
-                 </MudCard>
-             </MudItem>
-         </MudGrid>
-     </MudContainer>
- </MudForm>
-
- @code {
+@code {
     MudForm? _form;
 
     private readonly LoginCredentials _model = new();
 
-    private bool IsFormFilled()
+    private bool _isLoginWithPassword = true;
+
+    private void ChangeLoginForm()
     {
-        if (_model.Email == "" || _model.Password == "")
-        {
-            return false;
-        }
-        return true;
+        _isLoginWithPassword = !_isLoginWithPassword;
     }
 
     private async Task LogInAsync()
@@ -59,16 +53,16 @@
         {
             Snackbar.Add("Пользователь отсутствует в системе", Severity.Error, config => { config.VisibleStateDuration = 1000; });
             return;
-            // // TODO: пользователь не существует
-            // throw new NotImplementedException();
+    // // TODO: пользователь не существует
+    // throw new NotImplementedException();
         }
 
         if (!await SignInManager.CanSignInAsync(user))
         {
             Snackbar.Add("Пользователь более не имеет доступа к системе", Severity.Error, config => { config.VisibleStateDuration = 1000; });
             return;
-            // // TODO: учитель уволен (удален)
-            // throw new NotImplementedException();
+    // // TODO: учитель уволен (удален)
+    // throw new NotImplementedException();
         }
 
         var result = await SignInManager.CheckPasswordSignInAsync(user, _model.Password, false);
@@ -76,8 +70,8 @@
         {
             Snackbar.Add("Неверный пароль", Severity.Error, config => { config.VisibleStateDuration = 1000; });
             return;
-            // // TODO: неверный пароль
-            // throw new NotImplementedException();
+    // // TODO: неверный пароль
+    // throw new NotImplementedException();
         }
 
         var key = Guid.NewGuid();
@@ -85,23 +79,4 @@
         NavigationManager.NavigateTo($"/login?key={key}", true);
     }
 
-    bool isShow;
-    InputType PasswordInput = InputType.Password;
-    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
-
-    void ButtonTestClick()
-    {
-        @if (isShow)
-        {
-            isShow = false;
-            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
-            PasswordInput = InputType.Password;
-        }
-        else
-        {
-            isShow = true;
-            PasswordInputIcon = Icons.Material.Filled.Visibility;
-            PasswordInput = InputType.Text;
-        }
-    }
 }

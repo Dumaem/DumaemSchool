@@ -48,9 +48,9 @@
             return;
         }
 
-        var isAuthorized = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User.Identity.IsAuthenticated;
+        var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User.Identity;
 
-        if (!isAuthorized)
+        if (userIdentity is not null && !userIdentity.IsAuthenticated)
         {
             NavigationManager.NavigateTo("/login");
         }

@@ -1,0 +1,75 @@
+﻿@using DumaemSchool.BlazorWeb.Data
+@using Timer = System.Timers.Timer;
+
+@if (_isCodeSended)
+{
+}
+<MudCard>
+    <MudCardHeader>
+        <h2>Авторизация</h2>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudTextField Label="Почта" Class="mt-3" Required="true"
+                      @bind-Value="Model.Email" InputType="InputType.Email" Immediate For="@(() => Model.Email)"/>
+    </MudCardContent>
+    <MudCardActions>
+        <div class="ml-auto d-inline-flex flex-row">
+            @if (_isCodeSended)
+            {
+                <MudLink Disabled="@(!_isLinkEnable)" OnClick="@SendCode">
+                    Отправить повторно @(!_isLinkEnable ? $"через: {_counter.TotalSeconds}" : "")
+                </MudLink>
+            }
+            <MudButton Disabled="@(string.IsNullOrEmpty(Model.Email))"
+                       OnClick="@(_isCodeSended ? async () => await Login() : SendCode)" FullWidth="true"
+                       Variant="MudBlazor.Variant.Filled" Color="Color.Primary" >
+                @(_isCodeSended ? "Войти" : "Отправить код")
+            </MudButton>
+        </div>
+    </MudCardActions>
+</MudCard>
+
+@code {
+    [Parameter]
+    public LoginCredentials Model { get; set; } = null!;
+
+    private bool _isCodeSended;
+    private bool _isLinkEnable;
+    private static TimeSpan _countdownDurationSeconds = TimeSpan.FromSeconds(120);
+    
+    private Timer? _timer;
+    private TimeSpan _counter = _countdownDurationSeconds;
+
+    private void SendCode()
+    {
+        _counter = _countdownDurationSeconds;
+        _isCodeSended = true;
+        StartTimer();
+    }
+
+    private void StartTimer()
+    {
+        _timer = new Timer(TimeSpan.FromSeconds(1));
+        _timer.Elapsed += async (_, _) =>
+        {
+            if (_counter.TotalSeconds > 0)
+            {
+                _counter -= TimeSpan.FromSeconds(1);
+            }
+            else
+            {
+                _timer.Stop();
+                _isLinkEnable = true;
+            }
+            await InvokeAsync(StateHasChanged);
+        };
+        _timer.Start();
+        _isLinkEnable = false;
+    }
+    
+
+    private Task Login()
+    {
+        throw new NotImplementedException();
+    }
+}
