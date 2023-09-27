@@ -1,46 +1,81 @@
 ﻿@using DumaemSchool.BlazorWeb.Data
+@using ButtonType = MudBlazor.ButtonType
 @using Timer = System.Timers.Timer;
+@using System.ComponentModel.DataAnnotations
+@using FilterOperator = MudBlazor.FilterOperator    
 
-@if (_isCodeSended)
+@if(_isRestorationCodeRight)
 {
+    <PasswordSettingForm UserEmail=@Model.Email/>
+    return;
 }
-<MudCard>
-    <MudCardHeader>
-        <h2>Авторизация</h2>
-    </MudCardHeader>
-    <MudCardContent>
-        <MudTextField Label="Почта" Class="mt-3" Required="true"
-                      @bind-Value="Model.Email" InputType="InputType.Email" Immediate For="@(() => Model.Email)"/>
-    </MudCardContent>
-    <MudCardActions>
-        <div class="ml-auto d-inline-flex flex-row">
-            @if (_isCodeSended)
-            {
-                <MudLink Disabled="@(!_isLinkEnable)" OnClick="@SendCode">
-                    Отправить повторно @(!_isLinkEnable ? $"через: {_counter.TotalSeconds}" : "")
+<MudForm @ref="@_form" @onsubmit="@(() => _isCodeSended ? LoginAsync() : SendCode())">
+    <MudContainer Class="d-flex align-center justify-center mud-width-full" style="height:70vh;">
+        <MudGrid>
+            <MudItem xs="12" sm="12" lg="12">
+                <MudCard>
+                    <MudCardHeader>
+                        <h2>Авторизация</h2>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        @if (_isCodeSended)
+                        {
+                            <MudTextField Label="Код" Class="mt-3" Required="true" MaxLength="4"
+                                          @bind-Value="_restorationCode" InputType="InputType.Text"
+                                          Mask="@(new PatternMask("0000"))"/>
+                        }
+                        else
+                        {
+                            <MudTextField Label="Почта" Class="mt-3" Required="true"
+                                          @bind-Value="Model.Email"
+                                          InputType="InputType.Email" Immediate For="@(() => Model.Email)"
+                                          Validation="@(new EmailAddressAttribute { ErrorMessage = "Введенная почта не корректна" })"/>
+                        }
+                    </MudCardContent>
+                    <MudCardActions>
+                        <div class="ml-auto align-items-center" style="white-space: nowrap;">
+                            @if (_isCodeSended)
+                            {
+                                <MudLink Disabled="@(!_isLinkEnable)" OnClick="@SendCode" Style="vertical-align: center">
+                                    Отправить повторно @(!_isLinkEnable ? $"через: {_counter.TotalSeconds}" : "")
+                                </MudLink>
+                            }
+                            <MudButton Disabled="@(_isCodeSended ? 
+                                                     _restorationCode.Length < 4 : string.IsNullOrEmpty(Model.Email))"
+                                       Variant="MudBlazor.Variant.Filled" Color="Color.Primary"
+                                       ButtonType="ButtonType.Submit">
+                                @(_isCodeSended ? "Войти" : "Отправить код")
+                            </MudButton>
+                        </div>
+                    </MudCardActions>
+                </MudCard>
+                <MudLink OnClick="@ChangeLoginForm" Underline="Underline.Always"
+                         Style="text-align: center; display: block; margin: 0 auto;" Class="mt-3">
+                    Войти по паролю
                 </MudLink>
-            }
-            <MudButton Disabled="@(string.IsNullOrEmpty(Model.Email))"
-                       OnClick="@(_isCodeSended ? async () => await Login() : SendCode)" FullWidth="true"
-                       Variant="MudBlazor.Variant.Filled" Color="Color.Primary" >
-                @(_isCodeSended ? "Войти" : "Отправить код")
-            </MudButton>
-        </div>
-    </MudCardActions>
-</MudCard>
+            </MudItem>
+        </MudGrid>
+    </MudContainer>
+</MudForm>
 
 @code {
+
     [Parameter]
     public LoginCredentials Model { get; set; } = null!;
 
+    [Parameter]
+    public Action ChangeLoginForm { get; set; } = null!;
+
+    MudForm? _form;
     private bool _isCodeSended;
     private bool _isLinkEnable;
+    private bool _isRestorationCodeRight;
     private static TimeSpan _countdownDurationSeconds = TimeSpan.FromSeconds(120);
-    
     private Timer? _timer;
     private TimeSpan _counter = _countdownDurationSeconds;
+    private string _restorationCode = string.Empty;
 
-    private void SendCode()
+    private async Task SendCode()
     {
         _counter = _countdownDurationSeconds;
         _isCodeSended = true;
@@ -66,10 +101,11 @@
         _timer.Start();
         _isLinkEnable = false;
     }
-    
 
-    private Task Login()
+
+    private async Task LoginAsync()
     {
-        throw new NotImplementedException();
+        _isRestorationCodeRight = true;
+        await InvokeAsync(StateHasChanged);
     }
 }
