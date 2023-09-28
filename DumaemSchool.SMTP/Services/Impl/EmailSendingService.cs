@@ -43,7 +43,7 @@ public sealed class EmailSendingService : IEmailSendingService
                 await _smtpClient.ConnectAsync(_mailSettings.Host, _mailSettings.Port, true);
             else
                 await _smtpClient.ConnectAsync(_mailSettings.Host, _mailSettings.Port, SecureSocketOptions.StartTls);
-
+            await _smtpClient.AuthenticateAsync(_mailSettings.Mail, _mailSettings.Password);
             await _smtpClient.SendAsync(messageToSend);
             await _smtpClient.DisconnectAsync(true);
             return true;
