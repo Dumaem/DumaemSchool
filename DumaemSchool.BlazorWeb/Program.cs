@@ -4,6 +4,7 @@ using DumaemSchool.BlazorWeb.Middleware;
 using DumaemSchool.Core;
 using DumaemSchool.Database;
 using DumaemSchool.Migrator;
+using DumaemSchool.SMTP;
 using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor.Services;
 using Radzen;
@@ -22,6 +23,7 @@ builder.Services
     .AddDatabase(builder.Configuration)
     .AddMigrations(builder.Configuration)
     .AddAuth(builder.Configuration)
+    .AddSMTP(builder.Configuration)
     .AddScoped<AuthenticationStateProvider, DumaemSchool.BlazorWeb.AuthenticationStateProvider>();
 
 var app = builder.Build();

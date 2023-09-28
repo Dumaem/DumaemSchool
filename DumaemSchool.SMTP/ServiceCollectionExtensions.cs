@@ -1,4 +1,5 @@
-﻿using DumaemSchool.SMTP.Models;
+﻿using System.Reflection;
+using DumaemSchool.SMTP.Models;
 using DumaemSchool.SMTP.Services;
 using DumaemSchool.SMTP.Services.Impl;
 using MailKit.Net.Smtp;
@@ -14,7 +15,12 @@ public static class ServiceCollectionExtensions
         var mailSettings = new MailSettings();
 
         configuration.Bind(nameof(mailSettings), mailSettings);
-        
+        services.AddSingleton(mailSettings);
+
+        services.AddMediatR(options =>
+        {
+            options.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+        });
         services.AddScoped<ISmtpClient, SmtpClient>();
         services.AddScoped<IEmailSendingService, EmailSendingService>();
         return services;
