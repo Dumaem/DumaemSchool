@@ -19,6 +19,12 @@ internal sealed class SchoolIdentityContext : IdentityDbContext<SchoolUser, Scho
         {
             e.HasKey(x => x.Id);
             e.ToTable("restoration_codes");
+
+            e.Property(x => x.Id).HasColumnName("id");
+            e.Property(x => x.UserId).HasColumnName("user_id");
+            e.Property(x => x.Code).HasColumnName("code");
+            e.Property(x => x.SessionId).HasColumnName("session_id");
+            e.Property(x => x.DateCreated).HasColumnName("date_created");
         });
 
         builder.Entity<SchoolUser>()
