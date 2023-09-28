@@ -1,5 +1,4 @@
 using DumaemSchool.Auth;
-using DumaemSchool.Auth.Models;
 using DumaemSchool.BlazorWeb.Data;
 using DumaemSchool.BlazorWeb.Middleware;
 using DumaemSchool.Core;

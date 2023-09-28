@@ -10,9 +10,23 @@ internal sealed class SchoolIdentityContext : IdentityDbContext<SchoolUser, Scho
     {
     }
 
+    public DbSet<RestorationCode> RestorationCodes { get; set; } = null!;
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.HasDefaultSchema("identity");
+        builder.Entity<RestorationCode>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.ToTable("restoration_codes");
+        });
+
+        builder.Entity<SchoolUser>()
+            .HasMany<RestorationCode>()
+            .WithOne()
+            .HasForeignKey(x => x.UserId)
+            .IsRequired();
+
         base.OnModelCreating(builder);
     }
 }
