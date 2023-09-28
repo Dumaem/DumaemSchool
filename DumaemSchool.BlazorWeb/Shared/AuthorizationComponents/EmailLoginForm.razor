@@ -2,14 +2,24 @@
 @using ButtonType = MudBlazor.ButtonType
 @using Timer = System.Timers.Timer;
 @using System.ComponentModel.DataAnnotations
-@using FilterOperator = MudBlazor.FilterOperator    
+@using DumaemSchool.Auth.Managers
+@using DumaemSchool.Auth.Models
+@using DumaemSchool.Core.Commands.Auth
+@using MediatR
+@using Microsoft.AspNetCore.Identity
+@using FilterOperator = MudBlazor.FilterOperator
 
-@if(_isRestorationCodeRight)
+@inject ISnackbar Snackbar;
+@inject UserManager<SchoolUser> UserManager;
+@inject SchoolSignInManager SignInManager;
+@inject ISender Sender;
+
+@if (_isRestorationCodeRight)
 {
     <PasswordSettingForm UserEmail=@Model.Email/>
     return;
 }
-<MudForm @ref="@_form" @onsubmit="@(() => _isCodeSended ? LoginAsync() : SendCode())">
+<MudForm @ref="@_form" @onsubmit="@(() => _isCodeSent ? LoginAsync() : SendCode())">
     <MudContainer Class="d-flex align-center justify-center mud-width-full" style="height:70vh;">
         <MudGrid>
             <MudItem xs="12" sm="12" lg="12">
@@ -18,7 +28,7 @@
                         <h2>Авторизация</h2>
                     </MudCardHeader>
                     <MudCardContent>
-                        @if (_isCodeSended)
+                        @if (_isCodeSent)
                         {
                             <MudTextField Label="Код" Class="mt-3" Required="true" MaxLength="4"
                                           @bind-Value="_restorationCode" InputType="InputType.Text"
@@ -34,17 +44,16 @@
                     </MudCardContent>
                     <MudCardActions>
                         <div class="ml-auto align-items-center" style="white-space: nowrap;">
-                            @if (_isCodeSended)
+                            @if (_isCodeSent)
                             {
                                 <MudLink Disabled="@(!_isLinkEnable)" OnClick="@SendCode" Style="vertical-align: center">
                                     Отправить повторно @(!_isLinkEnable ? $"через: {_counter.TotalSeconds}" : "")
                                 </MudLink>
                             }
-                            <MudButton Disabled="@(_isCodeSended ? 
-                                                     _restorationCode.Length < 4 : string.IsNullOrEmpty(Model.Email))"
+                            <MudButton Disabled="@(_isCodeSent ? _restorationCode.Length < 4 : string.IsNullOrEmpty(Model.Email))"
                                        Variant="MudBlazor.Variant.Filled" Color="Color.Primary"
                                        ButtonType="ButtonType.Submit">
-                                @(_isCodeSended ? "Войти" : "Отправить код")
+                                @(_isCodeSent ? "Войти" : "Отправить код")
                             </MudButton>
                         </div>
                     </MudCardActions>
@@ -67,18 +76,29 @@
     public Action ChangeLoginForm { get; set; } = null!;
 
     MudForm? _form;
-    private bool _isCodeSended;
+    private bool _isCodeSent;
     private bool _isLinkEnable;
     private bool _isRestorationCodeRight;
     private static TimeSpan _countdownDurationSeconds = TimeSpan.FromSeconds(120);
     private Timer? _timer;
     private TimeSpan _counter = _countdownDurationSeconds;
     private string _restorationCode = string.Empty;
+    private Guid _sessionId;
 
     private async Task SendCode()
     {
         _counter = _countdownDurationSeconds;
-        _isCodeSended = true;
+        var restorationCodeCommand = new GenerateRestorationCodeCommand(Model.Email);
+        var res = await Sender.Send(restorationCodeCommand);
+        var resultMessage = res.Match<string>(x => x.ToString(), e =>  e.Message);
+        
+        if (!Guid.TryParse(resultMessage, out var sessionId))
+        {
+            Snackbar.Add("Произошла ошибка при отправке письма. Пожалуйста, повторите позднее");
+            return;
+        }
+        _sessionId = sessionId;
+        _isCodeSent = true;
         StartTimer();
     }
 
@@ -105,7 +125,19 @@
 
     private async Task LoginAsync()
     {
+        var restorationCodeLoginCommand = new RestorationCodeLoginCommand(Model.Email,
+            _sessionId, int.Parse(_restorationCode));
+        var res = await Sender.Send(restorationCodeLoginCommand);
+
+        if (!res)
+        {
+            Snackbar.Add("Неверный код");
+            return;
+        }
+        
         _isRestorationCodeRight = true;
+        _timer?.Dispose();
         await InvokeAsync(StateHasChanged);
     }
+
 }

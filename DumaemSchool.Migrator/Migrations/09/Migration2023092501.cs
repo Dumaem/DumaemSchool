@@ -1,7 +1,9 @@
 ﻿using DumaemSchool.Database;
+using FluentMigrator;
 
 namespace DumaemSchool.Migrator.Migrations._09;
 
+[Migration(2023092501)]
 public sealed class Migration2023092501 : BaseMigration
 {
     public Migration2023092501(NpgsqlConnectionProvider connectionProvider) : base(connectionProvider)
