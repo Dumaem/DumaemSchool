@@ -37,7 +37,7 @@ public sealed class Migration2023092501 : BaseMigration
             .WithColumn("date_created")
             .AsDateTime()
             .NotNullable()
-            .WithDefaultValue("now()");
+            .WithDefault(SystemMethods.CurrentDateTime);
 
         table
             .WithColumn("session_id")
