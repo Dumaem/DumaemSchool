@@ -50,7 +50,7 @@
                                     Отправить повторно @(!_isLinkEnable ? $"через: {_counter.TotalSeconds}" : "")
                                 </MudLink>
                             }
-                            <MudButton Disabled="@(_isCodeSent ? _restorationCode.Length < 4 : string.IsNullOrEmpty(Model.Email))"
+                            <MudButton Disabled="@(_isSendButtonClick ? _restorationCode.Length < 4 : string.IsNullOrEmpty(Model.Email))"
                                        Variant="MudBlazor.Variant.Filled" Color="Color.Primary"
                                        ButtonType="ButtonType.Submit"
                                        Style="{width: 12vw}">
@@ -78,6 +78,7 @@
 
     MudForm? _form;
     private bool _isCodeSent;
+    private bool _isSendButtonClick;
     private bool _isLinkEnable;
     private bool _isRestorationCodeRight;
     private static TimeSpan _countdownDurationSeconds = TimeSpan.FromSeconds(120);
@@ -88,6 +89,7 @@
 
     private async Task SendCode()
     {
+        _isSendButtonClick = true;
         _counter = _countdownDurationSeconds;
         var restorationCodeCommand = new GenerateRestorationCodeCommand(Model.Email);
         var res = await Sender.Send(restorationCodeCommand);
@@ -132,7 +134,7 @@
 
         if (!res)
         {
-            Snackbar.Add("Неверный код");
+            Snackbar.Add("Неверный код", Severity.Warning);
             return;
         }
         
