@@ -46,13 +46,14 @@
                         <div class="ml-auto align-items-center" style="white-space: nowrap;">
                             @if (_isCodeSent)
                             {
-                                <MudLink Disabled="@(!_isLinkEnable)" OnClick="@SendCode" Style="vertical-align: center">
+                                <MudLink Disabled="@(!_isLinkEnable)" OnClick="@SendCode" Style="vertical-align: center; margin-right: 10px">
                                     Отправить повторно @(!_isLinkEnable ? $"через: {_counter.TotalSeconds}" : "")
                                 </MudLink>
                             }
                             <MudButton Disabled="@(_isCodeSent ? _restorationCode.Length < 4 : string.IsNullOrEmpty(Model.Email))"
                                        Variant="MudBlazor.Variant.Filled" Color="Color.Primary"
-                                       ButtonType="ButtonType.Submit">
+                                       ButtonType="ButtonType.Submit"
+                                       Style="{width: 12vw}">
                                 @(_isCodeSent ? "Войти" : "Отправить код")
                             </MudButton>
                         </div>

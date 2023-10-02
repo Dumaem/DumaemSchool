@@ -21,7 +21,7 @@ public sealed class SetUserPasswordCommandHandler : IRequestHandler<SetUserPassw
         if (user is null)
             return;
 
-        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-        await _userManager.ResetPasswordAsync(user, token, request.NewPassword);
+        await _userManager.RemovePasswordAsync(user);
+        await _userManager.AddPasswordAsync(user, request.NewPassword);
     }
 }
