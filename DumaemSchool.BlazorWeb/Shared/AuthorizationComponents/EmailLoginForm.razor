@@ -2,6 +2,7 @@
 @using ButtonType = MudBlazor.ButtonType
 @using Timer = System.Timers.Timer;
 @using System.ComponentModel.DataAnnotations
+@using System.Timers
 @using DumaemSchool.Auth.Managers
 @using DumaemSchool.Auth.Models
 @using DumaemSchool.Core.Commands.Auth
@@ -13,6 +14,8 @@
 @inject UserManager<SchoolUser> UserManager;
 @inject SchoolSignInManager SignInManager;
 @inject ISender Sender;
+
+@implements IAsyncDisposable
 
 @if (_isRestorationCodeRight)
 {
@@ -76,16 +79,31 @@
     [Parameter]
     public Action ChangeLoginForm { get; set; } = null!;
 
+    [Parameter]
+    public Timer Timer { get; set; } = null!;
+
     MudForm? _form;
     private bool _isCodeSent;
     private bool _isSendButtonClick;
     private bool _isLinkEnable;
     private bool _isRestorationCodeRight;
-    private static TimeSpan _countdownDurationSeconds = TimeSpan.FromSeconds(120);
-    private Timer? _timer;
-    private TimeSpan _counter = _countdownDurationSeconds;
     private string _restorationCode = string.Empty;
     private Guid _sessionId;
+    private static TimeSpan _countdownDurationSeconds = TimeSpan.FromSeconds(120);
+    private static TimeSpan _counter = _countdownDurationSeconds;
+
+    protected override Task OnInitializedAsync()
+    {
+
+        Timer.Elapsed += Tick;
+        if (Timer.Enabled)
+        {
+            _isCodeSent = true;
+            _isSendButtonClick = true;
+        }
+
+        return base.OnInitializedAsync();
+    }
 
     private async Task SendCode()
     {
@@ -93,8 +111,8 @@
         _counter = _countdownDurationSeconds;
         var restorationCodeCommand = new GenerateRestorationCodeCommand(Model.Email);
         var res = await Sender.Send(restorationCodeCommand);
-        var resultMessage = res.Match<string>(x => x.ToString(), e =>  e.Message);
-        
+        var resultMessage = res.Match<string>(x => x.ToString(), e => e.Message);
+
         if (!Guid.TryParse(resultMessage, out var sessionId))
         {
             Snackbar.Add("Произошла ошибка при отправке письма. Пожалуйста, повторите позднее");
@@ -107,24 +125,23 @@
 
     private void StartTimer()
     {
-        _timer = new Timer(TimeSpan.FromSeconds(1));
-        _timer.Elapsed += async (_, _) =>
-        {
-            if (_counter.TotalSeconds > 0)
-            {
-                _counter -= TimeSpan.FromSeconds(1);
-            }
-            else
-            {
-                _timer.Stop();
-                _isLinkEnable = true;
-            }
-            await InvokeAsync(StateHasChanged);
-        };
-        _timer.Start();
+        Timer.Start();
         _isLinkEnable = false;
     }
-
+    
+    private async void Tick(object? o, ElapsedEventArgs elapsedEventArgs)
+    {
+        if (_counter.TotalSeconds > 0)
+        {
+            _counter -= TimeSpan.FromSeconds(1);
+        }
+        else
+        {
+            Timer.Stop();
+            _isLinkEnable = true;
+        }
+        await InvokeAsync(StateHasChanged);
+    }
 
     private async Task LoginAsync()
     {
@@ -137,10 +154,15 @@
             Snackbar.Add("Неверный код", Severity.Warning);
             return;
         }
-        
+
         _isRestorationCodeRight = true;
-        _timer?.Dispose();
+        Timer.Dispose();
         await InvokeAsync(StateHasChanged);
     }
 
+    public ValueTask DisposeAsync()
+    {
+        Timer.Elapsed -= Tick;
+        return ValueTask.CompletedTask;
+    }
 }

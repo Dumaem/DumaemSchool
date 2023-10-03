@@ -1,5 +1,6 @@
 ﻿@page "/login"
 @using DumaemSchool.BlazorWeb.Data
+@using Timer = System.Timers.Timer;
 
 
 @if (_isLoginWithPassword)
@@ -8,16 +9,18 @@
 }
 else
 {
-    <EmailLoginForm Model="@_model" ChangeLoginForm="ChangeLoginForm"/>
+    <EmailLoginForm Model="@_model" ChangeLoginForm="ChangeLoginForm" Timer="_timer" />
 }
 
 
 @code {
     private readonly LoginCredentials _model = new();
     private bool _isLoginWithPassword = true;
+    private readonly Timer _timer = new(TimeSpan.FromSeconds(1));
 
     private void ChangeLoginForm()
     {
         _isLoginWithPassword = !_isLoginWithPassword;
     }
+
 }
