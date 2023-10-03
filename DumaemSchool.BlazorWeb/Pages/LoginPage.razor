@@ -2,6 +2,7 @@
 @using DumaemSchool.BlazorWeb.Data
 @using Timer = System.Timers.Timer;
 
+@implements IDisposable
 
 @if (_isLoginWithPassword)
 {
@@ -21,6 +22,11 @@ else
     private void ChangeLoginForm()
     {
         _isLoginWithPassword = !_isLoginWithPassword;
+    }
+
+    public void Dispose()
+    {
+        _timer.Dispose();
     }
 
 }
