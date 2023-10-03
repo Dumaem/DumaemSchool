@@ -15,7 +15,7 @@
 @inject SchoolSignInManager SignInManager;
 @inject ISender Sender;
 
-@implements IAsyncDisposable
+@implements IDisposable
 
 @if (_isRestorationCodeRight)
 {
@@ -159,9 +159,8 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    public ValueTask DisposeAsync()
+    public void Dispose()
     {
         Timer.Elapsed -= Tick;
-        return ValueTask.CompletedTask;
     }
 }
