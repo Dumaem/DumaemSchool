@@ -1,5 +1,4 @@
-﻿using System.Data;
-using DumaemSchool.Core.Models;
+﻿using DumaemSchool.Core.Models;
 using MediatR;
 
 namespace DumaemSchool.Core.Notifications;
