@@ -24,16 +24,24 @@ public class AuthenticationMiddleware
         {
             var key = Guid.Parse(context.Request.Query["key"]!);
             var info = Logins[key];
+            Logins.Remove(key);
 
             var user = await signInManager.UserManager.FindByEmailAsync(info.Email);
-            var result = await signInManager.PasswordSignInAsync(user!, info.Password,
-                info.RememberMe, lockoutOnFailure: false);
-            info.Password = string.Empty;
-            Logins.Remove(key);
-            if (!result.Succeeded)
+
+            if (info.IsLoginWithPassword)
             {
-                context.Response.Redirect("/login");
-                return;
+                var result = await signInManager.PasswordSignInAsync(user!, info.Password,
+                    info.RememberMe, lockoutOnFailure: false);
+                info.Password = string.Empty;
+                if (!result.Succeeded)
+                {
+                    context.Response.Redirect("/login");
+                    return;
+                }
+            }
+            else
+            {
+                await signInManager.SignInAsync(user!, info.RememberMe);
             }
 
             context.Response.Redirect("/");
