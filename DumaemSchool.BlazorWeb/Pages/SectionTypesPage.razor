@@ -1,0 +1,20 @@
+﻿@page "/section-types"
+
+@using DumaemSchool.BlazorWeb.Data;
+@using Microsoft.AspNetCore.Identity
+@using DumaemSchool.Auth.Models
+@using DumaemSchool.Auth.Managers
+@using DumaemSchool.BlazorWeb.Middleware
+
+<h3>SectionTypesPage</h3>
+
+<RadzenDataGrid @ref="sectionTypesGrid" AllowAlternatingRows="false" AllowFiltering="true" AllowPaging="true" 
+                                        PageSize="5" AllowSorting="true" EditMode="Radzen.DataGridEditMode.Single"
+                                        TItem="WeatherForecast">
+
+</RadzenDataGrid>
+
+
+@code {
+    RadzenDataGrid<WeatherForecast> sectionTypesGrid;
+}
