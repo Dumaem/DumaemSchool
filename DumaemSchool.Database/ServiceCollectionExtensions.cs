@@ -41,6 +41,7 @@ public static class ServiceCollectionExtensions
         });
 
         services.AddScoped<ISectionTypeRepository, SectionTypeRepository>();
+        services.AddScoped<ITeacherRepository, TeacherRepository>();
 
         return services;
     }
