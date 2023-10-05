@@ -40,7 +40,7 @@ public static class ServiceCollectionExtensions
                     TransactPipelineBehavior<AddTeacherCommand, Core.Models.Teacher>>();
         });
 
-        services.AddScoped<ISectionRepository, SectionRepository>();
+        services.AddScoped<ISectionTypeRepository, SectionTypeRepository>();
 
         return services;
     }

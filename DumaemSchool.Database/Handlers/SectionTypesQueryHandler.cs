@@ -7,9 +7,9 @@ namespace DumaemSchool.Database.Handlers;
 
 public sealed class SectionTypesQueryHandler : IRequestHandler<SectionTypesQuery, IEnumerable<SectionType>>
 {
-    private readonly ISectionRepository _repository;
+    private readonly ISectionTypeRepository _repository;
 
-    public SectionTypesQueryHandler(ISectionRepository repository)
+    public SectionTypesQueryHandler(ISectionTypeRepository repository)
     {
         _repository = repository;
     }

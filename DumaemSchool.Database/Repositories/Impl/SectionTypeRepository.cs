@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DumaemSchool.Database.Repositories.Impl;
 
-public sealed class SectionRepository : ISectionRepository
+public sealed class SectionTypeRepository : ISectionTypeRepository
 {
-    private static readonly Func<ApplicationContext, Task<IEnumerable<SectionType>>> SectionTypeQuery =
-        EF.CompileAsyncQuery<ApplicationContext, IEnumerable<SectionType>>(ctx =>
+    private static readonly Func<ApplicationContext, IEnumerable<SectionType>> SectionTypeQuery =
+        EF.CompileQuery<ApplicationContext, IEnumerable<SectionType>>(ctx =>
             from sectionType in ctx.SectionTypes
             where !sectionType.IsDeleted
             select sectionType);
@@ -14,17 +14,17 @@ public sealed class SectionRepository : ISectionRepository
     private readonly ApplicationContext _context;
     private readonly DatabaseMapper _mapper;
 
-    public SectionRepository(ApplicationContext context)
+    public SectionTypeRepository(ApplicationContext context)
     {
         _context = context;
         _mapper = new DatabaseMapper();
     }
 
-    public async Task<IEnumerable<Core.Models.SectionType>> ListSectionTypesAsync()
+    public Task<IEnumerable<Core.Models.SectionType>> ListSectionTypesAsync()
     {
-        return (await SectionTypeQuery
-                .Invoke(_context))
-            .Select(x => _mapper.Map(x));
+        return Task.FromResult(SectionTypeQuery
+            .Invoke(_context)
+            .Select(x => _mapper.Map(x)));
     }
 
     public async Task<int> AddSectionTypeAsync(string name)

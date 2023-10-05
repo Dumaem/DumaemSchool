@@ -6,9 +6,9 @@ namespace DumaemSchool.Database.Handlers;
 
 public sealed class DeleteSectionTypeCommandHandler : IRequestHandler<DeleteSectionTypeCommand, bool>
 {
-    private readonly ISectionRepository _repository;
+    private readonly ISectionTypeRepository _repository;
 
-    public DeleteSectionTypeCommandHandler(ISectionRepository repository)
+    public DeleteSectionTypeCommandHandler(ISectionTypeRepository repository)
     {
         _repository = repository;
     }
