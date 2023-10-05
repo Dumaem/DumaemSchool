@@ -2,12 +2,7 @@
 
 public sealed class SortingDefinition
 {
-    public required string FieldName { get; set; }
+    public required string FieldName { get; init; }
 
-    public bool Asc { get; set; } = true;
-
-    public string ToSql()
-    {
-        return $"";
-    }
+    public bool Asc { get; init; } = true;
 }

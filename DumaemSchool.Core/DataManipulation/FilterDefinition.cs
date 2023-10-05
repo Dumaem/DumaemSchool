@@ -2,9 +2,9 @@
 
 public sealed class FilterDefinition
 {
-    public required string FieldName { get; set; }
-    public required FilterOperand Operand { get; set; }
-    public object? Value { get; set; }
+    public required string FieldName { get; init; }
+    public required FilterOperand Operand { get; init; }
+    public object? Value { get; init; }
 
     public override string ToString()
     {

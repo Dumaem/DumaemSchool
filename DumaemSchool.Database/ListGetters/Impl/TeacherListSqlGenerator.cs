@@ -15,8 +15,13 @@ public class TeacherListSqlGenerator : IListSqlGenerator<TeacherDto>
         { nameof(TeacherDto.SectionsCount), "count(st.*)" },
     };
 
+    private static readonly HashSet<string> AggregateColumns = new()
+    {
+        nameof(TeacherDto.SectionsCount)
+    };
+
     private static readonly string SelectString =
-        string.Join(", ", PropertyToDatabaseMap.Select(x => $"{x.Value} \"{x.Key}\""));
+        string.Join(", ", PropertyToDatabaseMap.Select(x => $"{x.Value} {x.Key}"));
 
     public ListQuery GetListSql(ListParam param)
     {
@@ -26,7 +31,9 @@ public class TeacherListSqlGenerator : IListSqlGenerator<TeacherDto>
         if (param.Filters.Any())
         {
             where =
-                $" WHERE {string.Join(" AND ", param.Filters.Select(x => SqlUtility.GetFilterToSql(x, dynamicParams, PropertyToDatabaseMap)))} ";
+                $" WHERE {string.Join(" AND ", param.Filters
+                    .Where(x => !AggregateColumns.Contains(x.FieldName))
+                    .Select(x => SqlUtility.GetFilterToSql(x, dynamicParams, PropertyToDatabaseMap)))} ";
         }
 
         var sort = param.Sorting.Any()
@@ -36,6 +43,16 @@ public class TeacherListSqlGenerator : IListSqlGenerator<TeacherDto>
         var pagination =
             $" LIMIT {param.Pagination.ItemCount} OFFSET {param.Pagination.PageNumber * param.Pagination.ItemCount} ";
 
+        var having = string.Empty;
+        var aggregateFilters = param.Filters
+            .Where(x => AggregateColumns.Contains(x.FieldName))
+            .ToList();
+        if (aggregateFilters.Any())
+        {
+            having = $" HAVING {string.Join(" AND ", aggregateFilters
+                .Select(x => SqlUtility.GetFilterToSql(x, dynamicParams, PropertyToDatabaseMap)))} ";
+        }
+
         return new ListQuery
         {
             Sql = @$"SELECT {SelectString}
@@ -44,6 +61,7 @@ public class TeacherListSqlGenerator : IListSqlGenerator<TeacherDto>
                           ON t.id = st.teacher_id
                   {where}
                   GROUP BY 1, 2, 3
+                  {having}
                   {sort}
                   {pagination}",
             Parameters = dynamicParams

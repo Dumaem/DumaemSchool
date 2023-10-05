@@ -4,6 +4,6 @@ namespace DumaemSchool.Database.ListGetters;
 
 public sealed class ListQuery
 {
-    public string Sql { get; init; }
-    public DynamicParameters Parameters { get; init; }
+    public required string Sql { get; init; }
+    public required DynamicParameters Parameters { get; init; }
 }

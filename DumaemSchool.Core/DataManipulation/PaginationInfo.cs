@@ -2,6 +2,6 @@
 
 public class PaginationInfo
 {
-    public int PageNumber { get; set; }
-    public int ItemCount { get; set; }
+    public int PageNumber { get; init; }
+    public int ItemCount { get; init; }
 }

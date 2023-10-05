@@ -2,7 +2,7 @@
 
 public sealed class ListParam
 {
-    public FilterDefinition[] Filters { get; set; } = Array.Empty<FilterDefinition>();
-    public SortingDefinition[] Sorting { get; set; } = Array.Empty<SortingDefinition>();
-    public PaginationInfo Pagination { get; set; } = new();
+    public FilterDefinition[] Filters { get; init; } = Array.Empty<FilterDefinition>();
+    public SortingDefinition[] Sorting { get; init; } = Array.Empty<SortingDefinition>();
+    public PaginationInfo Pagination { get; init; } = new();
 }
