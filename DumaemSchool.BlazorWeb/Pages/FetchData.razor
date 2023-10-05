@@ -1,15 +1,8 @@
 ﻿@page "/fetchdata"
 @using DumaemSchool.BlazorWeb.Data
-@using DumaemSchool.BlazorWeb.Middleware
-@using Microsoft.AspNetCore.Identity
-@using DumaemSchool.Auth.Models
-@using DumaemSchool.Auth.Managers
-@using DumaemSchool.Core.Commands
-@using DumaemSchool.Core.Models
+@using DumaemSchool.Core.Queries
 @using MediatR
 @inject WeatherForecastService ForecastService
-@inject NavigationManager NavigationManager
-@inject SchoolSignInManager SignInManager
 @inject ISender Sender;
 <PageTitle>Weather forecast</PageTitle>
 
@@ -58,12 +51,7 @@ else
 
     private async Task LogIn()
     {
-        var teacher = new Teacher() { Name = "Sasfasf" };
-        var register = new AddTeacherCommand(teacher, "bulat_sqwrwer1@mail.ru");
-        var res = await Sender.Send(register);
-        var message = res.Match(
-            succ => "Success",
-            err => err.Message);
+        var sections = await Sender.Send(new SectionTypesQuery());
     }
 
 }

@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using DumaemSchool.Auth.Managers;
 using DumaemSchool.Auth.Models;
-using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

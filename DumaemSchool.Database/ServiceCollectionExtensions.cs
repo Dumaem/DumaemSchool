@@ -1,6 +1,8 @@
 ﻿using System.Reflection;
 using DumaemSchool.Core.Commands;
 using DumaemSchool.Database.PipelineBehaviors;
+using DumaemSchool.Database.Repositories;
+using DumaemSchool.Database.Repositories.Impl;
 using LanguageExt.Common;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -37,6 +39,8 @@ public static class ServiceCollectionExtensions
                 .AddBehavior<IPipelineBehavior<AddTeacherCommand, Result<Core.Models.Teacher>>,
                     TransactPipelineBehavior<AddTeacherCommand, Core.Models.Teacher>>();
         });
+
+        services.AddScoped<ISectionTypeRepository, SectionTypeRepository>();
 
         return services;
     }
