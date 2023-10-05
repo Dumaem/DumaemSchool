@@ -1,0 +1,86 @@
+﻿@page "/teachers"
+
+@using System.Net.Http.Json
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
+
+<MudDataGrid Items="@employees" Filterable="true" SortMode="@SortMode.Multiple" Groupable="false" QuickFilter="@_quickFilter" Hideable="true">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Список учителей</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+            AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="x => x.Name" SortBy="x => x.Name" Title="ФИО" />
+        <PropertyColumn Property="x => x.NumberOfActivities" SortBy="x => x.NumberOfActivities" Title="Кол-во проводимых кружков" />
+
+        <TemplateColumn CellClass="d-flex justify-end" Sortable="false" Filterable="false">
+            <CellTemplate>
+                <MudStack Row>
+                    <MudButton Size="@Size.Small" Variant="@MudBlazor.Variant.Filled" Color="@Color.Error">Уволить</MudButton>
+                </MudStack>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+
+    <PagerContent>
+        <MudDataGridPager T="Employee" />
+    </PagerContent>
+</MudDataGrid>
+</MudContainer>
+@code {
+    private string _searchString;
+    private bool _sortNameByLength;
+
+
+    public record Employee(string Name, int NumberOfActivities);
+    public IEnumerable<Employee> employees;
+
+    private Func<Employee, bool> _quickFilter => x =>
+    {
+    if (string.IsNullOrWhiteSpace(_searchString))
+        return true;
+
+    if (x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        return true;
+
+    if ($"{x.NumberOfActivities}".Contains(_searchString))
+        return true;
+
+    return false;
+    };
+
+    private Func<Employee, object> _sortBy => x =>
+    {
+    if (_sortNameByLength)
+        return x.Name.Length;
+    else
+        return x.Name;
+    };
+
+
+    protected override void OnInitialized()
+    {
+        employees = new List<Employee>
+        {
+            new Employee("Sam", 3),
+            new Employee("Dan", 2),
+            new Employee("Ann", 1),
+            new Employee("April", 5),
+            new Employee("Sam", 3),
+            new Employee("Dan", 2),
+            new Employee("Ann", 1),
+            new Employee("April", 5),
+                        new Employee("Sam", 3),
+            new Employee("Dan", 2),
+            new Employee("Ann", 1),
+            new Employee("April", 5),
+            new Employee("Sam", 3),
+            new Employee("Dan", 2),
+            new Employee("Ann", 1),
+            new Employee("April", 5),
+            
+        };
+    }
+}
