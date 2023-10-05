@@ -1,6 +1,6 @@
 ﻿namespace DumaemSchool.Database.Repositories;
 
-public interface ISectionRepository
+public interface ISectionTypeRepository
 {
     public Task<IEnumerable<Core.Models.SectionType>> ListSectionTypesAsync();
     public Task<int> AddSectionTypeAsync(string name);

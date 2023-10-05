@@ -6,9 +6,9 @@ namespace DumaemSchool.Database.Handlers;
 
 public sealed class UpdateSectionTypeNameCommandHandler : IRequestHandler<UpdateSectionTypeNameCommand, bool>
 {
-    private readonly ISectionRepository _repository;
+    private readonly ISectionTypeRepository _repository;
 
-    public UpdateSectionTypeNameCommandHandler(ISectionRepository repository)
+    public UpdateSectionTypeNameCommandHandler(ISectionTypeRepository repository)
     {
         _repository = repository;
     }
