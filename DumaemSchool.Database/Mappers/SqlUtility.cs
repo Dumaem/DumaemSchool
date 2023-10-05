@@ -1,4 +1,5 @@
-﻿using DumaemSchool.Core.DataManipulation;
+﻿using Dapper;
+using DumaemSchool.Core.DataManipulation;
 
 namespace DumaemSchool.Database.Mappers;
 
@@ -15,17 +16,24 @@ public static class SqlUtility
         { FilterOperand.LessThanOrEqual, "<=" },
     };
 
-    public static string GetFilterToSql(FilterDefinition filter, Dictionary<string, string>? propertyMap = null)
+    public static string GetFilterToSql(FilterDefinition filter, DynamicParameters parameters, Dictionary<string, string>? propertyMap = null)
     {
-        var fieldName = propertyMap?[filter.FieldName] ?? filter.FieldName;
-        var value = filter.Value is string ? filter.Operand is FilterOperand.Contains ? $"'%{filter.Value}%'" : $"'{filter.Value}'" : $"{filter.Value}";
+        var fieldName = propertyMap?.TryGetValue(filter.FieldName, out var result) ?? false ? result : filter.FieldName;
+        var value = filter.Value is string
+            ? filter.Operand is FilterOperand.Contains ? $"%{filter.Value}%" : $"'{filter.Value}'"
+            : filter.Value;
+        var parameterKey = filter.ToString();
+        parameters.Add(parameterKey, value);
 
-        return $"{fieldName} {OperandToSql[filter.Operand]} {value}";
+        return $"{fieldName} {OperandToSql[filter.Operand]} @{parameterKey}";
     }
 
-    public static string GetSortingToSql(SortingDefinition sortingDefinition, Dictionary<string, string>? propertyMap = null)
+    public static string GetSortingToSql(SortingDefinition sortingDefinition,
+        Dictionary<string, string>? propertyMap = null)
     {
-        var fieldName = propertyMap?[sortingDefinition.FieldName] ?? sortingDefinition.FieldName;
+        var fieldName = propertyMap?.TryGetValue(sortingDefinition.FieldName, out var result) ?? false
+            ? result
+            : sortingDefinition.FieldName;
         return $"{fieldName} {(sortingDefinition.Asc ? "ASC" : "DESC")}";
     }
 }

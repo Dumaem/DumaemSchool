@@ -5,4 +5,9 @@ public sealed class FilterDefinition
     public required string FieldName { get; set; }
     public required FilterOperand Operand { get; set; }
     public object? Value { get; set; }
+
+    public override string ToString()
+    {
+        return $"{FieldName}_{Operand}";
+    }
 }
