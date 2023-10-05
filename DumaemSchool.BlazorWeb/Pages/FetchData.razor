@@ -1,6 +1,8 @@
 ﻿@page "/fetchdata"
 @using DumaemSchool.BlazorWeb.Data
-@using DumaemSchool.Core.Queries
+@using DumaemSchool.Auth.Managers
+@using DumaemSchool.Core.Commands
+@using DumaemSchool.Core.Models
 @using MediatR
 @inject WeatherForecastService ForecastService
 @inject ISender Sender;

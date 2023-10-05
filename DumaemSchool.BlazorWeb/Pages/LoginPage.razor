@@ -1,44 +1,32 @@
 ﻿@page "/login"
 @using DumaemSchool.BlazorWeb.Data
-@using Microsoft.AspNetCore.Identity
-@using DumaemSchool.Auth.Models
-@using DumaemSchool.Auth.Managers
-@using DumaemSchool.BlazorWeb.Middleware
+@using Timer = System.Timers.Timer;
 
-@inject UserManager<SchoolUser> UserManager
-@inject SchoolSignInManager SignInManager;
-@inject NavigationManager NavigationManager;
-<h3>LoginPage</h3>
+@implements IDisposable
+
+@if (_isLoginWithPassword)
+{
+    <PasswordLoginForm Model="@_model" ChangeLoginForm="ChangeLoginForm"/>
+}
+else
+{
+    <EmailLoginForm Model="@_model" ChangeLoginForm="ChangeLoginForm" Timer="_timer" />
+}
+
 
 @code {
+    private readonly LoginCredentials _model = new();
+    private bool _isLoginWithPassword = true;
+    private readonly Timer _timer = new(TimeSpan.FromSeconds(1));
 
-    private readonly LoginCredentials _model = new() { Email = "wingimobile@gmail.com", Password = "kredit200"};
-
-    private async Task LogInAsync()
+    private void ChangeLoginForm()
     {
-        var user = await UserManager.FindByEmailAsync(_model.Email);
-        if (user is null)
-        {
-            // TODO: пользователь не существует
-            throw new NotImplementedException();
-        }
+        _isLoginWithPassword = !_isLoginWithPassword;
+    }
 
-        if (!await SignInManager.CanSignInAsync(user))
-        {
-            // TODO: учитель уволен (удален)
-            throw new NotImplementedException();
-        }
-
-        var result = await SignInManager.CheckPasswordSignInAsync(user, _model.Password, false);
-        if (!result.Succeeded)
-        {
-            // TODO: неверный пароль
-            throw new NotImplementedException();
-        }
-
-        var key = Guid.NewGuid();
-        AuthenticationMiddleware.Logins[key] = _model;
-        NavigationManager.NavigateTo($"/login?key={key}", true);
+    public void Dispose()
+    {
+        _timer.Dispose();
     }
 
 }
