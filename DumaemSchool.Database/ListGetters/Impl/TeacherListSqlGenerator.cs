@@ -2,56 +2,57 @@
 using DumaemSchool.Core.DataManipulation;
 using DumaemSchool.Core.OutputModels;
 using DumaemSchool.Database.Mappers;
+using DumaemSchool.Database.Mappers.EntityMapping;
 
 namespace DumaemSchool.Database.ListGetters.Impl;
 
 public class TeacherListSqlGenerator : IListSqlGenerator<TeacherDto>
 {
-    private static readonly Dictionary<string, string> PropertyToDatabaseMap = new()
-    {
-        { nameof(TeacherDto.Id), "t.id" },
-        { nameof(TeacherDto.Name), "t.name" },
-        { nameof(TeacherDto.IsDeleted), "is_deleted" },
-        { nameof(TeacherDto.SectionsCount), "count(st.*)" },
-    };
+    private string SelectString =>
+        string.Join(", ", Mapping.GetMapping().Select(x => $"{x.Value} {x.Key}"));
 
-    private static readonly HashSet<string> AggregateColumns = new()
+    public TeacherListSqlGenerator(IEntityMapping<TeacherDto> mapping)
     {
-        nameof(TeacherDto.SectionsCount)
-    };
+        Mapping = mapping;
+    }
 
-    private static readonly string SelectString =
-        string.Join(", ", PropertyToDatabaseMap.Select(x => $"{x.Value} {x.Key}"));
+    public IEntityMapping<TeacherDto> Mapping { get; }
 
     public ListQuery GetListSql(ListParam param)
     {
+        var defaultMapping = Mapping.GetMapping();
         var dynamicParams = new DynamicParameters();
 
         var where = string.Empty;
+        var having = string.Empty;
         if (param.Filters.Any())
         {
-            where =
-                $" WHERE {string.Join(" AND ", param.Filters
-                    .Where(x => !AggregateColumns.Contains(x.FieldName))
-                    .Select(x => SqlUtility.GetFilterToSql(x, dynamicParams, PropertyToDatabaseMap)))} ";
+            var presentFilters = param.Filters
+                .Where(x => Mapping.DefaultMappingPropertyNames.Contains(x.FieldName))
+                .ToArray();
+            if (presentFilters.Any())
+            {
+                where = $" WHERE {string.Join(" AND ", presentFilters
+                    .Select(x => SqlUtility.GetFilterToSql(x, dynamicParams, defaultMapping)))} ";
+            }
+
+            presentFilters = param.Filters
+                .Where(x => Mapping.AggregateMappingPropertyNames.Contains(x.FieldName))
+                .ToArray();
+            if (presentFilters.Any())
+            {
+                having = $" HAVING {string.Join(" AND ", presentFilters
+                    .Select(x => SqlUtility.GetFilterToSql(x, dynamicParams, defaultMapping)))} ";
+            }
         }
 
         var sort = param.Sorting.Any()
-            ? $" ORDER BY {string.Join(", ", param.Sorting.Select(x => SqlUtility.GetSortingToSql(x, PropertyToDatabaseMap)))} "
+            ? $" ORDER BY {string.Join(", ", param.Sorting.Select(x => SqlUtility.GetSortingToSql(x, defaultMapping)))} "
             : " ORDER BY id ";
 
         var pagination =
             $" LIMIT {param.Pagination.ItemCount} OFFSET {param.Pagination.PageNumber * param.Pagination.ItemCount} ";
 
-        var having = string.Empty;
-        var aggregateFilters = param.Filters
-            .Where(x => AggregateColumns.Contains(x.FieldName))
-            .ToList();
-        if (aggregateFilters.Any())
-        {
-            having = $" HAVING {string.Join(" AND ", aggregateFilters
-                .Select(x => SqlUtility.GetFilterToSql(x, dynamicParams, PropertyToDatabaseMap)))} ";
-        }
 
         return new ListQuery
         {
