@@ -95,7 +95,7 @@ public static class SqlUtility
                 if (filter.Operand != FilterOperand.Equal)
                     return null;
 
-                return $"{(!boolValue ? "NOT" : "")}{fieldName}";
+                return $"{(!boolValue ? "NOT" : "")} {fieldName}";
             default:
                 return null;
         }

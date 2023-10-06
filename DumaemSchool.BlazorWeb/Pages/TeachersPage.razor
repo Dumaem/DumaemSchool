@@ -15,22 +15,21 @@
         <MudSwitch CheckedChanged="@(EventCallback.Factory.Create<bool>(this, OnShowDeletedChange))"  Color="Color.Primary">Отображать уволенных</MudSwitch>
     </div>
 
-    <MudDataGrid @ref="@_mudDataGrid" ServerData="@GetData" T="TeacherDto" Filterable="true" SortMode="@SortMode.Multiple" Groupable="false" Hideable="true">
+    <MudDataGrid RowStyleFunc="RowStyleFunc" @ref="@_mudDataGrid" ServerData="@GetData" T="TeacherDto" Filterable="true" SortMode="@SortMode.Multiple" Groupable="false" Hideable="true">
         <ToolBarContent>
             <MudText Typo="Typo.h6">Список учителей</MudText>
             <MudSpacer />
             <MudTextField ValueChanged="@(EventCallback.Factory.Create<string>(this, OnSearch))" Placeholder="Поиск" Adornment="Adornment.Start" Immediate="true"
                           AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
         </ToolBarContent>
+        
         <Columns>
             <PropertyColumn Filterable="false" Property="x => x.Name" SortBy="x => x.Name" Title="ФИО" />
             <PropertyColumn Filterable="false" Property="x => x.SectionsCount" SortBy="x => x.SectionsCount" Title="Кол-во проводимых кружков" />
 
-            <TemplateColumn CellClass="d-flex justify-end" Sortable="false" Filterable="false">
+            <TemplateColumn Sortable="false" Filterable="false">
                 <CellTemplate>
-                    <MudStack Row>
-                        <MudButton Size="@Size.Small" Variant="@MudBlazor.Variant.Filled" Color="@Color.Error">Уволить</MudButton>
-                    </MudStack>
+                    <MudButton Style="margin-left: 55%" Disabled="@(context.Item.IsDeleted)" Size="@Size.Medium" Variant="@MudBlazor.Variant.Filled" Color="@Color.Error">Уволить</MudButton>
                 </CellTemplate>
             </TemplateColumn>
         </Columns>
@@ -57,6 +56,15 @@
     {
         _showDeletedTeachers = state;
         _mudDataGrid.ReloadServerData();
+    }
+
+    private string RowStyleFunc(TeacherDto teacher, int index)
+    {
+        if(teacher.IsDeleted)
+        {
+            return "background-color: #cf8282";
+        }
+        return "";
     }
 
     private async Task<GridData<TeacherDto>> GetData(GridState<TeacherDto> state)
