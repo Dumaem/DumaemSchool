@@ -1,86 +1,84 @@
 ﻿@page "/teachers"
 
 @using System.Net.Http.Json
+@using DumaemSchool.Core.DataManipulation;
+@using DumaemSchool.Core.OutputModels;
+@using DumaemSchool.Core.Queries;
+@using MediatR;
+
+@inject ISender Sender;
+
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
 
-<MudDataGrid Items="@employees" Filterable="true" SortMode="@SortMode.Multiple" Groupable="false" QuickFilter="@_quickFilter" Hideable="true">
-    <ToolBarContent>
-        <MudText Typo="Typo.h6">Список учителей</MudText>
-        <MudSpacer />
-        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
-            AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-    </ToolBarContent>
-    <Columns>
-        <PropertyColumn Property="x => x.Name" SortBy="x => x.Name" Title="ФИО" />
-        <PropertyColumn Property="x => x.NumberOfActivities" SortBy="x => x.NumberOfActivities" Title="Кол-во проводимых кружков" />
+    <div class="d-flex flex-wrap mt-4">
+        <MudSwitch CheckedChanged="@(EventCallback.Factory.Create<bool>(this, OnShowDeletedChange))"  Color="Color.Primary">Отображать уволенных</MudSwitch>
+    </div>
 
-        <TemplateColumn CellClass="d-flex justify-end" Sortable="false" Filterable="false">
-            <CellTemplate>
-                <MudStack Row>
-                    <MudButton Size="@Size.Small" Variant="@MudBlazor.Variant.Filled" Color="@Color.Error">Уволить</MudButton>
-                </MudStack>
-            </CellTemplate>
-        </TemplateColumn>
-    </Columns>
+    <MudDataGrid @ref="@_mudDataGrid" ServerData="@GetData" T="TeacherDto" Filterable="true" SortMode="@SortMode.Multiple" Groupable="false" Hideable="true">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Список учителей</MudText>
+            <MudSpacer />
+            <MudTextField ValueChanged="@(EventCallback.Factory.Create<string>(this, OnSearch))" Placeholder="Поиск" Adornment="Adornment.Start" Immediate="true"
+                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <Columns>
+            <PropertyColumn Filterable="false" Property="x => x.Name" SortBy="x => x.Name" Title="ФИО" />
+            <PropertyColumn Filterable="false" Property="x => x.SectionsCount" SortBy="x => x.SectionsCount" Title="Кол-во проводимых кружков" />
 
-    <PagerContent>
-        <MudDataGridPager T="Employee" />
-    </PagerContent>
-</MudDataGrid>
+            <TemplateColumn CellClass="d-flex justify-end" Sortable="false" Filterable="false">
+                <CellTemplate>
+                    <MudStack Row>
+                        <MudButton Size="@Size.Small" Variant="@MudBlazor.Variant.Filled" Color="@Color.Error">Уволить</MudButton>
+                    </MudStack>
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+
+        <PagerContent>
+            <MudDataGridPager T="TeacherDto" />
+        </PagerContent>
+    </MudDataGrid>
 </MudContainer>
 @code {
-    private string _searchString;
-    private bool _sortNameByLength;
+    private string _searchString = "";
 
+    private bool _showDeletedTeachers = false;
 
-    public record Employee(string Name, int NumberOfActivities);
-    public IEnumerable<Employee> employees;
+    private MudDataGrid<TeacherDto> _mudDataGrid;
 
-    private Func<Employee, bool> _quickFilter => x =>
+    private void OnSearch(string text)
     {
-    if (string.IsNullOrWhiteSpace(_searchString))
-        return true;
+        _searchString = text;
+        _mudDataGrid.ReloadServerData();
+    }
 
-    if (x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-        return true;
-
-    if ($"{x.NumberOfActivities}".Contains(_searchString))
-        return true;
-
-    return false;
-    };
-
-    private Func<Employee, object> _sortBy => x =>
+    private void OnShowDeletedChange(bool state)
     {
-    if (_sortNameByLength)
-        return x.Name.Length;
-    else
-        return x.Name;
-    };
+        _showDeletedTeachers = state;
+        _mudDataGrid.ReloadServerData();
+    }
 
-
-    protected override void OnInitialized()
+    private async Task<GridData<TeacherDto>> GetData(GridState<TeacherDto> state)
     {
-        employees = new List<Employee>
+        var filters = new List<FilterDefinition>();
+        if (!_showDeletedTeachers)
         {
-            new Employee("Sam", 3),
-            new Employee("Dan", 2),
-            new Employee("Ann", 1),
-            new Employee("April", 5),
-            new Employee("Sam", 3),
-            new Employee("Dan", 2),
-            new Employee("Ann", 1),
-            new Employee("April", 5),
-                        new Employee("Sam", 3),
-            new Employee("Dan", 2),
-            new Employee("Ann", 1),
-            new Employee("April", 5),
-            new Employee("Sam", 3),
-            new Employee("Dan", 2),
-            new Employee("Ann", 1),
-            new Employee("April", 5),
-            
-        };
+            filters.Add(new FilterDefinition() { FieldName = "IsDeleted", Value = false, Operand = FilterOperand.Equal });
+        }
+        filters.Add(new FilterDefinition { FieldName = "Name", Value = _searchString, Operand = FilterOperand.Contains });
+
+        var result = await Sender.Send(new TeachersQuery(false, new ListParam()
+            {
+                Pagination = new PaginationInfo() { ItemCount = state.PageSize, PageNumber = state.Page },
+                Sorting = state.SortDefinitions.Select(x => new SortingDefinition()
+                {
+                    FieldName = x.SortBy,
+                    Asc = !x.Descending
+                }).ToArray(),
+                Filters = filters.ToArray()
+            }));
+
+        return new GridData<TeacherDto>() { Items = result.Items, TotalItems = result.TotalItemsCount };
     }
 }

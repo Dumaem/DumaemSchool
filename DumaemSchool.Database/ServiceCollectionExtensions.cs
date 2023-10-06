@@ -1,6 +1,11 @@
 ﻿using System.Reflection;
 using DumaemSchool.Core.Commands;
+using DumaemSchool.Core.OutputModels;
+using DumaemSchool.Database.ListGetters;
+using DumaemSchool.Database.ListGetters.Impl;
 using DumaemSchool.Database.PipelineBehaviors;
+using DumaemSchool.Database.Repositories;
+using DumaemSchool.Database.Repositories.Impl;
 using LanguageExt.Common;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -37,6 +42,10 @@ public static class ServiceCollectionExtensions
                 .AddBehavior<IPipelineBehavior<AddTeacherCommand, Result<Core.Models.Teacher>>,
                     TransactPipelineBehavior<AddTeacherCommand, Core.Models.Teacher>>();
         });
+
+        services.AddScoped<ISectionTypeRepository, SectionTypeRepository>();
+        services.AddScoped<ITeacherRepository, TeacherRepository>();
+        services.AddSingleton<IListSqlGenerator<TeacherDto>, TeacherListSqlGenerator>();
 
         return services;
     }
