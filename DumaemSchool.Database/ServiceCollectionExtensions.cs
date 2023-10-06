@@ -3,6 +3,7 @@ using DumaemSchool.Core.Commands;
 using DumaemSchool.Core.OutputModels;
 using DumaemSchool.Database.ListGetters;
 using DumaemSchool.Database.ListGetters.Impl;
+using DumaemSchool.Database.Mappers.EntityMapping;
 using DumaemSchool.Database.PipelineBehaviors;
 using DumaemSchool.Database.Repositories;
 using DumaemSchool.Database.Repositories.Impl;
@@ -46,6 +47,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISectionTypeRepository, SectionTypeRepository>();
         services.AddScoped<ITeacherRepository, TeacherRepository>();
         services.AddSingleton<IListSqlGenerator<TeacherDto>, TeacherListSqlGenerator>();
+        services.AddSingleton<IEntityMapping<TeacherDto>, TeacherDtoEntityMapping>();
 
         return services;
     }
