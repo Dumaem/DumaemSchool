@@ -13,7 +13,7 @@ public static class ServiceCollectionExtensions
         services.AddFluentMigratorCore()
             .ConfigureRunner(r => r
                 .AddPostgres()
-                .WithGlobalConnectionString(configuration.GetConnectionString("DefaultConnection")!)
+                .WithGlobalConnectionString(configuration.GetConnectionString("Default")!)
                 .ScanIn(Assembly.GetExecutingAssembly())
                 .For.Migrations());
 

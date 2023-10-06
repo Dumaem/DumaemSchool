@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DumaemSchool.Core", "Dumaem
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DumaemSchool.Auth", "DumaemSchool.Auth\DumaemSchool.Auth.csproj", "{B121B2B6-0225-4BC4-BCDC-A97D1509D6CC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DumaemSchool.SMTP", "DumaemSchool.SMTP\DumaemSchool.SMTP.csproj", "{B9409D58-2576-4DAC-8BDB-05A5A96CA01C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{B121B2B6-0225-4BC4-BCDC-A97D1509D6CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B121B2B6-0225-4BC4-BCDC-A97D1509D6CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B121B2B6-0225-4BC4-BCDC-A97D1509D6CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9409D58-2576-4DAC-8BDB-05A5A96CA01C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9409D58-2576-4DAC-8BDB-05A5A96CA01C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9409D58-2576-4DAC-8BDB-05A5A96CA01C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9409D58-2576-4DAC-8BDB-05A5A96CA01C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
