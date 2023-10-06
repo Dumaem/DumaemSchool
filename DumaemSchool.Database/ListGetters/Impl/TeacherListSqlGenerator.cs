@@ -64,7 +64,13 @@ public class TeacherListSqlGenerator : IListSqlGenerator<TeacherDto>
                   {having}
                   {sort}
                   {pagination}",
-            CountSql = "SELECT COUNT(*) FROM public.teacher t",
+            CountSql = $@"SELECT {SelectString}
+                  FROM public.teacher t 
+                      JOIN public.section_teacher st
+                          ON t.id = st.teacher_id
+                  {where}
+                  GROUP BY 1, 2, 3
+                  {having}",
             Parameters = dynamicParams
         };
     }

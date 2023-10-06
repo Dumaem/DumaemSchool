@@ -27,7 +27,7 @@ public sealed class TeacherRepository : ITeacherRepository
         var connection = _context.Database.GetDbConnection();
         var result = await connection
             .QueryAsync<TeacherDto>(listQuery.SelectSql, listQuery.Parameters);
-        var count = await connection.ExecuteScalarAsync<int>(listQuery.CountSql);
+        var count = await connection.ExecuteScalarAsync<int>(listQuery.CountSql, listQuery.Parameters);
 
         return new ListDataResult<TeacherDto>
         {
