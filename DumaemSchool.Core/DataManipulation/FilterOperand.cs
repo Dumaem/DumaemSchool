@@ -42,5 +42,23 @@ public enum FilterOperand
     /// </summary>
     NotContains,
     
+    /// <summary>
+    /// Начинается на
+    /// </summary>
+    StartsWith,
     
+    /// <summary>
+    /// Заканчивается на
+    /// </summary>
+    EndsWith,
+    
+    /// <summary>
+    /// Пустой
+    /// </summary>
+    IsEmpty,
+    
+    /// <summary>
+    /// Не пустой
+    /// </summary>
+    IsNotEmpty,
 }
