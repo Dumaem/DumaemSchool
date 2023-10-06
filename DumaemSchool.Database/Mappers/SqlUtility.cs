@@ -95,8 +95,7 @@ public static class SqlUtility
                 if (filter.Operand != FilterOperand.Equal)
                     return null;
 
-                parameters.Add(parameterKey, boolValue);
-                return $"{fieldName} is @{parameterKey}";
+                return $"{(!boolValue ? "NOT" : "")}{fieldName}";
             default:
                 return null;
         }
