@@ -21,13 +21,18 @@ public sealed class TeacherRepository : ITeacherRepository
         _mapper = new DatabaseMapper();
     }
 
-    public async Task<IEnumerable<TeacherDto>> ListTeachersAsync(bool includeFired, ListParam param)
+    public async Task<ListDataResult<TeacherDto>> ListTeachersAsync(bool includeFired, ListParam param)
     {
         var listQuery = _sqlGenerator.GetListSql(param);
-        var result = await _context.Database.GetDbConnection()
-            .QueryAsync<TeacherDto>(listQuery.Sql, listQuery.Parameters);
+        var connection = _context.Database.GetDbConnection();
+        var result = await connection
+            .QueryAsync<TeacherDto>(listQuery.SelectSql, listQuery.Parameters);
+        var count = await connection.ExecuteScalarAsync<int>(listQuery.CountSql);
 
-        return result;
+        return new ListDataResult<TeacherDto>
+        {
+            Items = result, TotalItemsCount = count
+        };
     }
 
     public async Task<Core.Models.Teacher> AddTeacherAsync(Core.Models.Teacher teacher)

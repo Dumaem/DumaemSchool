@@ -5,7 +5,7 @@ using MediatR;
 
 namespace DumaemSchool.Database.Handlers;
 
-public sealed class TeachersQueryHandler : IRequestHandler<TeachersQuery, IEnumerable<TeacherDto>>
+public sealed class TeachersQueryHandler : IRequestHandler<TeachersQuery, ListDataResult<TeacherDto>>
 {
     private readonly ITeacherRepository _repository;
 
@@ -14,7 +14,7 @@ public sealed class TeachersQueryHandler : IRequestHandler<TeachersQuery, IEnume
         _repository = repository;
     }
 
-    public async Task<IEnumerable<TeacherDto>> Handle(TeachersQuery request, 
+    public async Task<ListDataResult<TeacherDto>> Handle(TeachersQuery request, 
         CancellationToken cancellationToken)
     {
         return await _repository.ListTeachersAsync(request.IncludeFired, request.Params);

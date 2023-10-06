@@ -36,4 +36,11 @@ public enum FilterOperand
     /// Содержит
     /// </summary>
     Contains,
+    
+    /// <summary>
+    /// Не содержит
+    /// </summary>
+    NotContains,
+    
+    
 }

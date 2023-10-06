@@ -8,6 +8,7 @@ public static class SqlUtility
     private static readonly Dictionary<FilterOperand, string> OperandToSql = new()
     {
         { FilterOperand.Contains, "ILIKE" },
+        { FilterOperand.NotContains, "NOT ILIKE" },
         { FilterOperand.Equal, "=" },
         { FilterOperand.NotEqual, "<>" },
         { FilterOperand.GreaterThan, ">" },

@@ -55,7 +55,7 @@ public class TeacherListSqlGenerator : IListSqlGenerator<TeacherDto>
 
         return new ListQuery
         {
-            Sql = @$"SELECT {SelectString}
+            SelectSql = @$"SELECT {SelectString}
                   FROM public.teacher t 
                       JOIN public.section_teacher st
                           ON t.id = st.teacher_id
@@ -64,6 +64,7 @@ public class TeacherListSqlGenerator : IListSqlGenerator<TeacherDto>
                   {having}
                   {sort}
                   {pagination}",
+            CountSql = "SELECT COUNT(*) FROM public.teacher t",
             Parameters = dynamicParams
         };
     }
