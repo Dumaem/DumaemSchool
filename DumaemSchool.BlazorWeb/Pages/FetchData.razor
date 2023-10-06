@@ -61,10 +61,9 @@ else
             Pagination = new PaginationInfo() { ItemCount = 10 },
             Filters = new[]
             {
-                new FilterDefinition() { FieldName = nameof(Teacher.Name), Operand = FilterOperand.Contains, Value = "кс" },
                 new FilterDefinition() { FieldName = nameof(TeacherDto.SectionsCount), Operand = FilterOperand.GreaterThan, Value = 1 }
             },
-            Sorting = new[] { new SortingDefinition() { FieldName = nameof(Teacher.Name) } }
+            Sorting = new[] { new SortingDefinition() { FieldName = nameof(Teacher.Name), Asc = false} }
         }));
     }
 
