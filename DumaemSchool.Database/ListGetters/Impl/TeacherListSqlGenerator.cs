@@ -6,7 +6,7 @@ using DumaemSchool.Database.Mappers.EntityMapping;
 
 namespace DumaemSchool.Database.ListGetters.Impl;
 
-public class TeacherListSqlGenerator : IListSqlGenerator<TeacherDto>
+public sealed class TeacherListSqlGenerator : IListSqlGenerator<TeacherDto>
 {
     private string SelectString =>
         string.Join(", ", Mapping.GetMapping().Select(x => $"{x.Value} {x.Key}"));
@@ -60,6 +60,7 @@ public class TeacherListSqlGenerator : IListSqlGenerator<TeacherDto>
                   FROM public.teacher t 
                       LEFT JOIN public.section_teacher st
                           ON t.id = st.teacher_id
+                            AND st.is_actual
                   {where}
                   GROUP BY 1, 2, 3
                   {having}
@@ -69,6 +70,7 @@ public class TeacherListSqlGenerator : IListSqlGenerator<TeacherDto>
                   FROM public.teacher t 
                       LEFT JOIN public.section_teacher st
                           ON t.id = st.teacher_id
+                            AND st.is_actual
                   {where}
                   GROUP BY 1, 2, 3
                   {having})
