@@ -1,77 +1,48 @@
 ﻿using Dapper;
 using DumaemSchool.Core.DataManipulation;
 using DumaemSchool.Core.OutputModels;
-using DumaemSchool.Database.Mappers;
-using DumaemSchool.Database.Mappers.EntityMapping;
+using DumaemSchool.Database.Mappers.EntityMapping.Base;
 
 namespace DumaemSchool.Database.ListGetters.Impl;
 
-public class TeacherListSqlGenerator : IListSqlGenerator<TeacherDto>
+public sealed class TeacherListSqlGenerator : AbstractListSqlGenerator<TeacherDto>
 {
-    private string SelectString =>
-        string.Join(", ", Mapping.GetMapping().Select(x => $"{x.Value} {x.Key}"));
-
-    public TeacherListSqlGenerator(IEntityMapping<TeacherDto> mapping)
+    public TeacherListSqlGenerator(IEntityMapping<TeacherDto> mapping) : base(mapping)
     {
-        Mapping = mapping;
     }
 
-    public IEntityMapping<TeacherDto> Mapping { get; }
-
-    public ListQuery GetListSql(ListParam param)
+    public override ListQuery GetListSql(ListParam param)
     {
-        var defaultMapping = Mapping.GetMapping();
         var dynamicParams = new DynamicParameters();
 
-        var where = string.Empty;
-        var having = string.Empty;
-        if (param.Filters.Any())
-        {
-            var presentFilters = param.Filters
-                .Where(x => Mapping.DefaultMappingPropertyNames.Contains(x.FieldName))
-                .ToArray();
-            if (presentFilters.Any())
-            {
-                where = $" WHERE {string.Join(" AND ", presentFilters
-                    .Select(x => SqlUtility.GetFilterToSql(x, dynamicParams, defaultMapping)))} ";
-            }
+        var where = GetWhereExpression(param.Filters, dynamicParams);
+        var having = GetHavingExpression(param.Filters, dynamicParams);
+        var sort = GetOrderByExpression(param.Sorting);
+        var pagination = GetPaginationExpression(param.Pagination);
 
-            presentFilters = param.Filters
-                .Where(x => Mapping.AggregateMappingPropertyNames.Contains(x.FieldName))
-                .ToArray();
-            if (presentFilters.Any())
-            {
-                having = $" HAVING {string.Join(" AND ", presentFilters
-                    .Select(x => SqlUtility.GetFilterToSql(x, dynamicParams, defaultMapping)))} ";
-            }
-        }
-
-        var sort = param.Sorting.Any()
-            ? $" ORDER BY {string.Join(", ", param.Sorting.Select(x => SqlUtility.GetSortingToSql(x, defaultMapping)))} "
-            : " ORDER BY id ";
-
-        var pagination =
-            $" LIMIT {param.Pagination.ItemCount} OFFSET {param.Pagination.PageNumber * param.Pagination.ItemCount} ";
-
+        var havingString = string.IsNullOrEmpty(having) ? "" : $"HAVING {having}";
 
         return new ListQuery
         {
             SelectSql = @$"SELECT {SelectString}
                   FROM public.teacher t 
-                      JOIN public.section_teacher st
+                      LEFT JOIN public.section_teacher st
                           ON t.id = st.teacher_id
-                  {where}
+                            AND st.is_actual
+                  WHERE TRUE {where}
                   GROUP BY 1, 2, 3
-                  {having}
-                  {sort}
+                  {havingString}
+                  ORDER BY {sort}
                   {pagination}",
-            CountSql = $@"SELECT {SelectString}
+            CountSql = $@"WITH t AS (SELECT {SelectString}
                   FROM public.teacher t 
-                      JOIN public.section_teacher st
+                      LEFT JOIN public.section_teacher st
                           ON t.id = st.teacher_id
-                  {where}
+                            AND st.is_actual
+                  WHERE TRUE {where}
                   GROUP BY 1, 2, 3
-                  {having}",
+                  {havingString})
+                  SELECT COUNT(*) FROM t",
             Parameters = dynamicParams
         };
     }
