@@ -6,7 +6,9 @@ namespace DumaemSchool.Database.Mappers;
 public sealed partial class DatabaseMapper
 {
     public partial DumaemSchool.Core.Models.Teacher Map(Teacher teacherDb);
-    
+
     [MapperIgnoreSource(nameof(Core.Models.Teacher.Id))]
     public partial Teacher Map(DumaemSchool.Core.Models.Teacher teacher);
+
+    public partial DumaemSchool.Core.Models.SectionType Map(SectionType sectionType);
 }

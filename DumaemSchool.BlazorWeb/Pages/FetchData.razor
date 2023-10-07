@@ -2,11 +2,12 @@
 @using DumaemSchool.BlazorWeb.Data
 @using DumaemSchool.Auth.Managers
 @using DumaemSchool.Core.Commands
+@using DumaemSchool.Core.DataManipulation
 @using DumaemSchool.Core.Models
+@using DumaemSchool.Core.OutputModels
+@using DumaemSchool.Core.Queries
 @using MediatR
 @inject WeatherForecastService ForecastService
-@inject NavigationManager NavigationManager
-@inject SchoolSignInManager SignInManager
 @inject ISender Sender;
 <PageTitle>Weather forecast</PageTitle>
 
@@ -55,12 +56,15 @@ else
 
     private async Task LogIn()
     {
-        var teacher = new Teacher() { Name = "Sasfasf" };
-        var register = new AddTeacherCommand(teacher, "bulat_sqwrwer1@mail.ru");
-        var res = await Sender.Send(register);
-        var message = res.Match(
-            succ => "Success",
-            err => err.Message);
+        var teachers = await Sender.Send(new TeachersQuery(new ListParam()
+        {
+            Pagination = new PaginationInfo() { ItemCount = 10 },
+            Filters = new[]
+            {
+                new FilterDefinition() { FieldName = nameof(TeacherDto.SectionsCount), Operand = FilterOperand.GreaterThan, Value = 1 }
+            },
+            Sorting = new[] { new SortingDefinition() { FieldName = nameof(Teacher.Name), Asc = false} }
+        }));
     }
 
 }
