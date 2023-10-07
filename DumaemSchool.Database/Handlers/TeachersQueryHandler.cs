@@ -17,6 +17,6 @@ public sealed class TeachersQueryHandler : IRequestHandler<TeachersQuery, ListDa
     public async Task<ListDataResult<TeacherDto>> Handle(TeachersQuery request, 
         CancellationToken cancellationToken)
     {
-        return await _repository.ListTeachersAsync(request.IncludeFired, request.Params);
+        return await _repository.ListTeachersAsync( request.Params);
     }
 }

@@ -1,0 +1,112 @@
+﻿@page "/teachers"
+
+@using System.Net.Http.Json
+@using DumaemSchool.Core.Commands;
+@using DumaemSchool.Core.DataManipulation;
+@using DumaemSchool.Core.OutputModels;
+@using DumaemSchool.Core.Queries;
+@using MediatR;
+
+@inject ISender Sender;
+@inject NavigationManager NavigationManager;
+
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
+
+    <div class="d-flex flex-wrap mt-4">
+        <MudSwitch CheckedChanged="@(EventCallback.Factory.Create<bool>(this, OnShowDeletedChange))"  Color="Color.Primary">Отображать уволенных</MudSwitch>
+    </div>
+
+    <MudDataGrid RowStyleFunc="RowStyleFunc" @ref="@_mudDataGrid" ServerData="@GetData" T="TeacherDto" Filterable="true" SortMode="@SortMode.Multiple" Groupable="false" Hideable="true">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Список учителей</MudText>
+            <MudSpacer />
+            <MudTextField ValueChanged="@(EventCallback.Factory.Create<string>(this, OnSearch))" Placeholder="Поиск" Adornment="Adornment.Start" Immediate="true"
+                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+  
+
+        <Columns>
+            <PropertyColumn Filterable="false" Property="x => x.Name" SortBy="x => x.Name" Title="ФИО" />
+            <PropertyColumn Filterable="false" Property="x => x.SectionsCount" SortBy="x => x.SectionsCount" Title="Кол-во проводимых кружков" />
+
+            <TemplateColumn Sortable="false" Filterable="false">
+                <CellTemplate>
+                    <MudStack Row>
+                        <MudButton Style="margin-left: 53%" Disabled="@(context.Item.IsDeleted)" Size="@Size.Small" Variant="@MudBlazor.Variant.Filled" OnClick="@(async() => await FireTeacher(context.Item.Id))" Color="@Color.Error">Уволить</MudButton>
+                        <MudButton Style="margin-left: 5%" Size="@Size.Small" Variant="@MudBlazor.Variant.Filled" OnClick="@(() => GoToTeacherDetailed(context.Item.Id))" Color="@Color.Primary">Перейти</MudButton>
+                    </MudStack>
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+
+        <PagerContent>
+            <MudDataGridPager T="TeacherDto" />
+        </PagerContent>
+    </MudDataGrid>
+</MudContainer>
+@code {
+    private string _searchString = "";
+
+    private bool _showDeletedTeachers = false;
+
+    private MudDataGrid<TeacherDto> _mudDataGrid;
+
+    private void OnSearch(string text)
+    {
+        _searchString = text;
+        _mudDataGrid.ReloadServerData();
+    }
+
+    private async Task FireTeacher(int teacherId)
+    {
+        var fireTeacherCommand = new FireTeacherCommand(teacherId);
+        var res = await Sender.Send(fireTeacherCommand);
+
+        await _mudDataGrid.ReloadServerData();
+
+    }
+
+    private void GoToTeacherDetailed(int teacherId)
+    {
+        NavigationManager.NavigateTo($"/teacher/{teacherId}");
+    }
+
+    private void OnShowDeletedChange(bool state)
+    {
+        _showDeletedTeachers = state;
+        _mudDataGrid.ReloadServerData();
+    }
+
+    private string RowStyleFunc(TeacherDto teacher, int index)
+    {
+        if(teacher.IsDeleted)
+        {
+            return "background-color: #cf8282";
+        }
+        return "";
+    }
+
+    private async Task<GridData<TeacherDto>> GetData(GridState<TeacherDto> state)
+    {
+        var filters = new List<FilterDefinition>();
+        if (!_showDeletedTeachers)
+        {
+            filters.Add(new FilterDefinition() { FieldName = "IsDeleted", Value = false, Operand = FilterOperand.Equal });
+        }
+        filters.Add(new FilterDefinition { FieldName = "Name", Value = _searchString, Operand = FilterOperand.Contains });
+
+        var result = await Sender.Send(new TeachersQuery(new ListParam()
+            {
+                Pagination = new PaginationInfo() { ItemCount = state.PageSize, PageNumber = state.Page },
+                Sorting = state.SortDefinitions.Select(x => new SortingDefinition()
+                {
+                    FieldName = x.SortBy,
+                    Asc = !x.Descending
+                }).ToArray(),
+                Filters = filters.ToArray()
+            }));
+
+        return new GridData<TeacherDto>() { Items = result.Items, TotalItems = result.TotalItemsCount };
+    }
+}

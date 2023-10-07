@@ -24,7 +24,7 @@ public sealed class TeacherListSqlGenerator : AbstractListSqlGenerator<TeacherDt
         {
             SelectSql = @$"SELECT {SelectString}
                   FROM public.teacher t 
-                      JOIN public.section_teacher st
+                      LEFT JOIN public.section_teacher st
                           ON t.id = st.teacher_id
                             AND st.is_actual
                   WHERE {where}
@@ -32,14 +32,15 @@ public sealed class TeacherListSqlGenerator : AbstractListSqlGenerator<TeacherDt
                   HAVING {having}
                   ORDER BY {sort}
                   {pagination}",
-            CountSql = $@"SELECT {SelectString}
+            CountSql = $@"WITH t AS (SELECT {SelectString}
                   FROM public.teacher t 
-                      JOIN public.section_teacher st
+                      LEFT JOIN public.section_teacher st
                           ON t.id = st.teacher_id
                             AND st.is_actual
                   WHERE {where}
                   GROUP BY 1, 2, 3
-                  HAVING {having}",
+                  HAVING {having})
+                  SELECT COUNT(*) FROM t",
             Parameters = dynamicParams
         };
     }

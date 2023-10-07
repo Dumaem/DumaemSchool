@@ -21,7 +21,7 @@ public sealed class TeacherRepository : ITeacherRepository
         _mapper = new DatabaseMapper();
     }
 
-    public async Task<ListDataResult<TeacherDto>> ListTeachersAsync(bool includeFired, ListParam param)
+    public async Task<ListDataResult<TeacherDto>> ListTeachersAsync(ListParam param)
     {
         var listQuery = _sqlGenerator.GetListSql(param);
         var connection = _context.Database.GetDbConnection();
