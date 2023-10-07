@@ -8,6 +8,7 @@
 @using MediatR;
 
 @inject ISender Sender;
+@inject NavigationManager NavigationManager;
 
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
@@ -23,14 +24,18 @@
             <MudTextField ValueChanged="@(EventCallback.Factory.Create<string>(this, OnSearch))" Placeholder="Поиск" Adornment="Adornment.Start" Immediate="true"
                           AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
         </ToolBarContent>
-        
+  
+
         <Columns>
             <PropertyColumn Filterable="false" Property="x => x.Name" SortBy="x => x.Name" Title="ФИО" />
             <PropertyColumn Filterable="false" Property="x => x.SectionsCount" SortBy="x => x.SectionsCount" Title="Кол-во проводимых кружков" />
 
             <TemplateColumn Sortable="false" Filterable="false">
                 <CellTemplate>
-                    <MudButton Style="margin-left: 55%" Disabled="@(context.Item.IsDeleted)" Size="@Size.Medium" Variant="@MudBlazor.Variant.Filled" OnClick="@(async() => await FireTeacher(context.Item.Id))" Color="@Color.Error">Уволить</MudButton>
+                    <MudStack Row>
+                        <MudButton Style="margin-left: 53%" Disabled="@(context.Item.IsDeleted)" Size="@Size.Small" Variant="@MudBlazor.Variant.Filled" OnClick="@(async() => await FireTeacher(context.Item.Id))" Color="@Color.Error">Уволить</MudButton>
+                        <MudButton Style="margin-left: 5%" Size="@Size.Small" Variant="@MudBlazor.Variant.Filled" OnClick="@(() => GoToTeacherDetailed(context.Item.Id))" Color="@Color.Primary">Перейти</MudButton>
+                    </MudStack>
                 </CellTemplate>
             </TemplateColumn>
         </Columns>
@@ -60,6 +65,11 @@
 
         await _mudDataGrid.ReloadServerData();
 
+    }
+
+    private void GoToTeacherDetailed(int teacherId)
+    {
+        NavigationManager.NavigateTo($"/teacher/{teacherId}");
     }
 
     private void OnShowDeletedChange(bool state)
