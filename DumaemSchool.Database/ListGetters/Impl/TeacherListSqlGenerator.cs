@@ -6,7 +6,7 @@ using DumaemSchool.Database.Mappers.EntityMapping;
 
 namespace DumaemSchool.Database.ListGetters.Impl;
 
-public class TeacherListSqlGenerator : IListSqlGenerator<TeacherDto>
+public sealed class TeacherListSqlGenerator : IListSqlGenerator<TeacherDto>
 {
     private string SelectString =>
         string.Join(", ", Mapping.GetMapping().Select(x => $"{x.Value} {x.Key}"));
