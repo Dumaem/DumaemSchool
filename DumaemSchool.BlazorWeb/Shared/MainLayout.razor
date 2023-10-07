@@ -1,7 +1,9 @@
 ﻿@inherits LayoutComponentBase
-@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
-@inject NavigationManager NavigationManager;
+
+@inject NavigationManager NavigationManager
+
 <PageTitle>DumaemSchool.BlazorWeb</PageTitle>
+
 
 <MudThemeProvider Theme="@_theme" />
 <MudDialogProvider />
@@ -11,28 +13,26 @@
     <MudAppBar Elevation="1">
         <MudText Typo="Typo.h5" Class="ml-3" Style="font-family: 'Century Gothic'">dumaem</MudText>
         <MudSpacer />
-        <AuthorizeView>
-            <div class="d-flex justify-content-end rounded-3 mr-5">
-                <MudTooltip Text="Кружки">
-                    <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.TheaterComedy" Color="Color.Inherit" />
-                </MudTooltip>
-                <MudTooltip Text="Виды кружков">
-                    <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.Category" Color="Color.Inherit" />
-                </MudTooltip>
-                <MudTooltip Text="Учителя">
-                    <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.People" Color="Color.Inherit" />
-                </MudTooltip>
-                <MudTooltip Text="Расписание">
-                    <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.EditCalendar" Color="Color.Inherit" />
-                </MudTooltip>
-                <MudTooltip Text="Статистика">
-                    <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.Insights" Color="Color.Inherit" />
-                </MudTooltip>
-                <MudTooltip Text="Профиль">
-                    <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" />
-                </MudTooltip>
-            </div>
-        </AuthorizeView>
+        <div class="d-flex justify-content-end rounded-3 mr-5">
+            <MudTooltip Text="Кружки">
+                <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.TheaterComedy" Color="Color.Inherit"/>
+            </MudTooltip>
+            <MudTooltip Text="Виды кружков">
+                <MudIconButton OnClick="@(() => NavigationManager.NavigateTo("/section-types"))" Size="Size.Medium" Icon="@Icons.Material.Filled.Category" Color="Color.Inherit"/>
+            </MudTooltip>
+            <MudTooltip Text="Учителя">
+                <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.People" Color="Color.Inherit"/>
+            </MudTooltip>
+            <MudTooltip Text="Расписание">
+                <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.EditCalendar" Color="Color.Inherit"/>
+            </MudTooltip>
+            <MudTooltip Text="Статистика">
+                <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.Insights" Color="Color.Inherit"/>
+            </MudTooltip>
+            <MudTooltip Text="Профиль">
+                <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit"/>
+            </MudTooltip>
+        </div>
     </MudAppBar>
     <MudMainContent>
         @Body
@@ -41,20 +41,6 @@
 
 @code
 {
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if(!firstRender)
-        {
-            return;
-        }
-
-        var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User.Identity;
-
-        if (userIdentity is not null && !userIdentity.IsAuthenticated)
-        {
-            NavigationManager.NavigateTo("/login");
-        }
-    }
     private readonly MudTheme _theme = new()
     {
         Palette = new PaletteLight
