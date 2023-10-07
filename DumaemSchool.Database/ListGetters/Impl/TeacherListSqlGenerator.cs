@@ -20,6 +20,8 @@ public sealed class TeacherListSqlGenerator : AbstractListSqlGenerator<TeacherDt
         var sort = GetOrderByExpression(param.Sorting);
         var pagination = GetPaginationExpression(param.Pagination);
 
+        var havingString = string.IsNullOrEmpty(having) ? "" : $"HAVING {having}";
+
         return new ListQuery
         {
             SelectSql = @$"SELECT {SelectString}
@@ -27,9 +29,9 @@ public sealed class TeacherListSqlGenerator : AbstractListSqlGenerator<TeacherDt
                       LEFT JOIN public.section_teacher st
                           ON t.id = st.teacher_id
                             AND st.is_actual
-                  WHERE {where}
+                  WHERE TRUE {where}
                   GROUP BY 1, 2, 3
-                  HAVING {having}
+                  {havingString}
                   ORDER BY {sort}
                   {pagination}",
             CountSql = $@"WITH t AS (SELECT {SelectString}
@@ -37,9 +39,9 @@ public sealed class TeacherListSqlGenerator : AbstractListSqlGenerator<TeacherDt
                       LEFT JOIN public.section_teacher st
                           ON t.id = st.teacher_id
                             AND st.is_actual
-                  WHERE {where}
+                  WHERE TRUE {where}
                   GROUP BY 1, 2, 3
-                  HAVING {having})
+                  {havingString})
                   SELECT COUNT(*) FROM t",
             Parameters = dynamicParams
         };

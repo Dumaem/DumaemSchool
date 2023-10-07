@@ -21,14 +21,12 @@ public sealed class SectionTypeListSqlGenerator : AbstractListSqlGenerator<Secti
         return new ListQuery
         {
             SelectSql = $@"SELECT {SelectString} 
-                           FROM public.section_type 
-                           WHERE NOT is_deleted 
-                             AND {where}
+                           FROM public.section_type s
+                           WHERE NOT is_deleted {where}
                            ORDER BY {sort}",
             CountSql = $@"SELECT {SelectString} 
-                           FROM public.section_type 
-                           WHERE NOT is_deleted 
-                             AND {where}",
+                           FROM public.section_type s
+                           WHERE NOT is_deleted {where}",
             Parameters = dynamicParams
         };
     }

@@ -51,6 +51,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IListSqlGenerator<TeacherDto>, TeacherListSqlGenerator>();
         services.AddSingleton<IListSqlGenerator<SectionType>, SectionTypeListSqlGenerator>();
         services.AddSingleton<IEntityMapping<TeacherDto>, TeacherDtoEntityMapping>();
+        services.AddSingleton<IEntityMapping<SectionType>, SectionTypeEntityMapping>();
 
         return services;
     }

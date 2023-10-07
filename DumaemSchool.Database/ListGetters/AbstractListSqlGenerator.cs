@@ -39,7 +39,7 @@ public abstract class AbstractListSqlGenerator<T> : IListSqlGenerator<T> where T
         if (presentFilters.Length == 0)
             return "";
 
-        return $" {string.Join(" AND ", presentFilters
+        return $" AND {string.Join(" AND ", presentFilters
             .Select(x => SqlUtility.GetFilterToSql(x, dynamicParams, PropertyToSqlMapping)))} ";
     }
 

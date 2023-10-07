@@ -28,13 +28,13 @@ public sealed class SectionTypeRepository : ISectionTypeRepository
     {
         var listQuery = _sqlGenerator.GetListSql(listParam);
         var connection = _context.Database.GetDbConnection();
-        var result = await connection
-            .QueryAsync<Core.Models.SectionType>(listQuery.SelectSql, listQuery.Parameters);
-        var count = await connection.ExecuteScalarAsync<int>(listQuery.CountSql, listQuery.Parameters);
+        var result = (await connection
+            .QueryAsync<Core.Models.SectionType>(listQuery.SelectSql, listQuery.Parameters))
+            .AsList();
 
         return new ListDataResult<Core.Models.SectionType>
         {
-            Items = result, TotalItemsCount = count
+            Items = result, TotalItemsCount = result.Count
         };
     }
 
