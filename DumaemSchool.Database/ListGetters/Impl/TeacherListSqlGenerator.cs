@@ -60,6 +60,7 @@ public class TeacherListSqlGenerator : IListSqlGenerator<TeacherDto>
                   FROM public.teacher t 
                       JOIN public.section_teacher st
                           ON t.id = st.teacher_id
+                            AND st.is_actual
                   {where}
                   GROUP BY 1, 2, 3
                   {having}
@@ -69,6 +70,7 @@ public class TeacherListSqlGenerator : IListSqlGenerator<TeacherDto>
                   FROM public.teacher t 
                       JOIN public.section_teacher st
                           ON t.id = st.teacher_id
+                            AND st.is_actual
                   {where}
                   GROUP BY 1, 2, 3
                   {having}",
