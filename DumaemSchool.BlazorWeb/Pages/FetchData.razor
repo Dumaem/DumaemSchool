@@ -56,7 +56,7 @@ else
 
     private async Task LogIn()
     {
-        var teachers = await Sender.Send(new TeachersQuery(false, new ListParam()
+        var teachers = await Sender.Send(new TeachersQuery(new ListParam()
         {
             Pagination = new PaginationInfo() { ItemCount = 10 },
             Filters = new[]

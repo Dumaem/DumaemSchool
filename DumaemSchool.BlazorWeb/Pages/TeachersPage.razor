@@ -96,7 +96,7 @@
         }
         filters.Add(new FilterDefinition { FieldName = "Name", Value = _searchString, Operand = FilterOperand.Contains });
 
-        var result = await Sender.Send(new TeachersQuery(false, new ListParam()
+        var result = await Sender.Send(new TeachersQuery(new ListParam()
             {
                 Pagination = new PaginationInfo() { ItemCount = state.PageSize, PageNumber = state.Page },
                 Sorting = state.SortDefinitions.Select(x => new SortingDefinition()
