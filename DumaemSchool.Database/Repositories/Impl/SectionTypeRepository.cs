@@ -1,4 +1,7 @@
-﻿using DumaemSchool.Database.Mappers;
+﻿using Dapper;
+using DumaemSchool.Core.DataManipulation;
+using DumaemSchool.Core.OutputModels;
+using DumaemSchool.Database.ListGetters;
 using Microsoft.EntityFrameworkCore;
 
 namespace DumaemSchool.Database.Repositories.Impl;
@@ -12,19 +15,27 @@ public sealed class SectionTypeRepository : ISectionTypeRepository
             select sectionType);
 
     private readonly ApplicationContext _context;
-    private readonly DatabaseMapper _mapper;
+    private readonly IListSqlGenerator<Core.Models.SectionType> _sqlGenerator;
 
-    public SectionTypeRepository(ApplicationContext context)
+    public SectionTypeRepository(ApplicationContext context, 
+        IListSqlGenerator<Core.Models.SectionType> sqlGenerator)
     {
         _context = context;
-        _mapper = new DatabaseMapper();
+        _sqlGenerator = sqlGenerator;
     }
 
-    public Task<IEnumerable<Core.Models.SectionType>> ListSectionTypesAsync()
+    public async Task<ListDataResult<Core.Models.SectionType>> ListSectionTypesAsync(ListParam listParam)
     {
-        return Task.FromResult(SectionTypeQuery
-            .Invoke(_context)
-            .Select(x => _mapper.Map(x)));
+        var listQuery = _sqlGenerator.GetListSql(listParam);
+        var connection = _context.Database.GetDbConnection();
+        var result = await connection
+            .QueryAsync<Core.Models.SectionType>(listQuery.SelectSql, listQuery.Parameters);
+        var count = await connection.ExecuteScalarAsync<int>(listQuery.CountSql, listQuery.Parameters);
+
+        return new ListDataResult<Core.Models.SectionType>
+        {
+            Items = result, TotalItemsCount = count
+        };
     }
 
     public async Task<int> AddSectionTypeAsync(string name)

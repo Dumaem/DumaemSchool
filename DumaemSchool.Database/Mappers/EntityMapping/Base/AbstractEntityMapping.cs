@@ -1,4 +1,4 @@
-﻿namespace DumaemSchool.Database.Mappers.EntityMapping;
+﻿namespace DumaemSchool.Database.Mappers.EntityMapping.Base;
 
 public abstract class AbstractEntityMapping<TEntity> : IEntityMapping<TEntity>
 {
@@ -12,13 +12,14 @@ public abstract class AbstractEntityMapping<TEntity> : IEntityMapping<TEntity>
     private readonly HashSet<string> _aggregatePropertyMappings = new();
     public IReadOnlyCollection<string> AggregateMappingPropertyNames => _aggregatePropertyMappings;
 
-    protected void Map(string propertyName, string databaseExpression, bool isAggregate = false)
+    protected void Map(string propertyName, string databaseExpression, bool isAggregate = false, bool isPrimaryKey = false)
     {
         var mapping = new PropertyMapping
         {
             PropertyName = propertyName,
             SqlExpression = databaseExpression,
-            IsAggregate = isAggregate
+            IsAggregate = isAggregate,
+            IsPrimaryKey = isPrimaryKey,
         };
         Mappings.Add(mapping);
         if (isAggregate)
