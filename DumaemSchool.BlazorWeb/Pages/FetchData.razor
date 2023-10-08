@@ -54,7 +54,7 @@ else
 
     private async Task LogIn()
     {
-        var teachers = await Sender.Send(new TeacherSectionsInfoQuery(new ListParam
+        var teachers = await Sender.Send(new SectionsInfoQuery(new ListParam
         {
             Filters = new[]
             {

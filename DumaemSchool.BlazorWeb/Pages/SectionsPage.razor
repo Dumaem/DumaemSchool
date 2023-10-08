@@ -1,39 +1,8 @@
 ﻿@page "/sections"
-@using DumaemSchool.Core.Dto;
+@using DumaemSchool.Core.OutputModels
+@using DumaemSchool.Core.Queries
+@using DumaemSchool.Core.DataManipulation
+@using MediatR
+@using DumaemSchool.BlazorWeb.Data.Converters
 
-<MudDataGrid Items="@_sections" >
-    <Header>
-        Кружки
-    </Header>
-    <Columns>
-        <PropertyColumn Property="x => x.Id" Title="Nr"/>
-        <PropertyColumn Property="x => x.GroupName" Title="Наименование группы"/>
-        <PropertyColumn Property="x => x.TeacherName" Title="ФИО преподавателя"/>
-        <PropertyColumn Property="x => x.SectionTypeName" Title="Наименование вида кружка"/>
-    </Columns>
-    <PagerContent>
-        <MudDataGridPager T="SectionDto"/>
-    </PagerContent>
-</MudDataGrid>
-
-@code {
-
-    private readonly List<SectionDto> _sections = new()
-    {
-        new SectionDto()
-        {
-            Id = 1,
-            GroupName = "Test1",
-            TeacherName = "Иванов И.И",
-            SectionTypeName = "Лепка"
-        },
-        new SectionDto()
-        {
-            Id = 2,
-            GroupName = "Test2",
-            TeacherName = "Иванов П.Р",
-            SectionTypeName = "Рисование"
-        }
-    };
-
-}
+<Sections TeacherId="1"></Sections>
