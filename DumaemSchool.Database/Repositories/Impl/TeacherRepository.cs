@@ -4,6 +4,7 @@ using DumaemSchool.Core.OutputModels;
 using DumaemSchool.Database.ListGetters;
 using DumaemSchool.Database.Mappers;
 using Microsoft.EntityFrameworkCore;
+using Teacher = DumaemSchool.Core.Models.Teacher;
 
 namespace DumaemSchool.Database.Repositories.Impl;
 
@@ -35,11 +36,20 @@ public sealed class TeacherRepository : ITeacherRepository
         };
     }
 
-    public async Task<Core.Models.Teacher> AddTeacherAsync(Core.Models.Teacher teacher)
+    public async Task<Teacher> AddTeacherAsync(Teacher teacher)
     {
         var teacherDb = _mapper.Map(teacher);
         await _context.Teachers.AddAsync(teacherDb);
         await _context.SaveChangesAsync();
+        return _mapper.Map(teacherDb);
+    }
+
+    public async Task<Teacher?> GetTeacherInfo(int teacherId)
+    {
+        var teacherDb = await _context.Teachers.FindAsync(teacherId);
+        if (teacherDb is null)
+            return null;
+
         return _mapper.Map(teacherDb);
     }
 

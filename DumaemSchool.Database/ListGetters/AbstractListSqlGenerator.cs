@@ -67,6 +67,8 @@ public abstract class AbstractListSqlGenerator<T> : IListSqlGenerator<T> where T
 
     protected string GetPaginationExpression(PaginationInfo paginationInfo)
     {
-        return $" LIMIT {paginationInfo.ItemCount} OFFSET {paginationInfo.PageNumber * paginationInfo.ItemCount} ";
+        return paginationInfo.IsEmpty
+            ? ""
+            : $" LIMIT {paginationInfo.ItemCount} OFFSET {paginationInfo.PageNumber * paginationInfo.ItemCount} ";
     }
 }

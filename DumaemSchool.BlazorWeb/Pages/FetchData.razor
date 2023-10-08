@@ -54,9 +54,15 @@ else
 
     private async Task LogIn()
     {
-        var teachers = await Sender.Send(new SectionTypesQuery(new ListParam
+        var teachers = await Sender.Send(new TeacherSectionsInfoQuery(new ListParam
         {
-            Sorting = new[] { new SortingDefinition() { FieldName = nameof(SectionType.Name), Asc = true} }
+            Filters = new[]
+            {
+                new FilterDefinition()
+                {
+                    FieldName = nameof(SectionInfo.TeacherName), Operand = FilterOperand.Contains, Value = "кс",
+                }
+            }
         }));
     }
 
