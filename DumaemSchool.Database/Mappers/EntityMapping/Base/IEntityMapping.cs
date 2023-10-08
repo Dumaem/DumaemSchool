@@ -1,4 +1,4 @@
-﻿namespace DumaemSchool.Database.Mappers.EntityMapping;
+﻿namespace DumaemSchool.Database.Mappers.EntityMapping.Base;
 
 public interface IEntityMapping<T>
 {
