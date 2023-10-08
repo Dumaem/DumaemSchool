@@ -39,8 +39,8 @@ public abstract class AbstractListSqlGenerator<T> : IListSqlGenerator<T> where T
         if (presentFilters.Length == 0)
             return "";
 
-        return $" AND {string.Join(" AND ", presentFilters
-            .Select(x => SqlUtility.GetFilterToSql(x, dynamicParams, PropertyToSqlMapping)))} ";
+        return
+            $" AND {string.Join(" AND ", presentFilters.Select(x => SqlUtility.GetFilterToSql(x, dynamicParams, PropertyToSqlMapping)).Where(x => !string.IsNullOrEmpty(x)))} ";
     }
 
     protected string GetHavingExpression(FilterDefinition[] filters, DynamicParameters dynamicParams)
@@ -55,7 +55,8 @@ public abstract class AbstractListSqlGenerator<T> : IListSqlGenerator<T> where T
             return "";
 
         return $" {string.Join(" AND ", presentFilters
-            .Select(x => SqlUtility.GetFilterToSql(x, dynamicParams, PropertyToSqlMapping)))} ";
+                .Select(x => SqlUtility.GetFilterToSql(x, dynamicParams, PropertyToSqlMapping))
+                .Where(x => !string.IsNullOrEmpty(x)))} ";
     }
 
     protected string GetOrderByExpression(SortingDefinition[] sortingDefinitions)
