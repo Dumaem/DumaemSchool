@@ -6,44 +6,52 @@
 @using MediatR;
 @using DataGridEditMode = Radzen.DataGridEditMode
 @using Variant = Radzen.Variant
+@using DumaemSchool.Core.Commands
 
 @inject ISender Sender;
 
-<RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Добавить вид кружка" 
-              Click="@InsertRow" Disabled=@(sectionTypeToInsert != null || sectionTypeToUpdate != null) />
-<RadzenDataGrid @ref="sectionTypesGrid" AllowAlternatingRows="false" AllowFiltering="true" AllowPaging="true" PageSize="8" 
-                AllowSorting="true" EditMode="DataGridEditMode.Single"  Data="@sectionTypes" TItem="SectionType" 
-                RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow" Sort="@Reset" 
-                Page="@Reset" Filter="@Reset" ColumnWidth="200px">
-    <Columns>
-        <RadzenDataGridColumn TItem="SectionType" Property="Name" Title="Название вида кружка" />
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
+    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mb-4" Text="Добавить вид кружка" 
+                  Click="@InsertRow" Disabled=@(sectionTypeToInsert != null || sectionTypeToUpdate != null) />
+    <RadzenDataGrid @ref="sectionTypesGrid" AllowAlternatingRows="true" AllowFiltering="false" AllowPaging="true" PageSize="8" 
+                    AllowSorting="true" EditMode="DataGridEditMode.Single"  Data="@sectionTypes" TItem="SectionType" 
+                    RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow" Sort="@Reset" 
+                    Page="@Reset" Filter="@Reset" ColumnWidth="200px">
+        <Columns>
+            <RadzenDataGridColumn TItem="SectionType" Property="Name" Title="Название вида кружка">
+                <EditTemplate Context="sectionType">
+                    <RadzenTextBox @bind-Value="sectionType.Name" Style="width:100%; display: block" Name="Name" />
+                    <RadzenRequiredValidator Text="Название вида кружка обязательно!" Component="Name" Popup="true" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
 
-        <RadzenDataGridColumn TItem="SectionType" Context="order" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="156px">
-            <Template Context="sectionType">
-                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" 
-                              Size="ButtonSize.Medium" Click="@(args => EditRow(sectionType))" 
-                              @onclick:stopPropagation="true"/>
+            <RadzenDataGridColumn TItem="SectionType" Context="sectionType" Filterable="false" Sortable="false" 
+                                  TextAlign="TextAlign.Right" Width="156px">
+                <Template Context="sectionType">
+                    <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" 
+                                  Size="ButtonSize.Medium" Click="@(args => EditRow(sectionType))" 
+                                  @onclick:stopPropagation="true"/>
+                    
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" 
+                                  Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" 
+                                  Click="@(args => DeleteRow(sectionType))" @onclick:stopPropagation="true"/>
+                </Template>
                 
-                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" 
-                              Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" 
-                              Click="@(args => DeleteRow(sectionType))" @onclick:stopPropagation="true"/>
-            </Template>
-            
-            <EditTemplate Context="sectionType">
-                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" 
-                              Size="ButtonSize.Medium" Click="@((args) => SaveRow(sectionType))"/>
-                
-                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" 
-                              Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(sectionType))"/>
-                
-                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" 
-                              Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" 
-                              Click="@(args => DeleteRow(sectionType))"/>
-            </EditTemplate>
-        </RadzenDataGridColumn>
-    </Columns>
-</RadzenDataGrid>
-
+                <EditTemplate Context="sectionType">
+                    <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" 
+                                  Size="ButtonSize.Medium" Click="@((args) => SaveRow(sectionType))"/>
+                    
+                    <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" 
+                                  Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(sectionType))"/>
+                    
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" 
+                                  Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" 
+                                  Click="@(args => DeleteRow(sectionType))"/>
+                </EditTemplate>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</MudContainer>
 
 @code {
     RadzenDataGrid<SectionType> sectionTypesGrid;
@@ -64,39 +72,33 @@
 
         var result = await Sender.Send(new SectionTypesQuery(new ListParam() { }));
         sectionTypes = result.Items;
-
-    // customers = dbContext.Customers;
-    // employees = dbContext.Employees;
-    //
-    // sectionTypes = dbContext.SectionTypes.Include("Customer").Include("Employee");
     }
 
     async Task EditRow(SectionType sectionType)
     {
-        // sectionTypeToUpdate = sectionType;
-        // await ordersGrid.EditRow(sectionType);
+        sectionTypeToUpdate = sectionType;
+        await sectionTypesGrid.EditRow(sectionType);
     }
 
-    void OnUpdateRow(SectionType sectionType)
+    async Task OnUpdateRow(SectionType sectionType)
     {
         Reset();
 
-        // dbContext.Update(sectionType);
-        //
-        // dbContext.SaveChanges();
+        var updateSectionTypeNameCommand = new UpdateSectionTypeNameCommand(sectionType);
+        var res = await Sender.Send(updateSectionTypeNameCommand);
     }
 
     async Task SaveRow(SectionType sectionType)
     {
-        //await ordersGrid.UpdateRow(sectionType);
+        await sectionTypesGrid.UpdateRow(sectionType);
     }
 
     void CancelEdit(SectionType sectionType)
     {
         Reset();
 
-        // ordersGrid.CancelEditRow(sectionType);
-        //
+        sectionTypesGrid.CancelEditRow(sectionType);
+        
         // var sectionTypeEntry = dbContext.Entry(sectionType);
         // if (sectionTypeEntry.State == EntityState.Modified)
         // {
@@ -105,38 +107,37 @@
         // }
     }
 
-    async Task DeleteRow(SectionType sectionType
-)
+    async Task DeleteRow(SectionType sectionType)
     {
         Reset();
 
-        // if (sectionTypes.Contains(sectionType))
-        // {
-        //     dbContext.Remove<SectionType>(sectionType);
-        //
-        //     dbContext.SaveChanges();
-        //
-        //     await ordersGrid.Reload();
-        // }
-        // else
-        // {
-        //     ordersGrid.CancelEditRow(sectionType);
-        //     await ordersGrid.Reload();
-        // }
+        if (sectionTypes.Contains(sectionType))
+        {
+            var deleteSectionTypeCommand = new DeleteSectionTypeCommand(sectionType.Id);
+            var res = await Sender.Send(deleteSectionTypeCommand);
+            
+            await sectionTypesGrid.Reload();
+        }
+        else
+        {
+            sectionTypesGrid.CancelEditRow(sectionType);
+            await sectionTypesGrid.Reload();
+        }
+        
+        Reset();
     }
 
     async Task InsertRow()
     {
-        // sectionTypeToInsert = new SectionType();
-        // await ordersGrid.InsertRow(sectionTypeToInsert);
+        sectionTypeToInsert = new SectionType();
+        await sectionTypesGrid.InsertRow(sectionTypeToInsert);
     }
 
-    void OnCreateRow(SectionType sectionType)
+    async Task OnCreateRow(SectionType sectionType)
     {
-        // dbContext.Add(sectionType);
-        //
-        // dbContext.SaveChanges();
-        //
-        // sectionTypeToInsert = null;
+        var addSectionTypeCommand = new AddSectionTypeCommand(sectionType.Name);
+        var res = await Sender.Send(addSectionTypeCommand);
+        
+        sectionTypeToInsert = null;
     }
 }
