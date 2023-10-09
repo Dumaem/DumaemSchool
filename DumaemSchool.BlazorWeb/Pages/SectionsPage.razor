@@ -1,8 +1,18 @@
 ﻿@page "/sections"
-@using DumaemSchool.Core.OutputModels
-@using DumaemSchool.Core.Queries
-@using DumaemSchool.Core.DataManipulation
-@using MediatR
-@using DumaemSchool.BlazorWeb.Data.Converters
+@using DumaemSchool.Auth.Models
+@attribute [Authorize]
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
 
-<Sections TeacherId="1"></Sections>
+<Sections TeacherId="_teacherId"></Sections>
+
+@code{
+    private int? _teacherId;
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+        if (user.IsInRole(Role.Teacher))
+        {
+            _teacherId = int.Parse(user.Claims.First(x => x.Type == UserClaims.TeacherId).Value);
+        }
+    }
+}

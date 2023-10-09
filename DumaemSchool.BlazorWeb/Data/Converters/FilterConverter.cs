@@ -3,27 +3,27 @@ using MudBlazor;
 
 namespace DumaemSchool.BlazorWeb.Data.Converters;
 
-public static class FilterConverter<T>
+public static class FilterConverter
 {
     private static readonly Dictionary<string, FilterOperand> Operands = new()
     {
-        {"contains", FilterOperand.Contains},
-        {"equals", FilterOperand.Equal},
-        {"not contains", FilterOperand.NotContains},
-        {"not equals", FilterOperand.NotEqual},
-        {"starts with", FilterOperand.StartsWith},
-        {"ends with", FilterOperand.EndsWith},
-        {"is empty", FilterOperand.IsEmpty},
-        {"is not empty", FilterOperand.IsNotEmpty},
-        {"=", FilterOperand.Equal},
-        {"!=", FilterOperand.NotEqual},
-        {">", FilterOperand.GreaterThan},
-        {">=", FilterOperand.GreaterThanOrEqual},
-        {"<", FilterOperand.LessThan},
-        {"<=", FilterOperand.LessThanOrEqual},
+        {FilterOperator.String.Contains, FilterOperand.Contains},
+        {FilterOperator.String.Equal, FilterOperand.Equal},
+        {FilterOperator.String.NotContains, FilterOperand.NotContains},
+        {FilterOperator.String.NotEqual, FilterOperand.NotEqual},
+        {FilterOperator.String.StartsWith, FilterOperand.StartsWith},
+        {FilterOperator.String.EndsWith, FilterOperand.EndsWith},
+        {FilterOperator.String.Empty, FilterOperand.IsEmpty},
+        {FilterOperator.String.NotEmpty, FilterOperand.IsNotEmpty},
+        {FilterOperator.Number.Equal, FilterOperand.Equal},
+        {FilterOperator.Number.NotEqual, FilterOperand.NotEqual},
+        {FilterOperator.Number.GreaterThan, FilterOperand.GreaterThan},
+        {FilterOperator.Number.GreaterThanOrEqual, FilterOperand.GreaterThanOrEqual},
+        {FilterOperator.Number.LessThan, FilterOperand.LessThan},
+        {FilterOperator.Number.LessThanOrEqual, FilterOperand.LessThanOrEqual},
     };
 
-    public static IEnumerable<FilterDefinition> Convert(IEnumerable<IFilterDefinition<T>> mudFilters)
+    public static IEnumerable<FilterDefinition> Convert<T>(IEnumerable<IFilterDefinition<T>> mudFilters)
     {
         return mudFilters.Where(mudFilter => mudFilter.Column is not null && mudFilter.Operator is not null
                                                                           && mudFilter.Value is not null)
@@ -35,7 +35,7 @@ public static class FilterConverter<T>
             }).ToList();
     }
 
-    public static ListParam GenerateParamsFromGrid(GridState<T> state, List<FilterDefinition>? filters)
+    public static ListParam GenerateParamsFromGrid<T>(GridState<T> state, List<FilterDefinition>? filters)
     {
         filters ??= new List<FilterDefinition>();
         filters.AddRange(Convert(state.FilterDefinitions));
