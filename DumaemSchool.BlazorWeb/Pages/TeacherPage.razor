@@ -29,7 +29,7 @@
         <Authorized>
             <MudStack>
                 <MudTextField Immediate @bind-Value="currentTeacher.Name"></MudTextField>
-                 <MudButton Disabled="@(!IsTeacherNameChange())" Variant="@MudBlazor.Variant.Filled"
+                 <MudButton Disabled="@(!TeacherNameChanged)" Variant="@MudBlazor.Variant.Filled"
                             OnClick="@(() => EditTeacher(currentTeacher))" Color="@Color.Primary">Изменить</MudButton>
              </MudStack>
         </Authorized>
@@ -45,7 +45,7 @@
 
 </MudContainer>
 
-@code {
+ @code {
 
     [Parameter]
     public int Id { get; set; }
@@ -53,18 +53,11 @@
     private string? savedTeacherName;
     private Teacher? currentTeacher;
 
+    private bool TeacherNameChanged => currentTeacher?.Name != savedTeacherName;
+
     protected override async Task OnInitializedAsync()
     {
         await GetTeacherData();
-    }
-
-    private bool IsTeacherNameChange()
-    {
-        if(currentTeacher?.Name != savedTeacherName)
-        {
-            return true;
-        }
-        return false;
     }
 
     private async Task GetTeacherData()

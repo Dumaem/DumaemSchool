@@ -84,11 +84,7 @@
 
         var result = await dialog.Result;
 
-        if (!result.Canceled)
-        {
-            return true;
-        }
-        return false;
+        return !result.Canceled;
     }
 
     private void GoToTeacherDetailed(int teacherId)
