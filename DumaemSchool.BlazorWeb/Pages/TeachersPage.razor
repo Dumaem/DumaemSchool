@@ -51,9 +51,9 @@
 @code {
     private string _searchString = "";
 
-    private bool _showDeletedTeachers = false;
+    private bool _showDeletedTeachers;
 
-    private MudDataGrid<TeacherDto> _mudDataGrid;
+    private MudDataGrid<TeacherDto> _mudDataGrid = null!;
 
     private void OnSearch(string text)
     {
