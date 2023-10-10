@@ -48,6 +48,7 @@
         </PagerContent>
     </MudDataGrid>
 </MudContainer>
+
 @code {
     private string _searchString = "";
 
@@ -80,7 +81,11 @@
     private async Task<bool> IsSuccessFireDialogResult()
     {
         var options = new MudBlazor.DialogOptions { CloseOnEscapeKey = true };
-        var dialog = await DialogService.ShowAsync<FireTeacherDialog>("Подтверждение увольнения", options);
+        var parameters = new MudBlazor.DialogParameters
+        {
+            ["DialogContent"] = "Вы уверены, что хотите уволить данного преподавателя?"
+        };
+        var dialog = await DialogService.ShowAsync<DialogWindow>("Подтверждение увольнения", parameters, options);
 
         var result = await dialog.Result;
 
