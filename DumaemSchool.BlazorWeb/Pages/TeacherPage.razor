@@ -1,0 +1,80 @@
+﻿@page "/teacher/{id:int}"
+
+@using System.Net.Http.Json
+@using DumaemSchool.Auth.Models;
+@using DumaemSchool.Core.Commands;
+@using DumaemSchool.Core.DataManipulation;
+@using DumaemSchool.Core.Models;
+@using DumaemSchool.Core.OutputModels;
+@using DumaemSchool.Core.Queries;
+@using MediatR;
+@using Microsoft.AspNetCore.Identity;
+@using System.Security.Claims;
+
+@inject ISender Sender;
+@inject NavigationManager NavigationManager;
+@inject UserManager<SchoolUser> UserManager
+
+
+@if (currentTeacher is null)
+{
+    return;
+}
+
+<MudContainer Style="margin-left: 0%;margin-top: 2%; width:30%">
+    <MudText Typo="Typo.h4">Информация о преподавателе:</MudText>
+    <MudSpacer></MudSpacer>
+
+    <AuthorizeView Roles="@Role.DeputyDirector">
+        <Authorized>
+            <MudStack>
+                <MudTextField Immediate @bind-Value="currentTeacher.Name"></MudTextField>
+                 <MudButton Disabled="@(!TeacherNameChanged)" Variant="@MudBlazor.Variant.Filled"
+                            OnClick="@(() => EditTeacher(currentTeacher))" Color="@Color.Primary">Изменить</MudButton>
+             </MudStack>
+        </Authorized>
+    </AuthorizeView>
+
+
+
+    <AuthorizeView Roles="@Role.Teacher">
+        <Authorized>
+            <MudText Style="margin-top: 2%" Typo="Typo.h5">@currentTeacher.Name</MudText>
+        </Authorized>
+    </AuthorizeView>
+
+</MudContainer>
+
+ @code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    private string? savedTeacherName;
+    private Teacher? currentTeacher;
+
+    private bool TeacherNameChanged => currentTeacher?.Name != savedTeacherName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetTeacherData();
+    }
+
+    private async Task GetTeacherData()
+    {
+        var result = await Sender.Send(new TeacherInfoQuery(Id));
+        if (result is not null)
+        {
+            currentTeacher = result;
+            savedTeacherName = currentTeacher.Name;
+        }
+    }
+
+    private async Task EditTeacher(Teacher teacher)
+    {
+        var editTeacherCommand = new EditTeacherNameCommand(teacher);
+        var res = await Sender.Send(editTeacherCommand);
+
+        await GetTeacherData();
+    }
+}

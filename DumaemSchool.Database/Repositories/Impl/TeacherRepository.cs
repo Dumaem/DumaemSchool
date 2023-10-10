@@ -53,6 +53,18 @@ public sealed class TeacherRepository : ITeacherRepository
         return _mapper.Map(teacherDb);
     }
 
+    public async Task<bool> UpdateTeacherNameAsync(int teacherId, string name)
+    {
+        var teacherDb = await _context.Teachers.FindAsync(teacherId);
+        if (teacherDb is null)
+            return false;
+
+        teacherDb.Name = name;
+        _context.Update(teacherDb);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
     public async Task<bool> DeleteTeacherAsync(int id)
     {
         var teacher = await _context.Teachers.FindAsync(id);
