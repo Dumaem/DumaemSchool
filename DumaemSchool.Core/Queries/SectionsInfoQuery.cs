@@ -4,4 +4,4 @@ using MediatR;
 
 namespace DumaemSchool.Core.Queries;
 
-public sealed record TeacherSectionsInfoQuery(ListParam Param) : IRequest<ListDataResult<SectionInfo>>;
+public sealed record SectionsInfoQuery(ListParam Param) : IRequest<ListDataResult<SectionInfo>>;

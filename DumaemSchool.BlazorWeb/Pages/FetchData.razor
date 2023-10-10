@@ -1,7 +1,6 @@
 ﻿@page "/fetchdata"
 @using DumaemSchool.BlazorWeb.Data
 @using DumaemSchool.Core.DataManipulation
-@using DumaemSchool.Core.Models
 @using DumaemSchool.Core.OutputModels
 @using DumaemSchool.Core.Queries
 @using MediatR
@@ -54,7 +53,7 @@ else
 
     private async Task LogIn()
     {
-        var teachers = await Sender.Send(new TeacherSectionsInfoQuery(new ListParam
+        var teachers = await Sender.Send(new SectionsInfoQuery(new ListParam
         {
             Filters = new[]
             {

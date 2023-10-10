@@ -18,7 +18,7 @@ public sealed class SectionInfoListSqlGenerator : AbstractListSqlGenerator<Secti
         var where = GetWhereExpression(param.Filters, dynamicParams);
         var having = GetHavingExpression(param.Filters, dynamicParams);
         var sort = GetOrderByExpression(param.Sorting);
-        var havingString = string.IsNullOrEmpty(having) ? "" : $"HAVING {having}";
+        var havingString = string.IsNullOrWhiteSpace(having) ? "" : $"HAVING {having}";
 
         return new ListQuery
         {
