@@ -59,6 +59,24 @@ public static class SqlUtility
                 parameters.Add(parameterKey, integerValue);
                 return $"{fieldName} {operandString} @{parameterKey}";
             }
+            case double doubleValue:
+            {
+                if (!IntegerOperands.Contains(filter.Operand))
+                    return null;
+                operandString = filter.Operand switch
+                {
+                    FilterOperand.Equal => "=",
+                    FilterOperand.NotEqual => "<>",
+                    FilterOperand.GreaterThan => ">",
+                    FilterOperand.LessThan => "<",
+                    FilterOperand.GreaterThanOrEqual => ">=",
+                    FilterOperand.LessThanOrEqual => "<=",
+                    _ => throw new UnreachableException()
+                };
+
+                parameters.Add(parameterKey, doubleValue);
+                return $"{fieldName} {operandString} @{parameterKey}";
+            }
             case string stringValue:
                 if (!StringOperands.Contains(filter.Operand))
                     return null;

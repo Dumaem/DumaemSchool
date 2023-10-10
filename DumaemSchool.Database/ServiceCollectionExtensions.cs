@@ -4,6 +4,7 @@ using DumaemSchool.Core.OutputModels;
 using DumaemSchool.Database.ListGetters;
 using DumaemSchool.Database.ListGetters.Impl;
 using DumaemSchool.Database.Mappers.EntityMapping;
+using DumaemSchool.Database.Mappers.EntityMapping.Base;
 using DumaemSchool.Database.PipelineBehaviors;
 using DumaemSchool.Database.Repositories;
 using DumaemSchool.Database.Repositories.Impl;
@@ -12,6 +13,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SectionType = DumaemSchool.Core.Models.SectionType;
 
 namespace DumaemSchool.Database;
 
@@ -46,8 +48,13 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<ISectionTypeRepository, SectionTypeRepository>();
         services.AddScoped<ITeacherRepository, TeacherRepository>();
+        services.AddScoped<ISectionRepository, SectionRepository>();
         services.AddSingleton<IListSqlGenerator<TeacherDto>, TeacherListSqlGenerator>();
+        services.AddSingleton<IListSqlGenerator<SectionType>, SectionTypeListSqlGenerator>();
+        services.AddSingleton<IListSqlGenerator<SectionInfo>, SectionInfoListSqlGenerator>();
         services.AddSingleton<IEntityMapping<TeacherDto>, TeacherDtoEntityMapping>();
+        services.AddSingleton<IEntityMapping<SectionType>, SectionTypeEntityMapping>();
+        services.AddSingleton<IEntityMapping<SectionInfo>, SectionInfoEntityMapping>();
 
         return services;
     }

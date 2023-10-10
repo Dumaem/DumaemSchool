@@ -1,0 +1,18 @@
+﻿@page "/sections"
+@using DumaemSchool.Auth.Models
+@attribute [Authorize]
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
+
+<Sections TeacherId="_teacherId"></Sections>
+
+@code{
+    private int? _teacherId;
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+        if (user.IsInRole(Role.Teacher))
+        {
+            _teacherId = int.Parse(user.Claims.First(x => x.Type == UserClaims.TeacherId).Value);
+        }
+    }
+}
