@@ -27,4 +27,6 @@ public sealed class Schedule
     public ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
 
     public Section Section { get; set; } = null!;
+
+    public TimeSpan Duration { get; set; }
 }
