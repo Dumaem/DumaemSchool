@@ -29,8 +29,8 @@ public static class FilterConverter
                                                                           && mudFilter.Value is not null)
             .Select(mudFilter => new FilterDefinition
             {
-                FieldName = mudFilter.Column.PropertyName,
-                Operand = Operands[mudFilter.Operator],
+                FieldName = mudFilter.Column!.PropertyName,
+                Operand = Operands[mudFilter.Operator!],
                 Value = mudFilter.Value
             }).ToList();
     }
