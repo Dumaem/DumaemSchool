@@ -48,10 +48,13 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<ISectionTypeRepository, SectionTypeRepository>();
         services.AddScoped<ITeacherRepository, TeacherRepository>();
+        services.AddScoped<ISectionRepository, SectionRepository>();
         services.AddSingleton<IListSqlGenerator<TeacherDto>, TeacherListSqlGenerator>();
         services.AddSingleton<IListSqlGenerator<SectionType>, SectionTypeListSqlGenerator>();
+        services.AddSingleton<IListSqlGenerator<SectionInfo>, SectionInfoListSqlGenerator>();
         services.AddSingleton<IEntityMapping<TeacherDto>, TeacherDtoEntityMapping>();
         services.AddSingleton<IEntityMapping<SectionType>, SectionTypeEntityMapping>();
+        services.AddSingleton<IEntityMapping<SectionInfo>, SectionInfoEntityMapping>();
 
         return services;
     }

@@ -20,7 +20,7 @@ public sealed class TeacherListSqlGenerator : AbstractListSqlGenerator<TeacherDt
         var sort = GetOrderByExpression(param.Sorting);
         var pagination = GetPaginationExpression(param.Pagination);
 
-        var havingString = string.IsNullOrEmpty(having) ? "" : $"HAVING {having}";
+        var havingString = string.IsNullOrWhiteSpace(having) ? "" : $"HAVING {having}";
 
         return new ListQuery
         {

@@ -140,6 +140,9 @@ public sealed class ApplicationContext : DbContext
             entity.Property(e => e.Time)
                 .HasComment("Время проведения")
                 .HasColumnName("time");
+            entity.Property(e => e.Duration)
+                .HasComment("Длительность проведения")
+                .HasColumnName("duration");
 
             entity.HasOne(d => d.Section).WithMany(p => p.Schedules)
                 .HasForeignKey(d => d.SectionId)
@@ -177,6 +180,7 @@ public sealed class ApplicationContext : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.SectionId).HasColumnName("section_id");
             entity.Property(e => e.StudentId).HasColumnName("student_id");
+            entity.Property(e => e.DateAdded).HasColumnName("date_added");
 
             entity.HasOne(d => d.Section).WithMany(p => p.SectionStudents)
                 .HasForeignKey(d => d.SectionId)

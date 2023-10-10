@@ -11,6 +11,8 @@ public sealed class SectionStudent
 
     public int StudentId { get; set; }
 
+    public DateOnly DateAdded { get; set; }
+
     public Section Section { get; set; } = null!;
 
     public Student Student { get; set; } = null!;

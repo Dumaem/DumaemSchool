@@ -1,11 +1,13 @@
 using DumaemSchool.Auth;
 using DumaemSchool.BlazorWeb.Data;
+using DumaemSchool.BlazorWeb.Localization;
 using DumaemSchool.BlazorWeb.Middleware;
 using DumaemSchool.Core;
 using DumaemSchool.Database;
 using DumaemSchool.Migrator;
 using DumaemSchool.SMTP;
 using Microsoft.AspNetCore.Components.Authorization;
+using MudBlazor;
 using MudBlazor.Services;
 using Radzen;
 
@@ -24,10 +26,10 @@ builder.Services
     .AddMigrations(builder.Configuration)
     .AddAuth(builder.Configuration)
     .AddSMTP(builder.Configuration)
+    .AddSingleton<MudLocalizer, RussianMudblazorLocalizer>()
     .AddScoped<AuthenticationStateProvider, DumaemSchool.BlazorWeb.AuthenticationStateProvider>();
 
 var app = builder.Build();
-
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -36,6 +38,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseRequestLocalization("ru");
 app.UseMiddleware<AuthenticationMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();

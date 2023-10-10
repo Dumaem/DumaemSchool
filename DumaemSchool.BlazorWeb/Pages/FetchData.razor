@@ -1,7 +1,6 @@
 ﻿@page "/fetchdata"
 @using DumaemSchool.BlazorWeb.Data
 @using DumaemSchool.Core.DataManipulation
-@using DumaemSchool.Core.Models
 @using DumaemSchool.Core.OutputModels
 @using DumaemSchool.Core.Queries
 @using MediatR
@@ -54,9 +53,15 @@ else
 
     private async Task LogIn()
     {
-        var teachers = await Sender.Send(new SectionTypesQuery(new ListParam
+        var teachers = await Sender.Send(new SectionsInfoQuery(new ListParam
         {
-            Sorting = new[] { new SortingDefinition() { FieldName = nameof(SectionType.Name), Asc = true} }
+            Filters = new[]
+            {
+                new FilterDefinition()
+                {
+                    FieldName = nameof(SectionInfo.TeacherName), Operand = FilterOperand.Contains, Value = "кс",
+                }
+            }
         }));
     }
 
