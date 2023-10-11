@@ -7,7 +7,6 @@
 @using DataGridEditMode = Radzen.DataGridEditMode
 @using Variant = Radzen.Variant
 @using DumaemSchool.Core.Commands
-@using DialogService = MudBlazor.DialogService
 @using DumaemSchool.BlazorWeb.Shared.Dialogs
 
 @inject ISender Sender;
@@ -32,24 +31,24 @@
                                   TextAlign="TextAlign.Right" Width="156px">
                 <Template Context="sectionType">
                     <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat"
-                                  Size="ButtonSize.Medium" Click="@(args => EditRow(sectionType))"
+                                  Size="ButtonSize.Medium" Click="@(() => EditRow(sectionType))"
                                   @onclick:stopPropagation="true"/>
 
                     <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat"
                                   Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1"
-                                  Click="@(args => DeleteRow(sectionType))" @onclick:stopPropagation="true"/>
+                                  Click="@(() => DeleteRow(sectionType))" @onclick:stopPropagation="true"/>
                 </Template>
 
                 <EditTemplate Context="sectionType">
                     <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat"
-                                  Size="ButtonSize.Medium" Click="@((args) => SaveRow(sectionType))"/>
+                                  Size="ButtonSize.Medium" Click="@(() => SaveRow(sectionType))"/>
 
                     <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat"
-                                  Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(sectionType))"/>
+                                  Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(() => CancelEdit(sectionType))"/>
 
                     <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat"
                                   Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1"
-                                  Click="@(args => DeleteRow(sectionType))"/>
+                                  Click="@(() => DeleteRow(sectionType))"/>
                 </EditTemplate>
             </RadzenDataGridColumn>
         </Columns>
@@ -57,11 +56,11 @@
 </MudContainer>
 
 @code {
-    RadzenDataGrid<SectionType> sectionTypesGrid;
-    IEnumerable<SectionType> sectionTypes;
+    RadzenDataGrid<SectionType> sectionTypesGrid = null!;
+    IEnumerable<SectionType> sectionTypes = null!;
 
-    SectionType sectionTypeToInsert;
-    SectionType sectionTypeToUpdate;
+    SectionType? sectionTypeToInsert;
+    SectionType? sectionTypeToUpdate;
 
     void Reset()
     {
@@ -146,14 +145,14 @@
 
     async Task ReloadServerData()
     {
-        var result = await Sender.Send(new SectionTypesQuery(new ListParam() { }));
+        var result = await Sender.Send(new SectionTypesQuery(new ListParam()));
         sectionTypes = result.Items;
     }
 
     private async Task<bool> IsSuccessDeleteDialogResult()
     {
         var options = new MudBlazor.DialogOptions { CloseOnEscapeKey = true };
-        var parameters = new MudBlazor.DialogParameters
+        var parameters = new DialogParameters
         {
             ["DialogContent"] = "Вы уверены, что хотите удалить данный вид кружка?"
         };

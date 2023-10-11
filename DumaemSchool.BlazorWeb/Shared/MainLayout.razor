@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
-
-@inject NavigationManager NavigationManager
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
+@inject NavigationManager NavigationManager;
 
 <PageTitle>DumaemSchool.BlazorWeb</PageTitle>
 
@@ -43,6 +43,21 @@
 
 @code
 {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(!firstRender)
+        {
+            return;
+        }
+
+        var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User.Identity;
+
+        if (userIdentity is not null && !userIdentity.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo("/login");
+        }
+    }
+    
     private readonly MudTheme _theme = new()
     {
         Palette = new PaletteLight
