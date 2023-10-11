@@ -1,0 +1,36 @@
+﻿@page "/lesson"
+@using DumaemSchool.Core.OutputModels
+@using DumaemSchool.Core.Queries
+@using DumaemSchool.Core.DataManipulation
+@using MediatR
+
+@inject ISender Sender;
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
+    <MudSelect Placeholder="Кружок" T="SectionInfo" Label="Кружок" @bind-Value="_selectedSection"
+               Clearable="true" ToStringFunc="_sectionConverter" Strict="true">
+        @if (_sections is null)
+        {
+            return;
+        }
+        @foreach (SectionInfo item in _sections)
+        {
+            <MudSelectItem Value="@item"/>
+        }
+    </MudSelect>
+</MudContainer>
+
+@code {
+    private IEnumerable<SectionInfo>? _sections;
+    private SectionInfo? _selectedSection;
+
+
+    private readonly Func<SectionInfo?, string> _sectionConverter = p => p is null ? "" : $"{p.TypeName} - {p.GroupName}";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var command = new SectionsInfoQuery(new ListParam());
+        _sections = (await Sender.Send(command)).Items;
+    }
+
+}

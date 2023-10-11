@@ -1,36 +1,41 @@
-﻿@inherits LayoutComponentBase
+﻿@using Variant = MudBlazor.Variant
+@using MudBlazor.Utilities
+@inherits LayoutComponentBase
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
 @inject NavigationManager NavigationManager;
 <PageTitle>DumaemSchool.BlazorWeb</PageTitle>
 
-<MudThemeProvider Theme="@_theme" />
-<MudDialogProvider />
-<MudSnackbarProvider />
+<MudThemeProvider Theme="@_theme"/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
 
 <MudLayout>
     <MudAppBar Elevation="1">
         <MudText Typo="Typo.h5" Class="ml-3" Style="font-family: 'Century Gothic'">dumaem</MudText>
-        <MudSpacer />
+        <MudSpacer/>
         <AuthorizeView>
             <div class="d-flex justify-content-end rounded-3 mr-5">
                 <MudTooltip Text="Кружки">
-                    <MudIconButton Href="/sections" Size="Size.Medium" Icon="@Icons.Material.Filled.TheaterComedy" Color="Color.Inherit" />
+                    <MudIconButton Href="/sections" Size="Size.Medium" Icon="@Icons.Material.Filled.TheaterComedy" Color="Color.Inherit"/>
                 </MudTooltip>
                 <MudTooltip Text="Виды кружков">
-                    <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.Category" Color="Color.Inherit" />
+                    <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.Category" Color="Color.Inherit"/>
                 </MudTooltip>
                 <MudTooltip Text="Учителя">
-                    <MudIconButton Href="/teachers" Size="Size.Medium" Icon="@Icons.Material.Filled.People" Color="Color.Inherit" />
+                    <MudIconButton Href="/teachers" Size="Size.Medium" Icon="@Icons.Material.Filled.People" Color="Color.Inherit"/>
                 </MudTooltip>
-                <MudTooltip Text="Расписание">
-                    <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.EditCalendar" Color="Color.Inherit" />
+                <MudTooltip Text="Занятия">
+                    <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.EditCalendar" Color="Color.Inherit"/>
                 </MudTooltip>
                 <MudTooltip Text="Статистика">
-                    <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.Insights" Color="Color.Inherit" />
+                    <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.Insights" Color="Color.Inherit"/>
                 </MudTooltip>
                 <MudTooltip Text="Профиль">
-                    <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" />
+                    <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit"/>
                 </MudTooltip>
+                <MudButton Href="/lesson" Color="Color.Inherit" EndIcon="@Icons.Material.Filled.AddComment">
+                    Создать занятие
+                </MudButton>
             </div>
         </AuthorizeView>
     </MudAppBar>
@@ -43,7 +48,7 @@
 {
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if(!firstRender)
+        if (!firstRender)
         {
             return;
         }
@@ -55,6 +60,7 @@
             NavigationManager.NavigateTo("/login");
         }
     }
+
     private readonly MudTheme _theme = new()
     {
         Palette = new PaletteLight
