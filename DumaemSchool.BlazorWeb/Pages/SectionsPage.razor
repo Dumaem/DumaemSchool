@@ -1,12 +1,24 @@
 ﻿@page "/sections"
+
 @using DumaemSchool.Auth.Models
+@using Variant = MudBlazor.Variant
+
 @attribute [Authorize]
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
+@inject NavigationManager NavigationManager;
 
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" style="margin-top: 2%">
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AddCircleOutline"
+               Href="/create-section">
+        Добавить кружок
+    </MudButton>
+</MudContainer>
 <Sections TeacherId="_teacherId"></Sections>
 
 @code{
     private int? _teacherId;
+
     protected override async Task OnInitializedAsync()
     {
         var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
@@ -14,5 +26,10 @@
         {
             _teacherId = int.Parse(user.Claims.First(x => x.Type == UserClaims.TeacherId).Value);
         }
+    }
+    
+    private void GoToCreateSection()
+    {
+        NavigationManager.NavigateTo($"/create-section");
     }
 }
