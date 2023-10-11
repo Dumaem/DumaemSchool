@@ -1,0 +1,64 @@
+﻿@using DumaemSchool.BlazorWeb.Data.Converters;
+@using DumaemSchool.Core.DataManipulation;
+@using DumaemSchool.Core.OutputModels;
+@using DumaemSchool.Core.Queries;
+@using MediatR;
+
+@inject ISender Sender;
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
+    <MudDataGrid @ref="@_mudDataGrid" ServerData="@GetData" T="SectionStudent" Filterable="true" SortMode="@SortMode.Multiple" Groupable="false" Hideable="true">
+        <ToolBarContent>
+            <MudTextField Style="margin-left: 70%" ValueChanged="@(EventCallback.Factory.Create<string>(this, OnSearch))" Placeholder="Поиск" Adornment="Adornment.Start" Immediate="true"
+                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+
+
+        <Columns>
+            <PropertyColumn Filterable="true" Property="x => x.StudentName" SortBy="x => x.StudentName" Title="ФИО учащегося" />
+            <PropertyColumn Filterable="false" Property="x => x.DateAdded" SortBy="x => x.DateAdded" Title="Дата добавления студента в кружок" />
+
+@*             <TemplateColumn Sortable="false" Filterable="false">
+                <CellTemplate>
+                    <MudStack Row>
+                        // На будущее
+                        <MudButton Style="margin-left: 53%" Disabled="@(context.Item.IsDeleted)" Size="@Size.Small" Variant="@MudBlazor.Variant.Filled" OnClick="@(async() => await FireTeacher(context.Item.Id))" Color="@Color.Error">Уволить</MudButton>
+                    </MudStack>
+                </CellTemplate>
+            </TemplateColumn> *@
+        </Columns>
+
+    </MudDataGrid>
+</MudContainer>
+
+
+@code {
+    [Parameter] public int? SectionId { get; set; }
+
+    private MudDataGrid<SectionStudent> _mudDataGrid = null!;
+
+    private string _searchString = "";
+
+
+    private void OnSearch(string text)
+    {
+        _searchString = text;
+        _mudDataGrid.ReloadServerData();
+    }
+
+
+    private async Task<GridData<SectionStudent>> GetData(GridState<SectionStudent> state)
+    {
+        var filters = new List<FilterDefinition>();
+        if (SectionId is not null)
+        {
+            filters.Add(new FilterDefinition { FieldName = nameof(SectionStudent.SectionId), Value = SectionId, Operand = FilterOperand.Equal });
+        }
+        filters.Add(new FilterDefinition { FieldName = nameof(SectionStudent.StudentName), Value = _searchString, Operand = FilterOperand.Contains });
+
+        var result = await Sender.Send(new SectionStudentQuery(FilterConverter.GenerateParamsFromGrid(state, filters)));
+
+        return new GridData<SectionStudent> { Items = result.Items, TotalItems = result.TotalItemsCount };
+    }
+
+}
