@@ -3,6 +3,7 @@
 @using DumaemSchool.Core.DataManipulation
 @using DumaemSchool.Core.OutputModels
 @using DumaemSchool.Core.Queries
+@using DumaemSchool.Core.Queries.Lesson
 @using MediatR
 @inject WeatherForecastService ForecastService
 @inject ISender Sender;
@@ -53,15 +54,9 @@ else
 
     private async Task LogIn()
     {
-        var teachers = await Sender.Send(new SectionsInfoQuery(new ListParam
+        var teachers = await Sender.Send(new StudentLessonStatisticsQuery(new ListParam
         {
-            Filters = new[]
-            {
-                new FilterDefinition()
-                {
-                    FieldName = nameof(SectionInfo.TeacherName), Operand = FilterOperand.Contains, Value = "кс",
-                }
-            }
+            Filters = new[] { new FilterDefinition() { FieldName = nameof(StudentLessonStatistics.LessonId), Operand = FilterOperand.Equal, Value = 26 } }
         }));
     }
 
