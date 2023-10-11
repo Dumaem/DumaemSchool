@@ -16,7 +16,7 @@
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
     
     <MudButton Variant="Variant.Filled" OnClick="@CreateTeacher" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AddCircleOutline">
-            Создать нового преподавателя
+            Создать нового учителя
         </MudButton>
     <div class="d-flex flex-wrap mt-4">
         <MudSwitch CheckedChanged="@(EventCallback.Factory.Create<bool>(this, OnShowDeletedChange))"  Color="Color.Primary">Отображать уволенных</MudSwitch>
@@ -78,7 +78,7 @@
 
         if (res)
         {
-            Snackbar.Add("Перподаватель успешно уволен", Severity.Success);
+            Snackbar.Add("Учитель успешно уволен", Severity.Success);
         }
         await _mudDataGrid.ReloadServerData();
     }
@@ -88,7 +88,7 @@
         var options = new MudBlazor.DialogOptions { CloseOnEscapeKey = true };
         var parameters = new DialogParameters
         {
-            ["DialogContent"] = "Вы уверены, что хотите уволить данного преподавателя?"
+            ["DialogContent"] = "Вы уверены, что хотите уволить данного учителя?"
         };
         var dialog = await DialogService.ShowAsync<DialogWindow>("Подтверждение увольнения", parameters, options);
 
@@ -148,13 +148,13 @@
             MaxWidth = MaxWidth.Medium, FullWidth = true
         };
         
-        var dialog = await DialogService.ShowAsync<TeacherCreateWindow>("Новый преподаватель", options);
+        var dialog = await DialogService.ShowAsync<TeacherCreateWindow>("Новый учитель", options);
 
         var result = await dialog.Result;
 
         if (!result.Canceled)
         {
-            Snackbar.Add("Преподаватель успешно добавлен!", Severity.Success);
+            Snackbar.Add("Учитель успешно добавлен!", Severity.Success);
             await _mudDataGrid.ReloadServerData();
         }
     }
