@@ -41,7 +41,7 @@ public static class SqlUtility
         string? operandString = default;
         switch (filter.Value)
         {
-            case int integerValue:
+            case int or double or DateTime:
             {
                 if (!IntegerOperands.Contains(filter.Operand))
                     return null;
@@ -56,25 +56,7 @@ public static class SqlUtility
                     _ => throw new UnreachableException()
                 };
 
-                parameters.Add(parameterKey, integerValue);
-                return $"{fieldName} {operandString} @{parameterKey}";
-            }
-            case double doubleValue:
-            {
-                if (!IntegerOperands.Contains(filter.Operand))
-                    return null;
-                operandString = filter.Operand switch
-                {
-                    FilterOperand.Equal => "=",
-                    FilterOperand.NotEqual => "<>",
-                    FilterOperand.GreaterThan => ">",
-                    FilterOperand.LessThan => "<",
-                    FilterOperand.GreaterThanOrEqual => ">=",
-                    FilterOperand.LessThanOrEqual => "<=",
-                    _ => throw new UnreachableException()
-                };
-
-                parameters.Add(parameterKey, doubleValue);
+                parameters.Add(parameterKey, filter.Value);
                 return $"{fieldName} {operandString} @{parameterKey}";
             }
             case string stringValue:
