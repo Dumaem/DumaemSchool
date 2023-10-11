@@ -1,5 +1,6 @@
 ﻿using DumaemSchool.Core.OutputModels;
 using DumaemSchool.Core.Queries;
+using DumaemSchool.Core.Queries.Section;
 using DumaemSchool.Database.Repositories;
 using MediatR;
 using SectionStudent = DumaemSchool.Core.OutputModels.SectionStudent;

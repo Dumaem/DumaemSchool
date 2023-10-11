@@ -1,4 +1,5 @@
 ﻿using DumaemSchool.Core.Queries;
+using DumaemSchool.Core.Queries.Teacher;
 using DumaemSchool.Database.Repositories;
 using MediatR;
 
