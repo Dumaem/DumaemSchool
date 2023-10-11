@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Dapper;
 using DumaemSchool.Core.Commands;
+using DumaemSchool.Core.Commands.Teacher;
 using DumaemSchool.Core.OutputModels;
 using DumaemSchool.Database.ListGetters;
 using DumaemSchool.Database.ListGetters.Impl;

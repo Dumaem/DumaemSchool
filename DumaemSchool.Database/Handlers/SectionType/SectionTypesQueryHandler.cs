@@ -2,11 +2,10 @@
 using DumaemSchool.Core.Queries;
 using DumaemSchool.Database.Repositories;
 using MediatR;
-using SectionType = DumaemSchool.Core.Models.SectionType;
 
-namespace DumaemSchool.Database.Handlers;
+namespace DumaemSchool.Database.Handlers.SectionType;
 
-public sealed class SectionTypesQueryHandler : IRequestHandler<SectionTypesQuery, ListDataResult<SectionType>>
+public sealed class SectionTypesQueryHandler : IRequestHandler<SectionTypesQuery, ListDataResult<Core.Models.SectionType>>
 {
     private readonly ISectionTypeRepository _repository;
 
@@ -15,7 +14,7 @@ public sealed class SectionTypesQueryHandler : IRequestHandler<SectionTypesQuery
         _repository = repository;
     }
 
-    public async Task<ListDataResult<SectionType>> Handle(SectionTypesQuery request,
+    public async Task<ListDataResult<Core.Models.SectionType>> Handle(SectionTypesQuery request,
         CancellationToken cancellationToken)
     {
         return await _repository.ListSectionTypesAsync(request.Params);

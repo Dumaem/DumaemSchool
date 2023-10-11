@@ -4,7 +4,7 @@ using DumaemSchool.Database.Repositories;
 using MediatR;
 using SectionStudent = DumaemSchool.Core.OutputModels.SectionStudent;
 
-namespace DumaemSchool.Database.Handlers;
+namespace DumaemSchool.Database.Handlers.Section;
 
 public sealed class SectionStudentQueryHandler : IRequestHandler<SectionStudentQuery, ListDataResult<SectionStudent>>
 {

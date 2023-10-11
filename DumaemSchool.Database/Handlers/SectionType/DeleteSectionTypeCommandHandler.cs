@@ -1,8 +1,8 @@
-﻿using DumaemSchool.Core.Commands;
+﻿using DumaemSchool.Core.Commands.SectionType;
 using DumaemSchool.Database.Repositories;
 using MediatR;
 
-namespace DumaemSchool.Database.Handlers;
+namespace DumaemSchool.Database.Handlers.SectionType;
 
 public sealed class DeleteSectionTypeCommandHandler : IRequestHandler<DeleteSectionTypeCommand, bool>
 {

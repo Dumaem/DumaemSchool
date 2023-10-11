@@ -1,8 +1,8 @@
-﻿using DumaemSchool.Core.Commands;
+﻿using DumaemSchool.Core.Commands.Teacher;
 using DumaemSchool.Database.Repositories;
 using MediatR;
 
-namespace DumaemSchool.Database.Handlers;
+namespace DumaemSchool.Database.Handlers.Teacher;
 
 public sealed class FireTeacherCommandHandler : IRequestHandler<FireTeacherCommand, bool>
 {

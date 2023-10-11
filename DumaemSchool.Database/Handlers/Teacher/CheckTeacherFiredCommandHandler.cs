@@ -1,8 +1,8 @@
-﻿using DumaemSchool.Core.Commands;
+﻿using DumaemSchool.Core.Commands.Teacher;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace DumaemSchool.Database.Handlers;
+namespace DumaemSchool.Database.Handlers.Teacher;
 
 public sealed class CheckTeacherFiredCommandHandler : IRequestHandler<CheckTeacherFiredCommand, bool>
 {

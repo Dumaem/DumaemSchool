@@ -3,7 +3,7 @@ using DumaemSchool.Core.Queries;
 using DumaemSchool.Database.Repositories;
 using MediatR;
 
-namespace DumaemSchool.Database.Handlers;
+namespace DumaemSchool.Database.Handlers.Teacher;
 
 public sealed class TeachersQueryHandler : IRequestHandler<TeachersQuery, ListDataResult<TeacherDto>>
 {
