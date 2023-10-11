@@ -1,5 +1,4 @@
-﻿@using DumaemSchool.Auth.Models
-@using DumaemSchool.BlazorWeb.Data
+﻿@using DumaemSchool.BlazorWeb.Data
 @using DumaemSchool.Core.Commands
 @using DumaemSchool.Core.Models
 @using MediatR
@@ -7,16 +6,18 @@
 @inject ISender Sender;
 @inject ISnackbar Snackbar;
 
-<MudForm @ref="@_form" @onsubmit="@(() => CreateTeacher())">
+<MudForm @bind-IsValid="_isValid" @ref="@_form" @onsubmit="@(async() => await CreateTeacher())">
     <MudDialog>
         <DialogContent>
-            <MudTextField Label="Почта" Class="mt-3" Required="true"
-                          @bind-Value="_newTeacher.Email" InputType="InputType.Email" Immediate For="@(() => _newTeacher.Email)"/>
+            <MudStack>
+                <MudTextField Label="Почта" Class="mt-3" Required="true" FullWidth="true"
+                              @bind-Value="_newTeacher.Email" InputType="InputType.Email" Immediate For="@(() => _newTeacher.Email)"/>
 
-            <MudTextField Label="ФИО" Immediate For="@(() => _newTeacher.Name)" InputType="InputType.Text" @bind-Value="_newTeacher.Name"/>
+                <MudTextField FullWidth="true" Label="ФИО" Immediate For="@(() => _newTeacher.Name)" InputType="InputType.Text" @bind-Value="_newTeacher.Name"/>
+            </MudStack>
         </DialogContent>
         <DialogActions>
-            <MudButton Disabled="@(!IsFormFilled() && _isButtonClicked)" ButtonType="MudBlazor.ButtonType.Submit"
+            <MudButton Disabled="@(!_isValid)" ButtonType="MudBlazor.ButtonType.Submit"
                        Variant="MudBlazor.Variant.Filled" Color="Color.Primary" Class="ml-auto" Style="width: 8vw">
                 Создать
             </MudButton>
@@ -31,13 +32,12 @@
 
     private MudForm? _form;
     private TeacherCreateCredentials _newTeacher = new();
-    private bool _isButtonClicked;
+    private bool _isValid;
 
     private async Task CreateTeacher()
     {
-        _isButtonClicked = true;
         var teacher = new Teacher
-        {Name = _newTeacher.Name};
+        { Name = _newTeacher.Name };
         var addTeacherCommand = new AddTeacherCommand(teacher, _newTeacher.Email);
         var result = await Sender.Send(addTeacherCommand);
         if (!result.IsSuccess)
@@ -47,10 +47,4 @@
         }
         MudDialog?.Close(DialogResult.Ok(true));
     }
-
-    private bool IsFormFilled()
-    {
-        return _newTeacher.Email != "" && _newTeacher.Name != "";
-    }
-
 }
