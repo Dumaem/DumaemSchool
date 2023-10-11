@@ -8,5 +8,5 @@ public class TeacherCreateCredentials
     public string Email { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Имя должно быть заполнено")]
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 }
