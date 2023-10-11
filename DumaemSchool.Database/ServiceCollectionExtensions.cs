@@ -31,10 +31,8 @@ public static class ServiceCollectionExtensions
 
         services.AddDbContext<ApplicationContext>(options =>
         {
-            options.UseNpgsql(connectionString, npgsqlOptions =>
-            {
-                npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-            });
+            options.UseNpgsql(connectionString,
+                npgsqlOptions => { npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery); });
             options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             options.UseSnakeCaseNamingConvention();
         });
@@ -54,16 +52,19 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISectionTypeRepository, SectionTypeRepository>();
         services.AddScoped<ITeacherRepository, TeacherRepository>();
         services.AddScoped<ISectionRepository, SectionRepository>();
+        services.AddScoped<ILessonRepository, LessonRepository>();
         services.AddSingleton<IListSqlGenerator<TeacherDto>, TeacherListSqlGenerator>();
         services.AddSingleton<IListSqlGenerator<SectionType>, SectionTypeListSqlGenerator>();
         services.AddSingleton<IListSqlGenerator<SectionInfo>, SectionInfoListSqlGenerator>();
         services.AddSingleton<IListSqlGenerator<SectionStudent>, SectionStudentListSqlGetter>();
         services.AddSingleton<IListSqlGenerator<SectionSchedule>, SectionScheduleListSqlGetter>();
+        services.AddSingleton<IListSqlGenerator<StudentLessonStatistics>, StudentLessonStatisticsListSqlGetter>();
         services.AddSingleton<IEntityMapping<TeacherDto>, TeacherDtoEntityMapping>();
         services.AddSingleton<IEntityMapping<SectionType>, SectionTypeEntityMapping>();
         services.AddSingleton<IEntityMapping<SectionInfo>, SectionInfoEntityMapping>();
         services.AddSingleton<IEntityMapping<SectionStudent>, SectionStudentEntityMapping>();
         services.AddSingleton<IEntityMapping<SectionSchedule>, SectionScheduleEntityMapping>();
+        services.AddSingleton<IEntityMapping<StudentLessonStatistics>, StudentLessonStatisticsEnityMapping>();
 
         return services;
     }
