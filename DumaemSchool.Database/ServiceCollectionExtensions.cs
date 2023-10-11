@@ -40,6 +40,7 @@ public static class ServiceCollectionExtensions
         });
 
         SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+        SqlMapper.AddTypeHandler(new TimeOnlyTypeHandler());
         services.AddScoped<NpgsqlConnectionProvider>();
 
         services.AddMediatR(options =>
@@ -57,10 +58,12 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IListSqlGenerator<SectionType>, SectionTypeListSqlGenerator>();
         services.AddSingleton<IListSqlGenerator<SectionInfo>, SectionInfoListSqlGenerator>();
         services.AddSingleton<IListSqlGenerator<SectionStudent>, SectionStudentListSqlGetter>();
+        services.AddSingleton<IListSqlGenerator<SectionSchedule>, SectionScheduleListSqlGetter>();
         services.AddSingleton<IEntityMapping<TeacherDto>, TeacherDtoEntityMapping>();
         services.AddSingleton<IEntityMapping<SectionType>, SectionTypeEntityMapping>();
         services.AddSingleton<IEntityMapping<SectionInfo>, SectionInfoEntityMapping>();
         services.AddSingleton<IEntityMapping<SectionStudent>, SectionStudentEntityMapping>();
+        services.AddSingleton<IEntityMapping<SectionSchedule>, SectionScheduleEntityMapping>();
 
         return services;
     }
