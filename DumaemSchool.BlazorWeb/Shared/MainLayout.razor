@@ -1,7 +1,9 @@
 ﻿@inherits LayoutComponentBase
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
 @inject NavigationManager NavigationManager;
+
 <PageTitle>DumaemSchool.BlazorWeb</PageTitle>
+
 
 <MudThemeProvider Theme="@_theme" />
 <MudDialogProvider />
@@ -17,7 +19,7 @@
                     <MudIconButton Href="/sections" Size="Size.Medium" Icon="@Icons.Material.Filled.TheaterComedy" Color="Color.Inherit" />
                 </MudTooltip>
                 <MudTooltip Text="Виды кружков">
-                    <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.Category" Color="Color.Inherit" />
+                    <MudIconButton Href="/section-types" Size="Size.Medium" Icon="@Icons.Material.Filled.Category" Color="Color.Inherit"/>
                 </MudTooltip>
                 <MudTooltip Text="Учителя">
                     <MudIconButton Href="/teachers" Size="Size.Medium" Icon="@Icons.Material.Filled.People" Color="Color.Inherit" />
@@ -55,6 +57,7 @@
             NavigationManager.NavigateTo("/login");
         }
     }
+    
     private readonly MudTheme _theme = new()
     {
         Palette = new PaletteLight
