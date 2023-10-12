@@ -1,36 +1,43 @@
 ﻿@page "/lesson"
 @using DumaemSchool.Core.OutputModels
-@using DumaemSchool.Core.Queries
-@using DumaemSchool.Core.DataManipulation
-@using MediatR
+@using Variant = MudBlazor.Variant
 
-@inject ISender Sender;
+@inject IDialogService DialogService;
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
-    <MudSelect Placeholder="Кружок" T="SectionInfo" Label="Кружок" @bind-Value="_selectedSection"
-               Clearable="true" ToStringFunc="_sectionConverter" Strict="true">
-        @if (_sections is null)
-        {
-            return;
-        }
-        @foreach (SectionInfo item in _sections)
-        {
-            <MudSelectItem Value="@item"/>
-        }
-    </MudSelect>
+    <div class="d-flex justify-content-md-between align-items-end">
+        <MudTextField InputType="InputType.Text" Variant="Variant.Text" T="string" ReadOnly="true" Label="Кружок" @bind-Value="@(_selectedSection.GroupName)"/>
+        <MudButton Style="margin-left: 2%" Variant="Variant.Filled" OnClick="@ShowSections" Color="Color.Primary">Выбрать кружок</MudButton>
+    </div>
+    <div class="d-flex justify-content-md-between align-items-end">
+            <MudTextField InputType="InputType.Text" Variant="Variant.Text" T="string" ReadOnly="true" Label="Кружок" @bind-Value="@(_selectedSection.GroupName)"/>
+            <MudButton Style="margin-left: 2%" Variant="Variant.Filled" OnClick="@ShowSections" Color="Color.Primary">Выбрать кружок</MudButton>
+        </div>
 </MudContainer>
 
 @code {
-    private IEnumerable<SectionInfo>? _sections;
-    private SectionInfo? _selectedSection;
+    private SectionInfo _selectedSection = new();
 
-
-    private readonly Func<SectionInfo?, string> _sectionConverter = p => p is null ? "" : $"{p.TypeName} - {p.GroupName}";
-
-    protected override async Task OnInitializedAsync()
+    private async Task ShowSections()
     {
-        var command = new SectionsInfoQuery(new ListParam());
-        _sections = (await Sender.Send(command)).Items;
+        var options = new MudBlazor.DialogOptions
+        {
+            CloseOnEscapeKey = true, DisableBackdropClick = true, FullWidth = true,
+            CloseButton = true, MaxWidth = MaxWidth.Large
+        };
+        var parameters = new DialogParameters
+        {
+            ["IsForLesson"] = true
+        };
+
+        var dialog = await DialogService.ShowAsync<Sections>("Выбор кружка", parameters, options);
+
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            _selectedSection = (SectionInfo)result.Data;
+        }
     }
 
 }

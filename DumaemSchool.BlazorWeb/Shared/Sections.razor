@@ -8,7 +8,7 @@
 @inject ISender Sender;
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
-    <MudDataGrid T="SectionInfo" ServerData="GetData" Striped="true">
+    <MudDataGrid T="SectionInfo" ServerData="GetData" Striped="true" RowClick="OnRowClick">
         <ToolBarContent>
             <MudText Typo="Typo.h6">Список кружков</MudText>
         </ToolBarContent>
@@ -20,11 +20,14 @@
             <PropertyColumn Filterable="true" Property="x => x.GroupName" SortBy="x => x.GroupName" Title="Наименование группы"/>
             <PropertyColumn Filterable="true" Property="x => x.TypeName" SortBy="x => x.TypeName" Title="Наименование вида кружка"/>
             <PropertyColumn Filterable="true" Property="x => x.LessonPerWeek" SortBy="x => x.LessonPerWeek" Title="Количество занятий в неделю"/>
-            <TemplateColumn Sortable="false" Filterable="false">
-                <CellTemplate>
-                    <MudButton Style="margin-left: 5%" Size="@Size.Small" Variant="@MudBlazor.Variant.Filled" OnClick="@(() => GoToSectionDetailed(context.Item.Id))" Color="@Color.Primary">Перейти</MudButton>
-                </CellTemplate>
-            </TemplateColumn>
+            @if (!IsForLesson)
+            {
+                <TemplateColumn Sortable="false" Filterable="false">
+                    <CellTemplate>
+                        <MudButton Style="margin-left: 5%" Size="@Size.Small" Variant="@MudBlazor.Variant.Filled" OnClick="@(() => GoToSectionDetailed(context.Item.Id))" Color="@Color.Primary">Перейти</MudButton>
+                    </CellTemplate>
+                </TemplateColumn>
+            }
         </Columns>
         <PagerContent>
             <MudDataGridPager T="SectionInfo"/>
@@ -36,6 +39,12 @@
 
     [Parameter]
     public int? TeacherId { get; set; }
+    
+    [Parameter]
+    public bool IsForLesson { get; set; }
+    
+    [CascadingParameter]
+    public MudDialogInstance? MudDialog { get; set; }
 
     private async Task<GridData<SectionInfo>> GetData(GridState<SectionInfo> state)
     {
@@ -53,5 +62,13 @@
     private void GoToSectionDetailed(int sectionId)
     {
         NavigationManager.NavigateTo($"/section/{sectionId}");
+    }
+
+    private void OnRowClick(DataGridRowClickEventArgs<SectionInfo> args)
+    {
+        if (!IsForLesson)
+            return;
+        
+        MudDialog?.Close(DialogResult.Ok(args.Item));
     }
 }

@@ -3,7 +3,7 @@
 @attribute [Authorize]
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
 
-<Sections TeacherId="_teacherId"></Sections>
+<Sections TeacherId="_teacherId" IsForLesson="false"></Sections>
 
 @code{
     private int? _teacherId;

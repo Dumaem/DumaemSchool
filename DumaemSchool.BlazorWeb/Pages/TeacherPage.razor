@@ -18,7 +18,7 @@
 @inject UserManager<SchoolUser> UserManager
 
 
-@if (currentTeacher is null)
+@if (_currentTeacher is null)
 {
     return;
 }
@@ -30,9 +30,9 @@
     <AuthorizeView Roles="@Role.DeputyDirector">
         <Authorized>
             <MudStack>
-                <MudTextField Immediate @bind-Value="currentTeacher.Name"></MudTextField>
+                <MudTextField Immediate @bind-Value="_currentTeacher.Name"></MudTextField>
                  <MudButton Disabled="@(!TeacherNameChanged)" Variant="@MudBlazor.Variant.Filled"
-                            OnClick="@(() => EditTeacher(currentTeacher))" Color="@Color.Primary">Изменить</MudButton>
+                            OnClick="@(() => EditTeacher(_currentTeacher))" Color="@Color.Primary">Изменить</MudButton>
              </MudStack>
         </Authorized>
     </AuthorizeView>
@@ -41,23 +41,23 @@
 
     <AuthorizeView Roles="@Role.Teacher">
         <Authorized>
-            <MudText Style="margin-top: 2%" Typo="Typo.h5">@currentTeacher.Name</MudText>
+            <MudText Style="margin-top: 2%" Typo="Typo.h5">@_currentTeacher.Name</MudText>
         </Authorized>
     </AuthorizeView>
 
 </MudContainer>
 
-<Sections TeacherId="Id"></Sections>
+<Sections TeacherId="Id" IsForLesson="false"></Sections>
 
  @code {
 
     [Parameter]
     public int Id { get; set; }
 
-    private string? savedTeacherName;
-    private Teacher? currentTeacher;
+    private string? _savedTeacherName;
+    private Teacher? _currentTeacher;
 
-    private bool TeacherNameChanged => currentTeacher?.Name != savedTeacherName;
+    private bool TeacherNameChanged => _currentTeacher?.Name != _savedTeacherName;
 
     protected override async Task OnInitializedAsync()
     {
@@ -69,8 +69,8 @@
         var result = await Sender.Send(new TeacherInfoQuery(Id));
         if (result is not null)
         {
-            currentTeacher = result;
-            savedTeacherName = currentTeacher.Name;
+            _currentTeacher = result;
+            _savedTeacherName = _currentTeacher.Name;
         }
     }
 
