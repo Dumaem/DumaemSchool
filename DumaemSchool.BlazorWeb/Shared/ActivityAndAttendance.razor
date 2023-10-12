@@ -11,7 +11,8 @@
 @inject ISender Sender;
 @inject IDialogService DialogService
 
-<MudDatePicker  ></MudDatePicker>
+<MudDatePicker Style="margin-left: 70%" DateChanged="@((e) => OnDateChange(e!.Value))">
+</MudDatePicker>
 
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
@@ -27,8 +28,8 @@
 
         <Columns>
             <PropertyColumn Filterable="true" Property="x => x.StudentName" SortBy="x => x.StudentName" Title="ФИО учащегося" />
-            <PropertyColumn Filterable="false" Property="x => x.DateAdded" SortBy="x => x.DateAdded" Title="Дата добавления студента в кружок" />
-
+            <PropertyColumn Filterable="true" Property="x => x.WasAttended" SortBy="x => x.WasAttended" Title="Присутствовал ли ученик на уроке" />
+            <PropertyColumn Filterable="true" Property="x => x.ActivityMark" SortBy="x => x.ActivityMark" Title="Оценка за урок" />
         </Columns>
 
     </MudDataGrid>
@@ -42,12 +43,25 @@
 
     private IEnumerable<LessonDate>? lessonDates;
 
+    private DateTime? selectedDateTime;
+
     private string _searchString = "";
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
         await GetLessonsDates();
+    }
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+    private void OnDateChange(DateTime date)
+    {
+        selectedDateTime = date;
+        _mudDataGrid.ReloadServerData();
     }
 
     private void OnSearch(string text)
@@ -60,16 +74,32 @@
     {
         var result = await Sender.Send(new LessonDatesQuery(SectionId!.Value));
         lessonDates = result;
+        List<int> lessonsIdCollection = lessonDates.Select(x => x.LessonId).ToList();
     }
 
     private async Task<GridData<StudentLessonStatistics>> GetData(GridState<StudentLessonStatistics> state)
     {
         var filters = new List<FilterDefinition>();
-        if (SectionId is not null)
+        if (selectedDateTime is null)
         {
-            filters.Add(new FilterDefinition { FieldName = nameof(StudentLessonStatistics.LessonId), Value = lessonId, Operand = FilterOperand.Equal });
+            filters.Add(new FilterDefinition
+                {
+                    FieldName = nameof(StudentLessonStatistics.LessonId),
+                    Value = lessonDates!.Select(x => x.LessonId).ToList().Min(),
+                    Operand = FilterOperand.Equal
+                });
         }
-        filters.Add(new FilterDefinition { FieldName = nameof(SectionStudent.StudentName), Value = _searchString, Operand = FilterOperand.Contains });
+        else
+        {
+            filters.Add(new FilterDefinition
+                {
+                    FieldName = nameof(StudentLessonStatistics.LessonId),
+                    Value = lessonDates!.FirstOrDefault(x => x.ConductionDate == DateOnly.FromDateTime(selectedDateTime.Value))?.LessonId,
+                    Operand = FilterOperand.Equal
+                });
+        }
+
+        filters.Add(new FilterDefinition { FieldName = nameof(StudentLessonStatistics.StudentName), Value = _searchString, Operand = FilterOperand.Contains });
 
         var result = await Sender.Send(new StudentLessonStatisticsQuery(FilterConverter.GenerateParamsFromGrid(state, filters)));
 
