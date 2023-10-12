@@ -1,7 +1,7 @@
 ﻿using Dapper;
 using DumaemSchool.Core.DataManipulation;
 using DumaemSchool.Core.OutputModels;
-using DumaemSchool.Database.Mappers;
+using DumaemSchool.Database.DataManipulation;
 using DumaemSchool.Database.Mappers.EntityMapping.Base;
 
 namespace DumaemSchool.Database.ListGetters.Impl;

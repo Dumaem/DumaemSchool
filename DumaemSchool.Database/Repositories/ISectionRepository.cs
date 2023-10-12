@@ -9,4 +9,5 @@ public interface ISectionRepository
     public Task<ListDataResult<SectionInfo>> ListSectionInfo(ListParam param);
     public Task<ListDataResult<SectionStudent>> ListSectionStudents(ListParam param);
     public Task<ListDataResult<SectionSchedule>> ListSectionSchedule(ListParam param);
+    public Task<ListDataResult<StudentToAddToSection>> ListStudentsToAdd(ListParam param);
 }

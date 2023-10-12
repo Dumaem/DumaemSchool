@@ -13,16 +13,19 @@ public sealed class SectionRepository : ISectionRepository
     private readonly IListSqlGenerator<SectionInfo> _sectionInfoSqlGenerator;
     private readonly IListSqlGenerator<SectionStudent> _sectionStudentSqlGenerator;
     private readonly IListSqlGenerator<SectionSchedule> _sectionScheduleSqlGenerator;
+    private readonly IListSqlGenerator<StudentToAddToSection> _studentToAddSqlGenerator;
 
     public SectionRepository(IListSqlGenerator<SectionInfo> sectionInfoSqlGenerator, 
         ApplicationContext context, 
         IListSqlGenerator<SectionStudent> sectionStudentSqlGenerator, 
-        IListSqlGenerator<SectionSchedule> sectionScheduleSqlGenerator)
+        IListSqlGenerator<SectionSchedule> sectionScheduleSqlGenerator, 
+        IListSqlGenerator<StudentToAddToSection> studentToAddSqlGenerator)
     {
         _sectionInfoSqlGenerator = sectionInfoSqlGenerator;
         _context = context;
         _sectionStudentSqlGenerator = sectionStudentSqlGenerator;
         _sectionScheduleSqlGenerator = sectionScheduleSqlGenerator;
+        _studentToAddSqlGenerator = studentToAddSqlGenerator;
     }
 
     public async Task<ListDataResult<SectionInfo>> ListSectionInfo(ListParam param)
@@ -62,6 +65,20 @@ public sealed class SectionRepository : ISectionRepository
             ).AsList();
 
         return new ListDataResult<SectionSchedule>
+        {
+            Items = result, TotalItemsCount = result.Count
+        };
+    }
+
+    public async Task<ListDataResult<StudentToAddToSection>> ListStudentsToAdd(ListParam param)
+    {
+        var listQuery = _studentToAddSqlGenerator.GetListSql(param);
+        var connection = _context.Database.GetDbConnection();
+        var result = (await connection
+                .QueryAsync<StudentToAddToSection>(listQuery.SelectSql, listQuery.Parameters)
+            ).AsList();
+
+        return new ListDataResult<StudentToAddToSection>
         {
             Items = result, TotalItemsCount = result.Count
         };

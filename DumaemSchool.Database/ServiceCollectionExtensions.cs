@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using Dapper;
-using DumaemSchool.Core.Commands;
 using DumaemSchool.Core.Commands.Teacher;
 using DumaemSchool.Core.OutputModels;
 using DumaemSchool.Database.ListGetters;
@@ -60,12 +59,14 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IListSqlGenerator<SectionStudent>, SectionStudentListSqlGetter>();
         services.AddSingleton<IListSqlGenerator<SectionSchedule>, SectionScheduleListSqlGetter>();
         services.AddSingleton<IListSqlGenerator<StudentLessonStatistics>, StudentLessonStatisticsListSqlGetter>();
+        services.AddSingleton<IListSqlGenerator<StudentToAddToSection>, SectionStudentsToAddListSqlGetter>();
         services.AddSingleton<IEntityMapping<TeacherDto>, TeacherDtoEntityMapping>();
         services.AddSingleton<IEntityMapping<SectionType>, SectionTypeEntityMapping>();
         services.AddSingleton<IEntityMapping<SectionInfo>, SectionInfoEntityMapping>();
         services.AddSingleton<IEntityMapping<SectionStudent>, SectionStudentEntityMapping>();
         services.AddSingleton<IEntityMapping<SectionSchedule>, SectionScheduleEntityMapping>();
         services.AddSingleton<IEntityMapping<StudentLessonStatistics>, StudentLessonStatisticsEnityMapping>();
+        services.AddSingleton<IEntityMapping<StudentToAddToSection>, StudentToAddToSectionEntityMapping>();
 
         return services;
     }

@@ -2,7 +2,7 @@
 using Dapper;
 using DumaemSchool.Core.DataManipulation;
 
-namespace DumaemSchool.Database.Mappers;
+namespace DumaemSchool.Database.DataManipulation;
 
 public static class SqlUtility
 {
@@ -26,7 +26,7 @@ public static class SqlUtility
         FilterOperand.EndsWith,
     };
 
-    public static string? GetFilterToSql(FilterDefinition filter, DynamicParameters parameters,
+    public static SqlFilterDefinition? GetFilterToSql(FilterDefinition filter, DynamicParameters parameters,
         IReadOnlyDictionary<string, string>? propertyMap = null)
     {
         var parameterKey = filter.ToString();
@@ -35,7 +35,10 @@ public static class SqlUtility
         if (filter.Operand is FilterOperand.IsEmpty or FilterOperand.IsNotEmpty)
         {
             var addNot = filter.Operand == FilterOperand.IsNotEmpty; 
-            return $"{fieldName} is {(addNot ? "NOT" : "")} null";
+            return new SqlFilterDefinition
+            {
+                SqlText = $"{fieldName} is {(addNot ? "NOT" : "")} null",
+            };
         }
 
         string? operandString = default;
@@ -57,7 +60,11 @@ public static class SqlUtility
                 };
 
                 parameters.Add(parameterKey, filter.Value);
-                return $"{fieldName} {operandString} @{parameterKey}";
+                return new SqlFilterDefinition
+                {
+                    SqlText = $"{fieldName} {operandString} @{parameterKey}",
+                    ParameterName = parameterKey
+                };
             }
             case string stringValue:
                 if (!StringOperands.Contains(filter.Operand))
@@ -90,12 +97,19 @@ public static class SqlUtility
                 }
 
                 parameters.Add(parameterKey, stringValue);
-                return $"{fieldName} {operandString} @{parameterKey}";
+                return new SqlFilterDefinition
+                {
+                    SqlText = $"{fieldName} {operandString} @{parameterKey}",
+                    ParameterName = parameterKey
+                };
             case bool boolValue:
                 if (filter.Operand != FilterOperand.Equal)
                     return null;
 
-                return $"{(!boolValue ? "NOT" : "")} {fieldName}";
+                return new SqlFilterDefinition
+                {
+                    SqlText = $"{(!boolValue ? "NOT" : "")} {fieldName}"
+                };
             default:
                 return null;
         }
