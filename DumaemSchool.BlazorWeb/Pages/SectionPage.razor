@@ -1,0 +1,21 @@
+﻿@page "/section/{id:int}"
+
+<MudTabs Elevation="4" Rounded="false" Color="@Color.Primary">
+    <MudTabPanel Icon="@Icons.Material.Filled.Groups" Text="Список учеников">
+
+    </MudTabPanel>
+        
+    <MudTabPanel Icon="@Icons.Material.Filled.CalendarMonth" Text="Расписание кружка">
+
+    </MudTabPanel>
+
+    <MudTabPanel Icon="@Icons.Material.Filled.LocalActivity" Text="Активность и посещаемость"> 
+
+    </MudTabPanel>
+</MudTabs>
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+}
