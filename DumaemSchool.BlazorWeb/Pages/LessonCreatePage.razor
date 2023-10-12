@@ -1,6 +1,7 @@
 ﻿@page "/lesson"
 @using DumaemSchool.Core.OutputModels
 @using Variant = MudBlazor.Variant
+@using System.Globalization
 
 @inject IDialogService DialogService;
 
@@ -9,14 +10,38 @@
         <MudTextField InputType="InputType.Text" Variant="Variant.Text" T="string" ReadOnly="true" Label="Кружок" @bind-Value="@(_selectedSection.GroupName)"/>
         <MudButton Style="margin-left: 2%" Variant="Variant.Filled" OnClick="@ShowSections" Color="Color.Primary">Выбрать кружок</MudButton>
     </div>
-    <div class="d-flex justify-content-md-between align-items-end">
-            <MudTextField InputType="InputType.Text" Variant="Variant.Text" T="string" ReadOnly="true" Label="Кружок" @bind-Value="@(_selectedSection.GroupName)"/>
-            <MudButton Style="margin-left: 2%" Variant="Variant.Filled" OnClick="@ShowSections" Color="Color.Primary">Выбрать кружок</MudButton>
-        </div>
+    <div class="d-flex flex-row align-items-start mt-5">
+        <MudContainer Class="ma-0 pa-0">
+            <MudTable Items="_selectedSectionSchedule" T="SectionSchedule">
+                <HeaderContent>
+                    <MudTh>День недели</MudTh>
+                    <MudTh>Время</MudTh>
+                    <MudTh>Продолжительность</MudTh>
+                    <MudTh>Кабинет</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>
+                        <MudText>@(DateTimeFormatInfo.CurrentInfo.GetDayName(context.DayOfWeek))</MudText>
+                    </MudTd>
+                    <MudTd>
+                        <MudText>@context.Time</MudText>
+                    </MudTd>
+                    <MudTd>
+                        <MudText>@context.Duration </MudText>
+                    </MudTd>
+                    <MudTd>
+                        <MudText>@context.Cabinet</MudText>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudContainer>
+        <MudButton Disabled="@(_selectedSection.Id == 0)" Style="margin-left: 2%" Variant="Variant.Filled" OnClick="@ShowSchedule" Color="Color.Primary">Выбрать расписание</MudButton>
+    </div>
 </MudContainer>
 
 @code {
     private SectionInfo _selectedSection = new();
+    private List<SectionSchedule> _selectedSectionSchedule = new();
 
     private async Task ShowSections()
     {
@@ -38,6 +63,31 @@
         {
             _selectedSection = (SectionInfo)result.Data;
         }
+    }
+
+    private async Task ShowSchedule()
+    {
+        var options = new MudBlazor.DialogOptions
+        {
+            CloseOnEscapeKey = true, DisableBackdropClick = true, FullWidth = true,
+            CloseButton = true, MaxWidth = MaxWidth.Large
+        };
+        var parameters = new DialogParameters
+        {
+            ["IsForLesson"] = true,
+            ["SectionId"] = _selectedSection.Id
+        };
+
+        var dialog = await DialogService.ShowAsync<Schedule>("Выбор из расписания", parameters, options);
+
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            _selectedSectionSchedule.Clear();
+            _selectedSectionSchedule.Add((SectionSchedule)result.Data);
+        }
+        await InvokeAsync(StateHasChanged);
     }
 
 }

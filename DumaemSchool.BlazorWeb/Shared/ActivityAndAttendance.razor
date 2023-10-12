@@ -27,7 +27,7 @@
 
         <Columns>
             <PropertyColumn Filterable="true" Property="x => x.StudentName" SortBy="x => x.StudentName" Title="ФИО учащегося" />
-            <PropertyColumn Filterable="false" Property="x => x.DateAdded" SortBy="x => x.DateAdded" Title="Дата добавления студента в кружок" />
+            @* <PropertyColumn Filterable="false" Property="x => x.DateAdded" SortBy="x => x.DateAdded" Title="Дата добавления студента в кружок" /> *@
 
         </Columns>
 
@@ -67,7 +67,7 @@
         var filters = new List<FilterDefinition>();
         if (SectionId is not null)
         {
-            filters.Add(new FilterDefinition { FieldName = nameof(StudentLessonStatistics.LessonId), Value = lessonId, Operand = FilterOperand.Equal });
+            filters.Add(new FilterDefinition { FieldName = nameof(StudentLessonStatistics.LessonId), Value = 1, Operand = FilterOperand.Equal });
         }
         filters.Add(new FilterDefinition { FieldName = nameof(SectionStudent.StudentName), Value = _searchString, Operand = FilterOperand.Contains });
 

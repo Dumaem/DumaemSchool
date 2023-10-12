@@ -9,7 +9,7 @@
 @inject ISender Sender;
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
-    <MudDataGrid @ref="@_mudDataGrid" ServerData="@GetData" T="SectionSchedule" Filterable="true" SortMode="@SortMode.Multiple" Groupable="false" Hideable="true">
+    <MudDataGrid RowClick="OnRowClick" @ref="@_mudDataGrid" ServerData="@GetData" T="SectionSchedule" Filterable="true" SortMode="@SortMode.Multiple" Groupable="false" Hideable="true">
         <Columns>
             <PropertyColumn Filterable="true" Property="x => (DateTimeFormatInfo.CurrentInfo.GetDayName(x.DayOfWeek))" 
                 SortBy="x => DateTimeFormatInfo.CurrentInfo.GetDayName(x.DayOfWeek)" Title="День недели" />
@@ -35,7 +35,12 @@
     [Parameter] public int? SectionId { get; set; }
 
     private MudDataGrid<SectionSchedule> _mudDataGrid = null!;
-
+    
+    [Parameter]
+    public bool IsForLesson { get; set; }
+    
+    [CascadingParameter]
+    public MudDialogInstance? MudDialog { get; set; }
 
     private async Task<GridData<SectionSchedule>> GetData(GridState<SectionSchedule> state)
     {
@@ -49,5 +54,12 @@
 
         return new GridData<SectionSchedule> { Items = result.Items, TotalItems = result.TotalItemsCount };
     }
-
+    
+    private void OnRowClick(DataGridRowClickEventArgs<SectionSchedule> args)
+    {
+        if (!IsForLesson)
+            return;
+        
+        MudDialog?.Close(DialogResult.Ok(args.Item));
+    }
 }
