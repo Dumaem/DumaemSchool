@@ -40,7 +40,7 @@ public abstract class AbstractListSqlGenerator<T> : IListSqlGenerator<T> where T
             return "";
 
         return
-            $" AND {string.Join(" AND ", presentFilters.Select(x => SqlUtility.GetFilterToSql(x, dynamicParams, PropertyToSqlMapping))
+            $" AND {string.Join(" AND ", presentFilters.Select(x => SqlUtility.GetFilterToSql(x, dynamicParams, PropertyToSqlMapping)?.SqlText)
                 .Where(x => x is not null))} ";
     }
 
@@ -56,7 +56,7 @@ public abstract class AbstractListSqlGenerator<T> : IListSqlGenerator<T> where T
             return "";
 
         return $" {string.Join(" AND ", presentFilters
-            .Select(x => SqlUtility.GetFilterToSql(x, dynamicParams, PropertyToSqlMapping))
+            .Select(x => SqlUtility.GetFilterToSql(x, dynamicParams, PropertyToSqlMapping)?.SqlText)
             .Where(x => x is not null))} ";
     }
 

@@ -41,8 +41,14 @@ public static class SqlUtility
             };
         }
 
+        var filterValue = filter.Value;
+        if (filter.Value?.GetType().IsEnum is true)
+        {
+            filterValue = (int)filter.Value;
+        }
+
         string? operandString = default;
-        switch (filter.Value)
+        switch (filterValue)
         {
             case int or double or DateTime:
             {

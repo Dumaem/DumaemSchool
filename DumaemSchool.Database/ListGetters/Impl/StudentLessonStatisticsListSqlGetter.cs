@@ -37,7 +37,7 @@ public sealed class StudentLessonStatisticsListSqlGetter : AbstractListSqlGenera
                                         ON ss.section_id = sch.section_id
                                     JOIN public.student s
                                         ON s.id = ss.student_id
-                                WHERE {lessonIdFilter} AND ss.date_added <= l.date
+                                WHERE {lessonIdFilter.SqlText} AND ss.date_added <= l.date
                            )
                            SELECT {SelectString} 
                            FROM section_students ss
