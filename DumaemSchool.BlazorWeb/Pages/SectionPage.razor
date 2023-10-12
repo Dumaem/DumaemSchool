@@ -2,15 +2,15 @@
 
 <MudTabs Elevation="4" Rounded="false" Color="@Color.Primary">
     <MudTabPanel Icon="@Icons.Material.Filled.Groups" Text="Список учеников">
-
+        <Students SectionId="@Id"></Students>
     </MudTabPanel>
         
     <MudTabPanel Icon="@Icons.Material.Filled.CalendarMonth" Text="Расписание кружка">
-
+        <Schedule SectionId="@Id"></Schedule>
     </MudTabPanel>
 
     <MudTabPanel Icon="@Icons.Material.Filled.LocalActivity" Text="Активность и посещаемость"> 
-
+        <ActivityAndAttendance SectionId="@Id"></ActivityAndAttendance>
     </MudTabPanel>
 </MudTabs>
 
