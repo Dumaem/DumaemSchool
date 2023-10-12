@@ -1,0 +1,79 @@
+﻿@using DumaemSchool.BlazorWeb.Data.Converters;
+@using DumaemSchool.BlazorWeb.Shared.Dialogs;
+@using DumaemSchool.Core.Commands.Section;
+@using DumaemSchool.Core.DataManipulation;
+@using DumaemSchool.Core.OutputModels;
+@using DumaemSchool.Core.Queries;
+@using DumaemSchool.Core.Queries.Lesson;
+@using DumaemSchool.Core.Queries.Section;
+@using MediatR;
+
+@inject ISender Sender;
+@inject IDialogService DialogService
+
+<MudDatePicker  ></MudDatePicker>
+
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
+    <MudDataGrid @ref="@_mudDataGrid" ServerData="@GetData" T="StudentLessonStatistics" Filterable="true" SortMode="@SortMode.Multiple"
+                 Groupable="false" Hideable="true">
+
+        <ToolBarContent>
+            <MudTextField Style="margin-left: 70%" ValueChanged="@(EventCallback.Factory.Create<string>(this, OnSearch))"
+                          Placeholder="Поиск" Adornment="Adornment.Start" Immediate="true"
+                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+
+
+        <Columns>
+            <PropertyColumn Filterable="true" Property="x => x.StudentName" SortBy="x => x.StudentName" Title="ФИО учащегося" />
+            <PropertyColumn Filterable="false" Property="x => x.DateAdded" SortBy="x => x.DateAdded" Title="Дата добавления студента в кружок" />
+
+        </Columns>
+
+    </MudDataGrid>
+</MudContainer>
+
+
+@code {
+    [Parameter] public int? SectionId { get; set; }
+
+    private MudDataGrid<StudentLessonStatistics> _mudDataGrid = null!;
+
+    private IEnumerable<LessonDate>? lessonDates;
+
+    private string _searchString = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await GetLessonsDates();
+    }
+
+    private void OnSearch(string text)
+    {
+        _searchString = text;
+        _mudDataGrid.ReloadServerData();
+    }
+
+    private async Task GetLessonsDates()
+    {
+        var result = await Sender.Send(new LessonDatesQuery(SectionId!.Value));
+        lessonDates = result;
+    }
+
+    private async Task<GridData<StudentLessonStatistics>> GetData(GridState<StudentLessonStatistics> state)
+    {
+        var filters = new List<FilterDefinition>();
+        if (SectionId is not null)
+        {
+            filters.Add(new FilterDefinition { FieldName = nameof(StudentLessonStatistics.LessonId), Value = lessonId, Operand = FilterOperand.Equal });
+        }
+        filters.Add(new FilterDefinition { FieldName = nameof(SectionStudent.StudentName), Value = _searchString, Operand = FilterOperand.Contains });
+
+        var result = await Sender.Send(new StudentLessonStatisticsQuery(FilterConverter.GenerateParamsFromGrid(state, filters)));
+
+        return new GridData<StudentLessonStatistics> { Items = result.Items, TotalItems = result.TotalItemsCount };
+    }
+
+}

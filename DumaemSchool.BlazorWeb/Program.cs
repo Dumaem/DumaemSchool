@@ -10,6 +10,11 @@ using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
 using MudBlazor.Services;
 using Radzen;
+using System.Globalization;
+
+//Add localisation
+var cultureInfo = new CultureInfo("ru-RU");
+var dateTimeInfo = cultureInfo.DateTimeFormat;
 
 var builder = WebApplication.CreateBuilder(args);
 
