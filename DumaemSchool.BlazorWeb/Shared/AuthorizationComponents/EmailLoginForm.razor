@@ -115,6 +115,7 @@
         if (!Guid.TryParse(resultMessage, out var sessionId))
         {
             Snackbar.Add("Произошла ошибка при отправке письма. Пожалуйста, повторите позднее");
+            _isSendButtonClick = false;
             return;
         }
         _sessionId = sessionId;
