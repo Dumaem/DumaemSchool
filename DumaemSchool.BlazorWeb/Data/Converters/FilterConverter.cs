@@ -21,6 +21,7 @@ public static class FilterConverter
         {FilterOperator.Number.GreaterThanOrEqual, FilterOperand.GreaterThanOrEqual},
         {FilterOperator.Number.LessThan, FilterOperand.LessThan},
         {FilterOperator.Number.LessThanOrEqual, FilterOperand.LessThanOrEqual},
+        {FilterOperator.Boolean.Is, FilterOperand.Equal }
     };
 
     public static IEnumerable<FilterDefinition> Convert<T>(IEnumerable<IFilterDefinition<T>> mudFilters)

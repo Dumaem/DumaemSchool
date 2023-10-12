@@ -2,6 +2,7 @@
 @using DumaemSchool.BlazorWeb.Shared.Dialogs;
 @using DumaemSchool.Core.Commands.Section;
 @using DumaemSchool.Core.DataManipulation;
+@using DumaemSchool.Core.Models;
 @using DumaemSchool.Core.OutputModels;
 @using DumaemSchool.Core.Queries;
 @using DumaemSchool.Core.Queries.Lesson;
@@ -11,7 +12,9 @@
 @inject ISender Sender;
 @inject IDialogService DialogService
 
-<MudDatePicker Style="margin-left: 70%" DateChanged="@((e) => OnDateChange(e!.Value))">
+<MudDatePicker Style="margin-left: 80%; margin-right: 1%" PickerVariant="PickerVariant.Dialog" 
+    IsDateDisabledFunc="@( dt => !_lessonDateTimes.Contains(dt))" 
+    DateChanged="@((e) => OnDateChange(e!.Value))">
 </MudDatePicker>
 
 
@@ -28,8 +31,16 @@
 
         <Columns>
             <PropertyColumn Filterable="true" Property="x => x.StudentName" SortBy="x => x.StudentName" Title="ФИО учащегося" />
-            <PropertyColumn Filterable="true" Property="x => x.WasAttended" SortBy="x => x.WasAttended" Title="Присутствовал ли ученик на уроке" />
-            <PropertyColumn Filterable="true" Property="x => x.ActivityMark" SortBy="x => x.ActivityMark" Title="Оценка за урок" />
+            <PropertyColumn Filterable="true" Property="x => x.WasAttended" SortBy="x => x.WasAttended" Title="Присутствовал ли ученик на уроке">
+                <CellTemplate>
+                    @AttendanceOnRussianLanguage[context.Item.WasAttended]
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn Filterable="true" Property="x => x.ActivityMark" SortBy="x => x.ActivityMark" Title="Оценка за урок">
+                <CellTemplate>
+                    @MarksOnRussianLanguage[context.Item.ActivityMark]
+                </CellTemplate>
+            </PropertyColumn>
         </Columns>
 
     </MudDataGrid>
@@ -41,17 +52,31 @@
 
     private MudDataGrid<StudentLessonStatistics> _mudDataGrid = null!;
 
-    private IEnumerable<LessonDate>? lessonDates;
+    private LessonDate[] _lessonDates = null!;
+    private HashSet<DateTime> _lessonDateTimes = null!;
 
     private DateTime? selectedDateTime;
     private LessonDate? selectedLessonDate;
+    private Dictionary<LessonActivityMark, string> MarksOnRussianLanguage = new Dictionary<LessonActivityMark, string>()
+    {
+        {LessonActivityMark.Negative, "-"},
+        {LessonActivityMark.Default, "Нет оценки"},
+        {LessonActivityMark.Positive, "+"}
+    };
+
+    private Dictionary<bool, string> AttendanceOnRussianLanguage = new Dictionary<bool, string>()
+    {
+        {true, "Присутствовал"},
+        {false, "Отсутствовал"},
+    };
 
     private string _searchString = "";
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        await GetLessonsDates();
+        _lessonDates = (await Sender.Send(new LessonDatesQuery(SectionId!.Value))).ToArray();
+        _lessonDateTimes = _lessonDates.Select(x => x.ConductionDate.ToDateTime(TimeOnly.MinValue)).ToHashSet();
     }
 
     protected override Task OnAfterRenderAsync(bool firstRender)
@@ -62,20 +87,15 @@
     private void OnDateChange(DateTime date)
     {
         selectedDateTime = date;
-        selectedLessonDate = lessonDates!.FirstOrDefault(x => x.ConductionDate == DateOnly.FromDateTime(selectedDateTime.Value));
+        selectedLessonDate = _lessonDates.FirstOrDefault(x => x.ConductionDate == DateOnly.FromDateTime(selectedDateTime.Value));
         _mudDataGrid.ReloadServerData();
     }
+
 
     private void OnSearch(string text)
     {
         _searchString = text;
         _mudDataGrid.ReloadServerData();
-    }
-
-    private async Task GetLessonsDates()
-    {
-        var result = await Sender.Send(new LessonDatesQuery(SectionId!.Value));
-        lessonDates = result;
     }
 
     private async Task<GridData<StudentLessonStatistics>> GetData(GridState<StudentLessonStatistics> state)
