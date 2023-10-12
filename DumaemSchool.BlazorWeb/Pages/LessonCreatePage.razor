@@ -2,6 +2,7 @@
 @using DumaemSchool.Core.OutputModels
 @using Variant = MudBlazor.Variant
 @using System.Globalization
+@using Orientation = MudBlazor.Orientation
 
 @inject IDialogService DialogService;
 
@@ -10,8 +11,8 @@
         <MudTextField InputType="InputType.Text" Variant="Variant.Text" T="string" ReadOnly="true" Label="Кружок" @bind-Value="@(_selectedSection.GroupName)"/>
         <MudButton Style="margin-left: 2%" Variant="Variant.Filled" OnClick="@ShowSections" Color="Color.Primary">Выбрать кружок</MudButton>
     </div>
-    <div class="d-flex flex-row align-items-start mt-5">
-        <MudContainer Class="ma-0 pa-0">
+    <div class="d-flex justify-content-md-between flex-row align-items-start mt-5">
+        <MudContainer Class="ma-0 pa-0" MaxWidth="MaxWidth.False">
             <MudTable Items="_selectedSectionSchedule" T="SectionSchedule">
                 <HeaderContent>
                     <MudTh>День недели</MudTh>
@@ -37,11 +38,16 @@
         </MudContainer>
         <MudButton Disabled="@(_selectedSection.Id == 0)" Style="margin-left: 2%" Variant="Variant.Filled" OnClick="@ShowSchedule" Color="Color.Primary">Выбрать расписание</MudButton>
     </div>
+    <MudContainer Class="pa-0 ma-0 mt-5" MaxWidth="MaxWidth.False">
+        <MudDatePicker MinDate="@(DateTime.Now - TimeSpan.FromDays(1))" @bind-Date="_selectedDate" Disabled="@(_selectedSectionSchedule.Count <= 0)" PickerVariant="PickerVariant.Dialog" Variant="Variant.Text" Label="Дата проведения"
+                       IsDateDisabledFunc="@((DateTime dt) => dt.DayOfWeek != _selectedSectionSchedule.First().DayOfWeek)"/>
+    </MudContainer>
 </MudContainer>
 
 @code {
     private SectionInfo _selectedSection = new();
     private List<SectionSchedule> _selectedSectionSchedule = new();
+    private DateTime? _selectedDate;
 
     private async Task ShowSections()
     {
