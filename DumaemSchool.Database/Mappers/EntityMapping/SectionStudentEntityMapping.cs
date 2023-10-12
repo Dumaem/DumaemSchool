@@ -13,5 +13,6 @@ public sealed class SectionStudentEntityMapping : AbstractEntityMapping<SectionS
         Map(nameof(SectionStudent.StudentId), "stud.id");
         Map(nameof(SectionStudent.StudentName), "stud.name");
         Map(nameof(SectionStudent.DateAdded), "ss.date_added");
+        Map(nameof(SectionStudent.IsActual), "ss.is_actual");
     }
 }

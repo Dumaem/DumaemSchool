@@ -2,6 +2,7 @@
 using DumaemSchool.Core.DataManipulation;
 using DumaemSchool.Core.OutputModels;
 using DumaemSchool.Database.ListGetters;
+using LanguageExt;
 using Microsoft.EntityFrameworkCore;
 using SectionStudent = DumaemSchool.Core.OutputModels.SectionStudent;
 
@@ -65,5 +66,17 @@ public sealed class SectionRepository : ISectionRepository
         {
             Items = result, TotalItemsCount = result.Count
         };
+    }
+
+    public async Task<bool> DeleteStudentFromSection(int studentId, int sectionId)
+    {
+        var sectionStudent = await _context.SectionStudents.FirstOrDefaultAsync(x => x.SectionId == sectionId && x.StudentId == studentId);
+        if (sectionStudent is null)
+            return false;
+
+        sectionStudent.IsActual = false;
+        _context.SectionStudents.Update(sectionStudent);
+        await _context.SaveChangesAsync();
+        return true;
     }
 }

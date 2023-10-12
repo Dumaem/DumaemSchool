@@ -16,4 +16,5 @@ public sealed class SectionStudent
     public Section Section { get; set; } = null!;
 
     public Student Student { get; set; } = null!;
+    public bool IsActual { get; set; }
 }

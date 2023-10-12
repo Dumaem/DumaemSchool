@@ -1,16 +1,23 @@
 ﻿@using DumaemSchool.BlazorWeb.Data.Converters;
+@using DumaemSchool.BlazorWeb.Shared.Dialogs;
+@using DumaemSchool.Core.Commands.Section;
 @using DumaemSchool.Core.DataManipulation;
 @using DumaemSchool.Core.OutputModels;
 @using DumaemSchool.Core.Queries;
+@using DumaemSchool.Core.Queries.Section;
 @using MediatR;
 
 @inject ISender Sender;
+@inject IDialogService DialogService
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
-    <MudDataGrid @ref="@_mudDataGrid" ServerData="@GetData" T="SectionStudent" Filterable="true" SortMode="@SortMode.Multiple" Groupable="false" Hideable="true">
+    <MudDataGrid @ref="@_mudDataGrid" ServerData="@GetData" T="SectionStudent" Filterable="true" SortMode="@SortMode.Multiple"
+        Groupable="false" Hideable="true">
+
         <ToolBarContent>
-            <MudTextField Style="margin-left: 70%" ValueChanged="@(EventCallback.Factory.Create<string>(this, OnSearch))" Placeholder="Поиск" Adornment="Adornment.Start" Immediate="true"
-                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            <MudTextField Style="margin-left: 70%" ValueChanged="@(EventCallback.Factory.Create<string>(this, OnSearch))"
+                    Placeholder="Поиск" Adornment="Adornment.Start" Immediate="true"
+                    AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
         </ToolBarContent>
 
 
@@ -18,14 +25,15 @@
             <PropertyColumn Filterable="true" Property="x => x.StudentName" SortBy="x => x.StudentName" Title="ФИО учащегося" />
             <PropertyColumn Filterable="false" Property="x => x.DateAdded" SortBy="x => x.DateAdded" Title="Дата добавления студента в кружок" />
 
-@*             <TemplateColumn Sortable="false" Filterable="false">
+            <TemplateColumn Sortable="false" Filterable="false">
                 <CellTemplate>
                     <MudStack Row>
-                        // На будущее
-                        <MudButton Style="margin-left: 53%" Disabled="@(context.Item.IsDeleted)" Size="@Size.Small" Variant="@MudBlazor.Variant.Filled" OnClick="@(async() => await FireTeacher(context.Item.Id))" Color="@Color.Error">Уволить</MudButton>
+                        <MudButton Style="margin-left: 53%" Size="@Size.Small" Variant="@MudBlazor.Variant.Filled" 
+                            OnClick="@(async() => await DeleteStudentFromSection(context.Item.StudentId, context.Item.SectionId))" 
+                            Color="@Color.Error">Удалить студента с кружка</MudButton>
                     </MudStack>
                 </CellTemplate>
-            </TemplateColumn> *@
+            </TemplateColumn>
         </Columns>
 
     </MudDataGrid>
@@ -46,6 +54,35 @@
         _mudDataGrid.ReloadServerData();
     }
 
+    private async Task DeleteStudentFromSection(int studentId, int sectionId)
+    {
+        bool isAgreedToDelete = await IsSuccessDeleteDialogResult();
+
+        if (!isAgreedToDelete)
+        {
+            return;
+        }
+
+        var deleteStudentCommand = new DeleteStudentFromSectionCommand(studentId, sectionId);
+        var res = await Sender.Send(deleteStudentCommand);
+
+        await _mudDataGrid.ReloadServerData();
+
+    }
+
+    private async Task<bool> IsSuccessDeleteDialogResult()
+    {
+        var options = new MudBlazor.DialogOptions { CloseOnEscapeKey = true };
+        var parameters = new DialogParameters
+            {
+                ["DialogContent"] = "Вы уверены, что хотите удалить данного студента с кружка?"
+            };
+        var dialog = await DialogService.ShowAsync<DialogWindow>("Подтверждение удаления", parameters, options);
+
+        var result = await dialog.Result;
+
+        return !result.Canceled;
+    }
 
     private async Task<GridData<SectionStudent>> GetData(GridState<SectionStudent> state)
     {
