@@ -11,4 +11,6 @@ public sealed class SectionStudent
     public string SectionGroupName { get; set; } = null!;
 
     public DateOnly DateAdded { get; set; }
+    public bool IsActual { get; set; }
+
 }
