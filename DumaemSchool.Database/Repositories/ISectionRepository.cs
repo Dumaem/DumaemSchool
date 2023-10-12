@@ -10,4 +10,5 @@ public interface ISectionRepository
     public Task<ListDataResult<SectionStudent>> ListSectionStudents(ListParam param);
     public Task<ListDataResult<SectionSchedule>> ListSectionSchedule(ListParam param);
     public Task<bool> DeleteStudentFromSection(int studentId, int sectionId);
+    public Task<bool> AddStudentToSection(int studentId, int sectionId);
 }

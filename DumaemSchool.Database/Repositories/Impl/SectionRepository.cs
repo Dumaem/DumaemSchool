@@ -4,6 +4,7 @@ using DumaemSchool.Core.OutputModels;
 using DumaemSchool.Database.ListGetters;
 using LanguageExt;
 using Microsoft.EntityFrameworkCore;
+using System.Xml.Linq;
 using SectionStudent = DumaemSchool.Core.OutputModels.SectionStudent;
 
 namespace DumaemSchool.Database.Repositories.Impl;
@@ -15,9 +16,9 @@ public sealed class SectionRepository : ISectionRepository
     private readonly IListSqlGenerator<SectionStudent> _sectionStudentSqlGenerator;
     private readonly IListSqlGenerator<SectionSchedule> _sectionScheduleSqlGenerator;
 
-    public SectionRepository(IListSqlGenerator<SectionInfo> sectionInfoSqlGenerator, 
-        ApplicationContext context, 
-        IListSqlGenerator<SectionStudent> sectionStudentSqlGenerator, 
+    public SectionRepository(IListSqlGenerator<SectionInfo> sectionInfoSqlGenerator,
+        ApplicationContext context,
+        IListSqlGenerator<SectionStudent> sectionStudentSqlGenerator,
         IListSqlGenerator<SectionSchedule> sectionScheduleSqlGenerator)
     {
         _sectionInfoSqlGenerator = sectionInfoSqlGenerator;
@@ -36,7 +37,8 @@ public sealed class SectionRepository : ISectionRepository
 
         return new ListDataResult<SectionInfo>
         {
-            Items = result, TotalItemsCount = result.Count
+            Items = result,
+            TotalItemsCount = result.Count
         };
     }
 
@@ -50,7 +52,8 @@ public sealed class SectionRepository : ISectionRepository
 
         return new ListDataResult<SectionStudent>
         {
-            Items = result, TotalItemsCount = result.Count
+            Items = result,
+            TotalItemsCount = result.Count
         };
     }
 
@@ -64,7 +67,8 @@ public sealed class SectionRepository : ISectionRepository
 
         return new ListDataResult<SectionSchedule>
         {
-            Items = result, TotalItemsCount = result.Count
+            Items = result,
+            TotalItemsCount = result.Count
         };
     }
 
@@ -76,6 +80,25 @@ public sealed class SectionRepository : ISectionRepository
 
         sectionStudent.IsActual = false;
         _context.SectionStudents.Update(sectionStudent);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> AddStudentToSection(int studentId, int sectionId)
+    {
+        var foundStudent = await _context.Students.FindAsync(studentId);
+        var foundSection = await _context.Sections.FindAsync(sectionId);
+
+        if (foundStudent is null || foundSection is null) return false;
+
+        var sectionStudent = new SectionStudent
+        {
+            StudentId = studentId,
+            SectionId = sectionId,
+            DateAdded = DateOnly.FromDateTime(DateTime.Now)
+        };
+
+        await _context.AddAsync(sectionStudent);
         await _context.SaveChangesAsync();
         return true;
     }
