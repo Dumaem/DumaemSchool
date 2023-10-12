@@ -44,6 +44,7 @@
     private IEnumerable<LessonDate>? lessonDates;
 
     private DateTime? selectedDateTime;
+    private LessonDate? selectedLessonDate;
 
     private string _searchString = "";
 
@@ -61,6 +62,7 @@
     private void OnDateChange(DateTime date)
     {
         selectedDateTime = date;
+        selectedLessonDate = lessonDates!.FirstOrDefault(x => x.ConductionDate == DateOnly.FromDateTime(selectedDateTime.Value));
         _mudDataGrid.ReloadServerData();
     }
 
@@ -74,27 +76,21 @@
     {
         var result = await Sender.Send(new LessonDatesQuery(SectionId!.Value));
         lessonDates = result;
-        List<int> lessonsIdCollection = lessonDates.Select(x => x.LessonId).ToList();
     }
 
     private async Task<GridData<StudentLessonStatistics>> GetData(GridState<StudentLessonStatistics> state)
     {
         var filters = new List<FilterDefinition>();
-        if (selectedDateTime is null)
+        if (selectedDateTime is null || selectedLessonDate is null)
         {
-            filters.Add(new FilterDefinition
-                {
-                    FieldName = nameof(StudentLessonStatistics.LessonId),
-                    Value = lessonDates!.Select(x => x.LessonId).ToList().Min(),
-                    Operand = FilterOperand.Equal
-                });
+            return new GridData<StudentLessonStatistics> { Items = Array.Empty<StudentLessonStatistics>(), TotalItems = 0 };
         }
         else
         {
             filters.Add(new FilterDefinition
                 {
                     FieldName = nameof(StudentLessonStatistics.LessonId),
-                    Value = lessonDates!.FirstOrDefault(x => x.ConductionDate == DateOnly.FromDateTime(selectedDateTime.Value))?.LessonId,
+                    Value = selectedLessonDate?.LessonId,
                     Operand = FilterOperand.Equal
                 });
         }
