@@ -2,7 +2,7 @@
 @using DumaemSchool.BlazorWeb.Data
 @using DumaemSchool.Core.DataManipulation
 @using DumaemSchool.Core.OutputModels
-@using DumaemSchool.Core.Queries
+@using DumaemSchool.Core.Queries.Section
 @using MediatR
 @inject WeatherForecastService ForecastService
 @inject ISender Sender;
@@ -53,15 +53,9 @@ else
 
     private async Task LogIn()
     {
-        var teachers = await Sender.Send(new SectionsInfoQuery(new ListParam
+        var teachers = await Sender.Send(new SectionStudentsToAddQuery(new ListParam
         {
-            Filters = new[]
-            {
-                new FilterDefinition()
-                {
-                    FieldName = nameof(SectionInfo.TeacherName), Operand = FilterOperand.Contains, Value = "кс",
-                }
-            }
+            Filters = new[] { new FilterDefinition() { FieldName = nameof(StudentToAddToSection.SectionId), Operand = FilterOperand.Equal, Value = 2 } }
         }));
     }
 

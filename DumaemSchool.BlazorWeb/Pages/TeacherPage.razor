@@ -1,15 +1,10 @@
 ﻿@page "/teacher/{id:int}"
-
-@using System.Net.Http.Json
 @using DumaemSchool.Auth.Models;
-@using DumaemSchool.Core.Commands;
-@using DumaemSchool.Core.DataManipulation;
 @using DumaemSchool.Core.Models;
-@using DumaemSchool.Core.OutputModels;
-@using DumaemSchool.Core.Queries;
 @using MediatR;
 @using Microsoft.AspNetCore.Identity;
-@using System.Security.Claims;
+@using DumaemSchool.Core.Commands.Teacher
+@using DumaemSchool.Core.Queries.Teacher
 
 @inject ISender Sender;
 @inject NavigationManager NavigationManager;
@@ -22,7 +17,7 @@
 }
 
 <MudContainer Style="margin-left: 0%;margin-top: 2%; width:30%">
-    <MudText Typo="Typo.h4">Информация о преподавателе:</MudText>
+    <MudText Typo="Typo.h4">Информация о учителе:</MudText>
     <MudSpacer></MudSpacer>
 
     <AuthorizeView Roles="@Role.DeputyDirector">
