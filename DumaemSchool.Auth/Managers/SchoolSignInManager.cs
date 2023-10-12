@@ -1,5 +1,6 @@
 ﻿using DumaemSchool.Auth.Models;
 using DumaemSchool.Core.Commands;
+using DumaemSchool.Core.Commands.Teacher;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
