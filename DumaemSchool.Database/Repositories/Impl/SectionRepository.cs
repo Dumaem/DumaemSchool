@@ -16,18 +16,21 @@ public sealed class SectionRepository : ISectionRepository
     private readonly IListSqlGenerator<SectionStudent> _sectionStudentSqlGenerator;
     private readonly IListSqlGenerator<SectionSchedule> _sectionScheduleSqlGenerator;
     private readonly IListSqlGenerator<StudentToAddToSection> _studentToAddSqlGenerator;
+    private readonly IListSqlGenerator<SectionStudentStatistics> _sectionStudentStatisticsSqlGenerator;
 
-    public SectionRepository(IListSqlGenerator<SectionInfo> sectionInfoSqlGenerator, 
-        ApplicationContext context, 
-        IListSqlGenerator<SectionStudent> sectionStudentSqlGenerator, 
-        IListSqlGenerator<SectionSchedule> sectionScheduleSqlGenerator, 
-        IListSqlGenerator<StudentToAddToSection> studentToAddSqlGenerator)
+    public SectionRepository(IListSqlGenerator<SectionInfo> sectionInfoSqlGenerator,
+        ApplicationContext context,
+        IListSqlGenerator<SectionStudent> sectionStudentSqlGenerator,
+        IListSqlGenerator<SectionSchedule> sectionScheduleSqlGenerator,
+        IListSqlGenerator<StudentToAddToSection> studentToAddSqlGenerator,
+        IListSqlGenerator<SectionStudentStatistics> sectionStudentStatisticsSqlGenerator)
     {
         _sectionInfoSqlGenerator = sectionInfoSqlGenerator;
         _context = context;
         _sectionStudentSqlGenerator = sectionStudentSqlGenerator;
         _sectionScheduleSqlGenerator = sectionScheduleSqlGenerator;
         _studentToAddSqlGenerator = studentToAddSqlGenerator;
+        _sectionStudentStatisticsSqlGenerator = sectionStudentStatisticsSqlGenerator;
     }
 
     public async Task<ListDataResult<SectionInfo>> ListSectionInfo(ListParam param)
@@ -35,7 +38,7 @@ public sealed class SectionRepository : ISectionRepository
         var listQuery = _sectionInfoSqlGenerator.GetListSql(param);
         var connection = _context.Database.GetDbConnection();
         var result = (await connection
-            .QueryAsync<SectionInfo>(listQuery.SelectSql, listQuery.Parameters)
+                .QueryAsync<SectionInfo>(listQuery.SelectSql, listQuery.Parameters)
             ).AsList();
 
         return new ListDataResult<SectionInfo>
@@ -75,6 +78,33 @@ public sealed class SectionRepository : ISectionRepository
         };
     }
 
+    public async Task<ListDataResult<SectionStudentStatistics>> ListSectionStudentsStatistics(int sectionId)
+    {
+        var param = new ListParam
+        {
+            Filters = new[]
+            {
+                new FilterDefinition
+                {
+                    FieldName = nameof(SectionStudentStatistics.SectionId), Operand = FilterOperand.Equal,
+                    Value = sectionId
+                }
+            }
+        };
+
+        var listQuery = _sectionScheduleSqlGenerator.GetListSql(param);
+        var connection = _context.Database.GetDbConnection();
+        var result = (await connection
+                .QueryAsync<SectionStudentStatistics>(listQuery.SelectSql, listQuery.Parameters)
+            ).AsList();
+
+        return new ListDataResult<SectionStudentStatistics>
+        {
+            Items = result,
+            TotalItemsCount = result.Count
+        };
+    }
+
     public async Task<ListDataResult<StudentToAddToSection>> ListStudentsToAdd(ListParam param)
     {
         var listQuery = _studentToAddSqlGenerator.GetListSql(param);
@@ -91,7 +121,9 @@ public sealed class SectionRepository : ISectionRepository
 
     public async Task<bool> DeleteStudentFromSection(int studentId, int sectionId)
     {
-        var sectionStudent = await _context.SectionStudents.FirstOrDefaultAsync(x => x.SectionId == sectionId && x.StudentId == studentId);
+        var sectionStudent =
+            await _context.SectionStudents.FirstOrDefaultAsync(
+                x => x.SectionId == sectionId && x.StudentId == studentId);
         if (sectionStudent is null)
             return false;
 
