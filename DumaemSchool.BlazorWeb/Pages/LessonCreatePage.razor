@@ -15,11 +15,21 @@
 @inject ISnackbar Snackbar;
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
-    <div class="d-flex justify-content-md-between align-items-end">
-        <MudTextField InputType="InputType.Text" Variant="Variant.Text" T="string" ReadOnly="true" Label="Кружок" @bind-Value="@(_selectedSection.GroupName)"/>
-        <MudButton Style="margin-left: 2%" Variant="Variant.Filled" OnClick="@ShowSections" Color="Color.Primary">Выбрать кружок</MudButton>
+    <AuthorizeView Roles="@Role.DeputyDirector">
+        <div class="d-flex justify-content-md-between align-items-middle">
+            <MudContainer Class="ma-0 pa-0" MaxWidth="MaxWidth.False">
+                <MudTextField InputType="InputType.Text" Variant="Variant.Outlined" T="string" ReadOnly="true" Label="Учитель" @bind-Value="@(_teacherForReplace.Name)"/>
+            </MudContainer>
+            <MudButton Class="ml-3" Style="width: 10vw" Variant="Variant.Filled" OnClick="@ShowTeachers" Color="Color.Primary">Выбрать учителя</MudButton>
+        </div>
+    </AuthorizeView>
+    <div class="d-flex justify-content-md-between align-items-middle mt-5">
+        <MudContainer Class="ma-0 pa-0" MaxWidth="MaxWidth.False">
+            <MudTextField InputType="InputType.Text" Variant="Variant.Outlined" T="string" ReadOnly="true" Label="Кружок" @bind-Value="@(_selectedSection.GroupName)"/>
+        </MudContainer>
+        <MudButton Disabled="@(_teacherForReplace.Id == 0 && _teacherId == 0)" Class="ml-3" Style="width: 10vw" Variant="Variant.Filled" OnClick="@ShowSections" Color="Color.Primary">Выбрать кружок</MudButton>
     </div>
-    <div class="d-flex justify-content-md-between flex-row align-items-start mt-5">
+    <div class="d-flex justify-content-md-between flex-row align-items-middle mt-5">
         <MudContainer Class="ma-0 pa-0" MaxWidth="MaxWidth.False">
             <MudTable Items="_selectedSectionSchedule" T="SectionSchedule">
                 <HeaderContent>
@@ -44,15 +54,15 @@
                 </RowTemplate>
             </MudTable>
         </MudContainer>
-        <MudButton Disabled="@(_selectedSection.Id == 0)" Style="margin-left: 2%" Variant="Variant.Filled" OnClick="@ShowSchedule" Color="Color.Primary">Выбрать расписание</MudButton>
+        <MudButton Class="ml-3" Disabled="@(_selectedSection.Id == 0)" Style="width: 10vw" Variant="Variant.Filled" OnClick="@ShowSchedule" Color="Color.Primary">Выбрать расписание</MudButton>
     </div>
     <MudContainer Class="pa-0 ma-0 mt-5" MaxWidth="MaxWidth.False">
-        <MudDatePicker MinDate="@(DateTime.Now - TimeSpan.FromDays(1))" @bind-Date="_selectedDate" Disabled="@(_selectedSectionSchedule.Count <= 0)" PickerVariant="PickerVariant.Dialog" Variant="Variant.Text" Label="Дата проведения"
+        <MudDatePicker MinDate="@(DateTime.Now - TimeSpan.FromDays(1))" @bind-Date="_selectedDate" Disabled="@(_selectedSectionSchedule.Count <= 0)" PickerVariant="PickerVariant.Dialog" Variant="Variant.Outlined" Label="Дата проведения"
                        IsDateDisabledFunc="@((DateTime dt) => dt.DayOfWeek != _selectedSectionSchedule.First().DayOfWeek)"/>
     </MudContainer>
-    <div class="d-flex flex-row">
+    <div class="d-flex flex-row mt-5">
         <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="IsCanCreate" OnClick="@(async () => await CreateLesson())">Создать занятие</MudButton>
-        <MudButton Color="Color.Error" Variant="Variant.Filled" Disabled="IsCanCreate" OnClick="@(async () => await RevokeLesson())">Отменить занятие</MudButton>
+        <MudButton Class="ml-5" Color="Color.Error" Variant="Variant.Filled" Disabled="IsCanCreate" OnClick="@(async () => await RevokeLesson())">Отменить занятие</MudButton>
     </div>
 </MudContainer>
 
@@ -62,15 +72,11 @@
     private DateTime? _selectedDate;
     private bool IsCanCreate => !(_selectedSection.Id != 0 && _selectedSectionSchedule.Count > 0 && _selectedDate is not null);
     private int _teacherId;
+    private TeacherDto _teacherForReplace = new();
     private bool _isConducted = true;
-
+    
     private async Task ShowSections()
     {
-        var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
-        if (user.IsInRole(Role.Teacher))
-        {
-            _teacherId = int.Parse(user.Claims.First(x => x.Type == UserClaims.TeacherId).Value);
-        }
         var options = new MudBlazor.DialogOptions
         {
             CloseOnEscapeKey = true, DisableBackdropClick = true, FullWidth = true,
@@ -79,7 +85,7 @@
         var parameters = new DialogParameters
         {
             ["IsForLesson"] = true,
-            ["TeacherId"] = 1
+            ["TeacherId"] = _teacherForReplace.Id == 0 ? _teacherId : _teacherForReplace.Id
         };
 
         var dialog = await DialogService.ShowAsync<Sections>("Выбор кружка", parameters, options);
@@ -88,7 +94,16 @@
 
         if (!result.Canceled)
         {
-            _selectedSection = (SectionInfo)result.Data;
+            _selectedSection = (SectionInfo) result.Data;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+        if (user.IsInRole(Role.Teacher))
+        {
+            _teacherId = int.Parse(user.Claims.First(x => x.Type == UserClaims.TeacherId).Value);
         }
     }
 
@@ -112,14 +127,37 @@
         if (!result.Canceled)
         {
             _selectedSectionSchedule.Clear();
-            _selectedSectionSchedule.Add((SectionSchedule)result.Data);
+            _selectedSectionSchedule.Add((SectionSchedule) result.Data);
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ShowTeachers()
+    {
+        var options = new MudBlazor.DialogOptions
+        {
+            CloseOnEscapeKey = true, DisableBackdropClick = true, FullWidth = true,
+            CloseButton = true, MaxWidth = MaxWidth.Large
+        };
+        var parameters = new DialogParameters
+        {
+            ["IsForLesson"] = true,
+        };
+
+        var dialog = await DialogService.ShowAsync<Teachers>("Выбор Преподавателя", parameters, options);
+
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            _teacherForReplace = (TeacherDto) result.Data;
         }
         await InvokeAsync(StateHasChanged);
     }
 
     private async Task CreateLesson()
     {
-        var checkLessonCreatedCommand = new CheckLessonCreatedCommand(_selectedSectionSchedule.First().Id, 
+        var checkLessonCreatedCommand = new CheckLessonCreatedCommand(_selectedSectionSchedule.First().Id,
             DateOnly.FromDateTime(_selectedDate ?? DateTime.Now));
         var checkResult = await Sender.Send(checkLessonCreatedCommand);
 
@@ -133,14 +171,15 @@
         {
             ScheduleId = _selectedSectionSchedule.First().Id,
             Date = DateOnly.FromDateTime(_selectedDate ?? DateTime.Now),
-            TeacherId = 1, IsConducted = _isConducted
+            TeacherId = _teacherForReplace.Id == 0 ? _teacherId : _teacherForReplace.Id, IsConducted = _isConducted
         };
         var createLessonCommand = new CreateLessonCommand(newLesson);
         var result = await Sender.Send(createLessonCommand);
 
         if (result.IsSuccess)
         {
-            Snackbar.Add(_isConducted ? "Занятие успешно отменено!" : "Занятие успешно создано!", Severity.Success);
+            Snackbar.Add(!_isConducted ? "Занятие успешно отменено!" : "Занятие успешно создано!",
+                !_isConducted ? Severity.Normal : Severity.Success);
         }
     }
 
@@ -149,4 +188,5 @@
         _isConducted = false;
         await CreateLesson();
     }
+
 }
