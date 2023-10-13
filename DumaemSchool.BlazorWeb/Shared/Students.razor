@@ -131,6 +131,8 @@
     {
         if (!await IsStudentAvailable())
         {
+            Snackbar.Clear();
+            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomLeft;
             Snackbar.Add("Расписание кружков, на которые записан студент, пересекается с расписанием данного кружка!", Severity.Warning);
             return;
         }
@@ -162,7 +164,7 @@
         var parameters = new DialogParameters
             {
                 ["DialogContent"] = "Вы уверены, что хотите удалить данного студента с кружка?",
-                ["Color"] = MudBlazor.Color.Er
+                ["Color"] = MudBlazor.Color.Error
 
             };
         var dialog = await DialogService.ShowAsync<DialogWindow>("Подтверждение удаления", parameters, options);

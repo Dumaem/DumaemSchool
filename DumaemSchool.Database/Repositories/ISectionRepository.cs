@@ -13,4 +13,5 @@ public interface ISectionRepository
     public Task<bool> DeleteStudentFromSection(int studentId, int sectionId);
     public Task<bool> AddStudentToSection(int studentId, int sectionId);
     public Task<bool> CheckStudentAvailabilityToSection(int studentId, List<SectionSchedule> sectionSchedule);
+    public Task<TeacherDto> GetTeacherFromSection(int sectionId);
 }
