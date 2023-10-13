@@ -125,12 +125,15 @@ public sealed class TeacherRepository : ITeacherRepository
             SectionId = sectionId,
         };
 
-        var oldSectionTeacherRecord = await _context.SectionTeachers.FirstOrDefaultAsync(x => x.Teacher.Id == oldTeacherId 
+        var oldSectionTeacherRecord = await _context.SectionTeachers.FirstOrDefaultAsync(x => x.IsActual == true && x.Teacher.Id == oldTeacherId 
                                                                                         && x.SectionId == sectionId);
         oldSectionTeacherRecord!.IsActual = false;
 
+
+        _context.SectionTeachers.Update(oldSectionTeacherRecord);
         await _context.SectionTeachers.AddAsync(sectionTeacher);
         await _context.SaveChangesAsync();
+        _context.ChangeTracker.Clear();
         return true;
     }
 }

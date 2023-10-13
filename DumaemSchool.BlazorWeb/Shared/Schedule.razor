@@ -16,15 +16,6 @@
             <PropertyColumn Filterable="false" Property="x => x.Time" SortBy="x => x.Time" Title="Время проведения занятия" />
             <PropertyColumn Filterable="false" Property="x => x.Duration" SortBy="x => x.Duration" Title="Продолжительность занятия (мин.)" />
             <PropertyColumn Filterable="true" Property="x => x.Cabinet" SortBy="x => x.Cabinet" Title="Кабинет" />
-
-            @*             <TemplateColumn Sortable="false" Filterable="false">
-                <CellTemplate>
-                    <MudStack Row>
-                        // На будущее
-                        <MudButton Style="margin-left: 53%" Disabled="@(context.Item.IsDeleted)" Size="@Size.Small" Variant="@MudBlazor.Variant.Filled" OnClick="@(async() => await FireTeacher(context.Item.Id))" Color="@Color.Error">Уволить</MudButton>
-                    </MudStack>
-                </CellTemplate>
-            </TemplateColumn> *@
         </Columns>
 
     </MudDataGrid>
