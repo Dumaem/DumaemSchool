@@ -10,6 +10,6 @@ public class TeacherDtoEntityMapping : AbstractEntityMapping<TeacherDto>
         Map(nameof(TeacherDto.Id), "t.id", isPrimaryKey: true);
         Map(nameof(TeacherDto.Name), "t.name");
         Map(nameof(TeacherDto.IsDeleted), "t.is_deleted");
-        Map(nameof(TeacherDto.SectionsCount), "count(st.*)", true);
+        Map(nameof(TeacherDto.SectionsCount), "count(st.*)", isAggregate: true);
     }
 }

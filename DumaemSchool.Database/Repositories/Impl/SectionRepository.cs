@@ -5,12 +5,16 @@ using DumaemSchool.Database.ListGetters;
 using LanguageExt;
 using Microsoft.EntityFrameworkCore;
 using System.Xml.Linq;
+using DumaemSchool.Core.Models;
+using DumaemSchool.Database.Mappers;
+using Section = DumaemSchool.Core.Models.Section;
 using SectionStudent = DumaemSchool.Core.OutputModels.SectionStudent;
 
 namespace DumaemSchool.Database.Repositories.Impl;
 
 public sealed class SectionRepository : ISectionRepository
 {
+    private readonly DatabaseMapper _mapper;
     private readonly ApplicationContext _context;
     private readonly IListSqlGenerator<SectionInfo> _sectionInfoSqlGenerator;
     private readonly IListSqlGenerator<SectionStudent> _sectionStudentSqlGenerator;
@@ -23,6 +27,7 @@ public sealed class SectionRepository : ISectionRepository
         IListSqlGenerator<SectionSchedule> sectionScheduleSqlGenerator, 
         IListSqlGenerator<StudentToAddToSection> studentToAddSqlGenerator)
     {
+        _mapper = new DatabaseMapper();
         _sectionInfoSqlGenerator = sectionInfoSqlGenerator;
         _context = context;
         _sectionStudentSqlGenerator = sectionStudentSqlGenerator;
@@ -118,5 +123,28 @@ public sealed class SectionRepository : ISectionRepository
         await _context.AddAsync(sectionStudent);
         await _context.SaveChangesAsync();
         return true;
+    }
+
+    public async Task<Section> CreateSection(SectionWithSchedule section)
+    {
+        var sectionDb = new Entities.Section
+        {
+            GroupName = section.GroupName, SectionTypeId = section.SectionTypeId
+        };
+
+        var sectionTeacher = new SectionTeacher
+        {
+            Section = sectionDb, TeacherId = section.TeacherId
+        };
+
+        var schedules = section.Schedules.Select(x => _mapper.Map(x));
+
+        await _context.Sections.AddAsync(sectionDb);
+        await _context.SectionTeachers.AddAsync(sectionTeacher);
+        await _context.Schedules.AddRangeAsync(schedules);
+
+        await _context.SaveChangesAsync();
+
+        return _mapper.Map(sectionDb);
     }
 }

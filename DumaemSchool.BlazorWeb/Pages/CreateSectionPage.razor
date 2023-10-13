@@ -1,7 +1,171 @@
 ﻿@page "/create-section"
 
-<h3>CreateSectionPage</h3>
+@using DumaemSchool.Core.DataManipulation;
+@using DumaemSchool.Core.Models
+@using DumaemSchool.Core.Queries.Section
+@using Variant = MudBlazor.Variant
+@using System.ComponentModel.DataAnnotations
+@using DumaemSchool.Core.OutputModels
+@using DumaemSchool.Core.Queries.Teacher
+@using MediatR
+@using ButtonType = MudBlazor.ButtonType
+@using System.Collections.ObjectModel
+@using System.Globalization
+@using DialogOptions = MudBlazor.DialogOptions
+
+@inject ISender Sender;
+@inject IDialogService DialogService
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderContent>
+                <h3>Создание кружка</h3>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudForm Model="@model" bind-IsValid="@(model.SectionType is null && model.Teacher is null && model.GroupName == string.Empty)">
+                <MudTextField Label="Название группы" HelperText="Введите название группы" Variant="Variant.Outlined" @bind-Value="model.GroupName" For="@(() => model.GroupName)"/>
+                <div class="d-flex justify-content-between">
+                    <MudAutocomplete T="SectionType" Label="Вид кружка" @bind-Value="model.SectionType" class="mr-3"
+                                     SearchFunc="@SearchSectionTypes" Variant="Variant.Outlined" For="@(() => model.SectionType)"
+                                     ToStringFunc="@(e => e == null ? null : $"{e.Name}")">
+                    </MudAutocomplete>
+                    <MudAutocomplete T="TeacherDto" Label="Учитель" @bind-Value="model.Teacher" class="ml-3"
+                                     SearchFunc="@SearchTeachers" Variant="Variant.Outlined" For="@(() => model.Teacher)"
+                                     ToStringFunc="@(e => e == null ? null : $"{e.Name}")">
+                    </MudAutocomplete>
+                </div>
+
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AddCircleOutline"
+                           OnClick="@AddSchedule" Class="add-item-btn mt-3">
+                    Добавить расписание
+                </MudButton>
+                <MudDataGrid Items="@_items" T="SectionSchedule" Class="mt-3">
+                    <Columns>
+                        <PropertyColumn Property="x => x.DayOfWeek" Title="День недели" Culture="@(new CultureInfo("ru"))"/>
+                        <PropertyColumn Property="x => x.Time" Title="Время"/>
+                        <PropertyColumn Property="x => x.Duration" Title="Продолжительность"/>
+                        <PropertyColumn Property="x => x.Cabinet" Title="Кабинет"/>
+                        <TemplateColumn Sortable="false" Filterable="false">
+                            <CellTemplate>
+                                <MudContainer MaxWidth="MaxWidth.ExtraLarge" style="margin-top: 2%">
+
+                                    <MudIconButton Style="margin-left: 53%" Size="@Size.Small" Variant="@Variant.Filled"
+                                                   Color="@Color.Error" Icon="@Icons.Material.Filled.Delete"
+                                                   OnClick="@(async () => await RemoveSchedule())">
+                                        Уволить
+                                    </MudIconButton>
+                                </MudContainer>
+                            </CellTemplate>
+                        </TemplateColumn>
+                    </Columns>
+                </MudDataGrid>
+            </MudForm>
+        </MudCardContent>
+        <MudCardActions>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Сохранить</MudButton>
+        </MudCardActions>
+    </MudCard>
+</MudContainer>
 
 @code {
-    
+    RegisterAccountForm model = new RegisterAccountForm();
+    bool success;
+
+    List<SectionSchedule> _items = new();
+
+    async Task AddSchedule()
+    {
+    // var options = new DialogOptions
+    // {
+    //     CloseButton = true, DisableBackdropClick = true,
+    //     MaxWidth = MaxWidth.Medium, FullWidth = true
+    // };
+    //
+    // var dialog = await DialogService.ShowAsync<TeacherCreateWindow>("Новый учитель", options);
+    //
+    // var result = await dialog.Result;
+    //
+    // if (!result.Canceled)
+    // {
+    //     Snackbar.Add("Учитель успешно добавлен!", Severity.Success);
+    //     await _mudDataGrid.ReloadServerData();
+    // }
+    //
+    // //DialogService.Show<DialogKeyboardNavigationExample_Dialog>("Simple Dialog", closeOnEscapeKey);
+    //
+        _items.Add(new SectionSchedule());
+    }
+
+    async Task RemoveSchedule()
+    {
+        if (_items.Any())
+        {
+            _items.RemoveAt(0);
+        }
+    }
+
+    public class RegisterAccountForm
+    {
+        [Required(ErrorMessage = "Требуется указать учителя")]
+        public TeacherDto? Teacher { get; set; }
+
+        [Required(ErrorMessage = "Требуется указать вид секции")]
+        public SectionType? SectionType { get; set; }
+
+        [Required(ErrorMessage = "Требуется указать название группы")]
+        public string GroupName { get; set; } = string.Empty;
+    }
+
+    private async Task<IEnumerable<SectionType>> SearchSectionTypes(string searchString)
+    {
+    // if text is null or empty, show complete list
+        if (string.IsNullOrEmpty(searchString))
+        {
+            var result = await Sender.Send(new SectionTypesQuery(new ListParam()));
+            return result.Items;
+        }
+        else
+        {
+            var filters = new List<FilterDefinition>();
+            filters.Add(new FilterDefinition { FieldName = "Name", Value = searchString, Operand = FilterOperand.Contains });
+
+            var result = await Sender.Send(new SectionTypesQuery(new ListParam()
+            {
+                Filters = filters.ToArray()
+            }));
+
+            return result.Items;
+        }
+    }
+
+    private async Task<IEnumerable<TeacherDto>> SearchTeachers(string searchString)
+    {
+    // if text is null or empty, show complete list
+        if (string.IsNullOrEmpty(searchString))
+        {
+            var result = await Sender.Send(new TeachersQuery(new ListParam()));
+            return result.Items;
+        }
+        else
+        {
+            var filters = new List<FilterDefinition>();
+            filters.Add(new FilterDefinition { FieldName = "Name", Value = searchString, Operand = FilterOperand.Contains });
+
+            var result = await Sender.Send(new TeachersQuery(new ListParam()
+            {
+                Filters = filters.ToArray()
+            }));
+
+            return result.Items;
+        }
+    }
+
+    private void OnValidSubmit(EditContext context)
+    {
+        success = true;
+        StateHasChanged();
+    }
+
 }
