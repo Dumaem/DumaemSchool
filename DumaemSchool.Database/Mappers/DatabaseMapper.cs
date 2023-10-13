@@ -11,4 +11,7 @@ public sealed partial class DatabaseMapper
     public partial Teacher Map(DumaemSchool.Core.Models.Teacher teacher);
 
     public partial DumaemSchool.Core.Models.SectionType Map(SectionType sectionType);
+    public partial DumaemSchool.Core.Models.Lesson Map(Lesson lesson);
+    
+    public partial Lesson Map(DumaemSchool.Core.Models.Lesson lesson);
 }

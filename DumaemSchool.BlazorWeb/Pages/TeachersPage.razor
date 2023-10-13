@@ -125,7 +125,7 @@
 
         var result = await Sender.Send(new TeachersQuery(new ListParam()
             {
-                Pagination = new PaginationInfo() { ItemCount = state.PageSize, PageNumber = state.Page },
+                Pagination = new PaginationInfo { ItemCount = state.PageSize, PageNumber = state.Page },
                 Sorting = state.SortDefinitions.Select(x => new SortingDefinition()
                 {
                     FieldName = x.SortBy,

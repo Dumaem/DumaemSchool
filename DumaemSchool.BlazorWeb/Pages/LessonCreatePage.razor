@@ -2,9 +2,17 @@
 @using DumaemSchool.Core.OutputModels
 @using Variant = MudBlazor.Variant
 @using System.Globalization
-@using Orientation = MudBlazor.Orientation
+@using DumaemSchool.Auth.Models
+@using DumaemSchool.Core.Commands.Lesson
+@using DumaemSchool.Core.Models
+@using MediatR
+@using Role = DumaemSchool.Auth.Models.Role
+@using Schedule = DumaemSchool.BlazorWeb.Shared.Schedule
 
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
 @inject IDialogService DialogService;
+@inject ISender Sender;
+@inject ISnackbar Snackbar;
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
     <div class="d-flex justify-content-md-between align-items-end">
@@ -42,15 +50,27 @@
         <MudDatePicker MinDate="@(DateTime.Now - TimeSpan.FromDays(1))" @bind-Date="_selectedDate" Disabled="@(_selectedSectionSchedule.Count <= 0)" PickerVariant="PickerVariant.Dialog" Variant="Variant.Text" Label="Дата проведения"
                        IsDateDisabledFunc="@((DateTime dt) => dt.DayOfWeek != _selectedSectionSchedule.First().DayOfWeek)"/>
     </MudContainer>
+    <div class="d-flex flex-row">
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="IsCanCreate" OnClick="@(async () => await CreateLesson())">Создать занятие</MudButton>
+        <MudButton Color="Color.Error" Variant="Variant.Filled" Disabled="IsCanCreate" OnClick="@(async () => await RevokeLesson())">Отменить занятие</MudButton>
+    </div>
 </MudContainer>
 
 @code {
     private SectionInfo _selectedSection = new();
     private List<SectionSchedule> _selectedSectionSchedule = new();
     private DateTime? _selectedDate;
+    private bool IsCanCreate => !(_selectedSection.Id != 0 && _selectedSectionSchedule.Count > 0 && _selectedDate is not null);
+    private int _teacherId;
+    private bool _isConducted = true;
 
     private async Task ShowSections()
     {
+        var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+        if (user.IsInRole(Role.Teacher))
+        {
+            _teacherId = int.Parse(user.Claims.First(x => x.Type == UserClaims.TeacherId).Value);
+        }
         var options = new MudBlazor.DialogOptions
         {
             CloseOnEscapeKey = true, DisableBackdropClick = true, FullWidth = true,
@@ -58,7 +78,8 @@
         };
         var parameters = new DialogParameters
         {
-            ["IsForLesson"] = true
+            ["IsForLesson"] = true,
+            ["TeacherId"] = 1
         };
 
         var dialog = await DialogService.ShowAsync<Sections>("Выбор кружка", parameters, options);
@@ -96,4 +117,36 @@
         await InvokeAsync(StateHasChanged);
     }
 
+    private async Task CreateLesson()
+    {
+        var checkLessonCreatedCommand = new CheckLessonCreatedCommand(_selectedSectionSchedule.First().Id, 
+            DateOnly.FromDateTime(_selectedDate ?? DateTime.Now));
+        var checkResult = await Sender.Send(checkLessonCreatedCommand);
+
+        if (checkResult)
+        {
+            Snackbar.Add("Занятие на этот день уже создано!", Severity.Error);
+            return;
+        }
+
+        var newLesson = new Lesson
+        {
+            ScheduleId = _selectedSectionSchedule.First().Id,
+            Date = DateOnly.FromDateTime(_selectedDate ?? DateTime.Now),
+            TeacherId = 1, IsConducted = _isConducted
+        };
+        var createLessonCommand = new CreateLessonCommand(newLesson);
+        var result = await Sender.Send(createLessonCommand);
+
+        if (result.IsSuccess)
+        {
+            Snackbar.Add(_isConducted ? "Занятие успешно отменено!" : "Занятие успешно создано!", Severity.Success);
+        }
+    }
+
+    private async Task RevokeLesson()
+    {
+        _isConducted = false;
+        await CreateLesson();
+    }
 }

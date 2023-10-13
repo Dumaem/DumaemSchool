@@ -2,13 +2,16 @@
 using DumaemSchool.Core.DataManipulation;
 using DumaemSchool.Core.OutputModels;
 using DumaemSchool.Database.ListGetters;
+using DumaemSchool.Database.Mappers;
 using Microsoft.EntityFrameworkCore;
+using Lesson = DumaemSchool.Core.Models.Lesson;
 
 namespace DumaemSchool.Database.Repositories.Impl;
 
 public sealed class LessonRepository : ILessonRepository
 {
     private readonly ApplicationContext _context;
+    private readonly DatabaseMapper _mapper;
     private readonly IListSqlGenerator<StudentLessonStatistics> _statisticsListSqlGenerator;
 
     public LessonRepository(ApplicationContext context, 
@@ -16,6 +19,7 @@ public sealed class LessonRepository : ILessonRepository
     {
         _context = context;
         _statisticsListSqlGenerator = statisticsListSqlGenerator;
+        _mapper = new DatabaseMapper();
     }
 
     public Task<IEnumerable<LessonDate>> ListSectionLessonDates(int sectionId)
@@ -37,5 +41,13 @@ public sealed class LessonRepository : ILessonRepository
         {
             Items = result, TotalItemsCount = result.Count
         };
+    }
+
+    public async Task<Lesson> CreateLesson(Lesson lesson)
+    {
+        var lessonDb = _mapper.Map(lesson);
+        await _context.Lessons.AddAsync(lessonDb);
+        await _context.SaveChangesAsync();
+        return _mapper.Map(lessonDb);
     }
 }
