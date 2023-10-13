@@ -35,7 +35,7 @@ public static class ServiceCollectionExtensions
                 npgsqlOptions => { npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery); });
             options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             options.UseSnakeCaseNamingConvention();
-        }, ServiceLifetime.Transient);
+        });
 
         SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
         SqlMapper.AddTypeHandler(new TimeOnlyTypeHandler());

@@ -29,17 +29,24 @@
 </AuthorizeView>
 
 <MudTabs Elevation="4" Rounded="false" Color="@Color.Primary">
-    <MudTabPanel Icon="@Icons.Material.Filled.Groups" Text="Список учеников">
-        <Students SectionId="@Id"></Students>
-    </MudTabPanel>
+    @if (_initialized)
+    {
+        <MudTabPanel Icon="@Icons.Material.Filled.Groups" Text="Список учеников">
+            <Students SectionId="@Id"></Students>
+        </MudTabPanel>
 
-    <MudTabPanel Icon="@Icons.Material.Filled.CalendarMonth" Text="Расписание кружка">
-        <Schedule SectionId="@Id"></Schedule>
-    </MudTabPanel>
+        <MudTabPanel Icon="@Icons.Material.Filled.CalendarMonth" Text="Расписание кружка">
+            <Schedule SectionId="@Id"></Schedule>
+        </MudTabPanel>
 
-    <MudTabPanel Icon="@Icons.Material.Filled.LocalActivity" Text="Активность и посещаемость"> 
-        <ActivityAndAttendance SectionId="@Id"></ActivityAndAttendance>
-    </MudTabPanel>
+        <MudTabPanel Icon="@Icons.Material.Filled.LocalActivity" Text="Активность и посещаемость"> 
+            <ActivityAndAttendance SectionId="@Id"></ActivityAndAttendance>
+        </MudTabPanel>
+    }
+    else
+    {
+        <MudProgressCircular/>
+    }
 </MudTabs>
 
 
@@ -47,6 +54,7 @@
     [Parameter]
     public int Id { get; set; }
 
+    private bool _initialized;
     private TeacherDto? _selectedTeacher;
 
     private TeacherDto? _oldTeacher;
@@ -56,8 +64,9 @@
 
     protected override async Task OnInitializedAsync()
     { 
-        _selectedTeacher = (await(Sender.Send(new GetTeacherFromSectionQuery(Id))));
+        _selectedTeacher = await Sender.Send(new GetTeacherFromSectionQuery(Id));
         _oldTeacher = _selectedTeacher;
+        _initialized = true;
     }
 
 
