@@ -182,6 +182,11 @@ public sealed class ApplicationContext : DbContext
             entity.Property(e => e.StudentId).HasColumnName("student_id");
             entity.Property(e => e.DateAdded).HasColumnName("date_added");
 
+            entity.Property(e => e.IsActual)
+                .IsRequired()
+                .HasDefaultValueSql("true")
+                .HasColumnName("is_actual");
+
             entity.HasOne(d => d.Section).WithMany(p => p.SectionStudents)
                 .HasForeignKey(d => d.SectionId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
