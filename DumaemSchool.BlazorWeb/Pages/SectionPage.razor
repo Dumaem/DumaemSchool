@@ -101,8 +101,6 @@
     {
         if (!await IsTeacherAvailable())
         {
-            Snackbar.Clear();
-            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomLeft;
             Snackbar.Add("Расписание кружков, которые проводит преподаватель, пересекается с расписанием данного кружка!", Severity.Warning);
             return;
         }
@@ -117,8 +115,6 @@
         var addStudentToSectionCommand = new AddTeacherToSectionCommand(_selectedTeacher!.Id, Id);
         var res = await Sender.Send(addStudentToSectionCommand);
 
-        Snackbar.Clear();
-        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomLeft;
         Snackbar.Add("Преподаватель успешно закреплен за кружком!", Severity.Success);
 
         _oldTeacherId = _selectedTeacher.Id;

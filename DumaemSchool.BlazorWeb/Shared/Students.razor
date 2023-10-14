@@ -136,8 +136,6 @@
     {
         if (!await IsStudentAvailable())
         {
-            Snackbar.Clear();
-            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomLeft;
             Snackbar.Add("Расписание кружков, на которые записан студент, пересекается с расписанием данного кружка!", Severity.Warning);
             return;
         }
@@ -152,8 +150,6 @@
         var addStudentToSectionCommand = new AddStudentToSectionCommand(_selectedStudent!.Id, SectionId);
         var res = await Sender.Send(addStudentToSectionCommand);
 
-        Snackbar.Clear();
-        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomLeft;
         Snackbar.Add("Студент успешно записан на кружок!", Severity.Success);
 
         _selectedStudent = null;
