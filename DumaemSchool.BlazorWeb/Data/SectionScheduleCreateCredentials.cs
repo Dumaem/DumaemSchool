@@ -2,7 +2,7 @@
 
 namespace DumaemSchool.BlazorWeb.Data;
 
-public class SectionScheduleCredentials
+public class SectionScheduleCreateCredentials
 {
     [Required(ErrorMessage = "День недели должен быть заполнен")]
     public DayOfWeek DayOfWeek { get; set; }

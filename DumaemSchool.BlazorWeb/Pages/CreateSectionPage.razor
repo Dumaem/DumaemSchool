@@ -10,7 +10,9 @@
 @using MediatR
 @using ButtonType = MudBlazor.ButtonType
 @using System.Globalization
+@using DumaemSchool.BlazorWeb.Data
 @using DumaemSchool.BlazorWeb.Shared.Windows
+@using DumaemSchool.Database.Repositories
 @using DialogOptions = MudBlazor.DialogOptions
 
 @inject ISender Sender;
@@ -25,8 +27,9 @@
             </CardHeaderContent>
         </MudCardHeader>
         <MudCardContent>
-            <MudForm Model="@model" bind-IsValid="@(model.SectionType is null && model.Teacher is null && model.GroupName == string.Empty)">
-                <MudTextField Label="Название группы" HelperText="Введите название группы" Variant="Variant.Outlined" @bind-Value="model.GroupName" For="@(() => model.GroupName)"/>
+            <MudForm Model="@model" @ref="@_form">
+                <MudTextField Label="Название группы" HelperText="Введите название группы" Variant="Variant.Outlined"
+                              @bind-Value="model.GroupName" For="@(() => model.GroupName)"/>
                 <div class="d-flex justify-content-between">
                     <MudAutocomplete T="SectionType" Label="Вид кружка" @bind-Value="model.SectionType" class="mr-3"
                                      SearchFunc="@SearchSectionTypes" Variant="Variant.Outlined" For="@(() => model.SectionType)"
@@ -42,7 +45,7 @@
                            OnClick="@AddSchedule" Class="add-item-btn mt-3">
                     Добавить расписание
                 </MudButton>
-                <MudDataGrid @ref="@_mudDataGrid" Items="@_items" T="SectionSchedule"
+                <MudDataGrid @ref="@_mudDataGrid" Items="@model.Schedules" T="SectionSchedule"
                              Filterable="true" SortMode="@SortMode.Multiple"
                              Groupable="false" Hideable="true" Class="mt-3">
                     <Columns>
@@ -69,17 +72,22 @@
             </MudForm>
         </MudCardContent>
         <MudCardActions>
-            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Сохранить</MudButton>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled"
+                       Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await Submit())">
+                Сохранить
+            </MudButton>
         </MudCardActions>
     </MudCard>
 </MudContainer>
 
 @code {
+    private readonly ISectionRepository _repository;
+    MudForm _form;
     private MudDataGrid<SectionSchedule> _mudDataGrid = null!;
-    RegisterAccountForm model = new RegisterAccountForm();
-    bool success;
+    SectionCreateCredentials model = new();
+    //bool _success;
 
-    List<SectionSchedule> _items = new();
+    //List<SectionSchedule> _items = new();
 
     async Task AddSchedule()
     {
@@ -95,35 +103,18 @@
 
         if (!result.Canceled)
         {
-            _items.Add((SectionSchedule)result.Data);
+            model.Schedules.Add((SectionSchedule)result.Data);
 
             Snackbar.Add("Расписание добавлено!", Severity.Normal);
             await _mudDataGrid.ReloadServerData();
         }
-
-    //DialogService.Show<DialogKeyboardNavigationExample_Dialog>("Simple Dialog", closeOnEscapeKey);
-
-    //_items.Add(new SectionSchedule());
     }
 
-    async Task RemoveSchedule()
+    Task RemoveSchedule()
     {
-        if (_items.Any())
-        {
-            _items.RemoveAt(0);
-        }
-    }
-
-    public class RegisterAccountForm
-    {
-        [Required(ErrorMessage = "Требуется указать учителя")]
-        public TeacherDto? Teacher { get; set; }
-
-        [Required(ErrorMessage = "Требуется указать вид секции")]
-        public SectionType? SectionType { get; set; }
-
-        [Required(ErrorMessage = "Требуется указать название группы")]
-        public string GroupName { get; set; } = string.Empty;
+        if (model.Schedules.Any())
+            model.Schedules.RemoveAt(0);
+        return Task.CompletedTask;
     }
 
     private async Task<IEnumerable<SectionType>> SearchSectionTypes(string searchString)
@@ -172,8 +163,27 @@
 
     private void OnValidSubmit(EditContext context)
     {
-        success = true;
+    // bind-IsValid="@(model.SectionType is null && model.Teacher is null && model.GroupName == string.Empty)"
+    //_success = true;
         StateHasChanged();
+    }
+
+    private async Task Submit()
+    {
+        await _form.Validate();
+
+        if (_form.IsValid)
+        {
+            // var section = new SectionWithSchedule()
+            // {
+            //     Schedules = model.Schedules.ToArray(),
+            //     GroupName = model.GroupName,
+            //     TeacherId = model.Teacher.Id,
+            //     SectionTypeId = model.SectionType.Id
+            // };
+            // _repository.CreateSection(section);
+            Snackbar.Add("Submited!");
+        }
     }
 
 }
