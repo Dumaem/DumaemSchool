@@ -10,6 +10,11 @@ using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
 using MudBlazor.Services;
 using Radzen;
+using System.Globalization;
+
+//Add localisation
+var cultureInfo = new CultureInfo("ru-RU");
+var dateTimeInfo = cultureInfo.DateTimeFormat;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +23,10 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<WeatherForecastService>();
 
-builder.Services.AddMudServices();
+builder.Services.AddMudServices(config =>
+{
+    config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomLeft;
+});
 builder.Services.AddRadzenComponents();
 builder.Services
     .AddCore()

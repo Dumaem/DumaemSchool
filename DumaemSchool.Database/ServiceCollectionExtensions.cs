@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
-using DumaemSchool.Core.Commands;
+using Dapper;
+using DumaemSchool.Core.Commands.Teacher;
 using DumaemSchool.Core.OutputModels;
 using DumaemSchool.Database.ListGetters;
 using DumaemSchool.Database.ListGetters.Impl;
@@ -8,11 +9,13 @@ using DumaemSchool.Database.Mappers.EntityMapping.Base;
 using DumaemSchool.Database.PipelineBehaviors;
 using DumaemSchool.Database.Repositories;
 using DumaemSchool.Database.Repositories.Impl;
+using DumaemSchool.Database.TypeHandlers;
 using LanguageExt.Common;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SectionStudent = DumaemSchool.Core.OutputModels.SectionStudent;
 using SectionType = DumaemSchool.Core.Models.SectionType;
 
 namespace DumaemSchool.Database;
@@ -28,14 +31,14 @@ public static class ServiceCollectionExtensions
 
         services.AddDbContext<ApplicationContext>(options =>
         {
-            options.UseNpgsql(connectionString, npgsqlOptions =>
-            {
-                npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-            });
+            options.UseNpgsql(connectionString,
+                npgsqlOptions => { npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery); });
             options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             options.UseSnakeCaseNamingConvention();
         });
 
+        SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+        SqlMapper.AddTypeHandler(new TimeOnlyTypeHandler());
         services.AddScoped<NpgsqlConnectionProvider>();
 
         services.AddMediatR(options =>
@@ -49,12 +52,21 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISectionTypeRepository, SectionTypeRepository>();
         services.AddScoped<ITeacherRepository, TeacherRepository>();
         services.AddScoped<ISectionRepository, SectionRepository>();
+        services.AddScoped<ILessonRepository, LessonRepository>();
         services.AddSingleton<IListSqlGenerator<TeacherDto>, TeacherListSqlGenerator>();
         services.AddSingleton<IListSqlGenerator<SectionType>, SectionTypeListSqlGenerator>();
         services.AddSingleton<IListSqlGenerator<SectionInfo>, SectionInfoListSqlGenerator>();
+        services.AddSingleton<IListSqlGenerator<SectionStudent>, SectionStudentListSqlGetter>();
+        services.AddSingleton<IListSqlGenerator<SectionSchedule>, SectionScheduleListSqlGetter>();
+        services.AddSingleton<IListSqlGenerator<StudentLessonStatistics>, StudentLessonStatisticsListSqlGetter>();
+        services.AddSingleton<IListSqlGenerator<StudentToAddToSection>, SectionStudentsToAddListSqlGetter>();
         services.AddSingleton<IEntityMapping<TeacherDto>, TeacherDtoEntityMapping>();
         services.AddSingleton<IEntityMapping<SectionType>, SectionTypeEntityMapping>();
         services.AddSingleton<IEntityMapping<SectionInfo>, SectionInfoEntityMapping>();
+        services.AddSingleton<IEntityMapping<SectionStudent>, SectionStudentEntityMapping>();
+        services.AddSingleton<IEntityMapping<SectionSchedule>, SectionScheduleEntityMapping>();
+        services.AddSingleton<IEntityMapping<StudentLessonStatistics>, StudentLessonStatisticsEnityMapping>();
+        services.AddSingleton<IEntityMapping<StudentToAddToSection>, StudentToAddToSectionEntityMapping>();
 
         return services;
     }

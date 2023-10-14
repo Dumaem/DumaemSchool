@@ -1,0 +1,40 @@
+﻿@using DumaemSchool.BlazorWeb.Data.Converters;
+@using DumaemSchool.Core.DataManipulation;
+@using DumaemSchool.Core.OutputModels;
+@using DumaemSchool.Core.Queries;
+@using DumaemSchool.Core.Queries.Section;
+@using MediatR;
+@using System.Globalization;
+
+@inject ISender Sender;
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
+    <MudDataGrid @ref="@_mudDataGrid" ServerData="@GetData" T="SectionSchedule" Filterable="true" SortMode="@SortMode.Multiple" Groupable="false" Hideable="true">
+        <Columns>
+            <PropertyColumn Filterable="true" Property="x => (DateTimeFormatInfo.CurrentInfo.GetDayName(x.DayOfWeek))" 
+                SortBy="x => DateTimeFormatInfo.CurrentInfo.GetDayName(x.DayOfWeek)" Title="День недели" />
+            <PropertyColumn Filterable="false" Property="x => x.Time" SortBy="x => x.Time" Title="Время проведения занятия" />
+            <PropertyColumn Filterable="false" Property="x => x.Duration" SortBy="x => x.Duration" Title="Продолжительность занятия (мин.)" />
+            <PropertyColumn Filterable="true" Property="x => x.Cabinet" SortBy="x => x.Cabinet" Title="Кабинет" />
+        </Columns>
+
+    </MudDataGrid>
+</MudContainer>
+
+
+@code {
+    [Parameter] public int SectionId { get; set; }
+
+    private MudDataGrid<SectionSchedule> _mudDataGrid = null!;
+
+    private async Task<GridData<SectionSchedule>> GetData(GridState<SectionSchedule> state)
+    {
+        var filters = new List<FilterDefinition>();
+        filters.Add(new FilterDefinition { FieldName = nameof(SectionSchedule.SectionId), Value = SectionId, Operand = FilterOperand.Equal });
+
+        var result = await Sender.Send(new SectionScheduleQuery(FilterConverter.GenerateParamsFromGrid(state, filters)));
+
+        return new GridData<SectionSchedule> { Items = result.Items, TotalItems = result.TotalItemsCount };
+    }
+
+}

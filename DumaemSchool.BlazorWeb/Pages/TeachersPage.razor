@@ -1,10 +1,10 @@
 ﻿@page "/teachers"
 @using DumaemSchool.BlazorWeb.Shared.Dialogs;
 @using DumaemSchool.BlazorWeb.Shared.Windows
-@using DumaemSchool.Core.Commands;
+@using DumaemSchool.Core.Commands.Teacher
 @using DumaemSchool.Core.DataManipulation;
 @using DumaemSchool.Core.OutputModels;
-@using DumaemSchool.Core.Queries;
+@using DumaemSchool.Core.Queries.Teacher
 @using MediatR;
 @using Variant = MudBlazor.Variant
 
@@ -88,7 +88,8 @@
         var options = new MudBlazor.DialogOptions { CloseOnEscapeKey = true };
         var parameters = new DialogParameters
         {
-            ["DialogContent"] = "Вы уверены, что хотите уволить данного учителя?"
+            ["DialogContent"] = "Вы уверены, что хотите уволить данного учителя?",
+            ["Color"] = MudBlazor.Color.Error
         };
         var dialog = await DialogService.ShowAsync<DialogWindow>("Подтверждение увольнения", parameters, options);
 

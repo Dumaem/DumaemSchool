@@ -1,10 +1,10 @@
 ﻿@page "/teacher/{id:int}"
 @using DumaemSchool.Auth.Models;
-@using DumaemSchool.Core.Commands;
 @using DumaemSchool.Core.Models;
-@using DumaemSchool.Core.Queries;
 @using MediatR;
 @using Microsoft.AspNetCore.Identity;
+@using DumaemSchool.Core.Commands.Teacher
+@using DumaemSchool.Core.Queries.Teacher
 
 @inject ISender Sender;
 @inject NavigationManager NavigationManager;
