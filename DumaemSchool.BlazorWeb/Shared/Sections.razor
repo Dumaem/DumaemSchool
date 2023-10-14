@@ -32,13 +32,15 @@
 @code {
 
     [Parameter]
-    public int TeacherId { get; set; }
+    public int? TeacherId { get; set; }
 
     private async Task<GridData<SectionInfo>> GetData(GridState<SectionInfo> state)
     {
         var filters = new List<FilterDefinition>();
-        filters.Add(new FilterDefinition { FieldName = nameof(SectionInfo.TeacherId), Value = TeacherId, Operand = FilterOperand.Equal });
-
+        if(TeacherId is not null)
+        {
+            filters.Add(new FilterDefinition { FieldName = nameof(SectionInfo.TeacherId), Value = TeacherId, Operand = FilterOperand.Equal });  
+        }
         var result = await Sender.Send(new SectionsInfoQuery(FilterConverter.GenerateParamsFromGrid(state, filters)));
 
         return new GridData<SectionInfo> { Items = result.Items, TotalItems = result.TotalItemsCount };

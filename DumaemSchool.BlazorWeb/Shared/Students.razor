@@ -19,7 +19,7 @@
         <MudAutocomplete Variant="MudBlazor.Variant.Outlined" T="StudentToAddToSection" Label="ФИО ученика" @bind-Value="_selectedStudent" SearchFunc="@SearchStudentsToAdd"
                          ResetValueOnEmptyText="@true" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" />
 
-        <MudButton Disabled="@(_selectedStudent is null ? true: false)"
+        <MudButton Disabled="@(_selectedStudent is null)"
                    Style="margin-top: 2%" Variant="MudBlazor.Variant.Filled" OnClick="@AddStudentToSection" Color="Color.Primary">Записать студента на кружок</MudButton>
     </MudItem>
 </MudContainer>
@@ -67,8 +67,6 @@
 
     private StudentToAddToSection? _selectedStudent;
 
-    private List<StudentToAddToSection>? _studentsToAdd;
-
     private void OnSearch(string text)
     {
         _searchString = text;
@@ -95,7 +93,7 @@
     {
         if (string.IsNullOrEmpty(value))
         {
-            return _studentsToAdd = (await Sender.Send(new SectionStudentsToAddQuery(new ListParam
+            return (await Sender.Send(new SectionStudentsToAddQuery(new ListParam
                 {
                     Filters = new[]
                                 {
@@ -105,7 +103,7 @@
                 }))).Items.ToList();
         }
 
-        return _studentsToAdd = (await Sender.Send(new SectionStudentsToAddQuery(new ListParam
+        return (await Sender.Send(new SectionStudentsToAddQuery(new ListParam
             {
                 Filters = new[]
                             {   new FilterDefinition { Value = SectionId, Operand = FilterOperand.Equal,
