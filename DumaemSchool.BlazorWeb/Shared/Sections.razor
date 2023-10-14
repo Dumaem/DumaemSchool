@@ -13,7 +13,10 @@
             <MudText Typo="Typo.h6">Список кружков</MudText>
         </ToolBarContent>
         <Columns>
-            <PropertyColumn Filterable="true" Property="x => x.TeacherName" SortBy="x => x.TeacherName" Title="ФИО преподавателя" />
+            @if(TeacherId is null)
+            {
+                <PropertyColumn Filterable="true" Property="x => x.TeacherName" SortBy="x => x.TeacherName" Title="ФИО преподавателя" />
+            }
             <PropertyColumn Filterable="true" Property="x => x.GroupName" SortBy="x => x.GroupName" Title="Наименование группы"/>
             <PropertyColumn Filterable="true" Property="x => x.TypeName" SortBy="x => x.TypeName" Title="Наименование вида кружка"/>
             <PropertyColumn Filterable="true" Property="x => x.LessonPerWeek" SortBy="x => x.LessonPerWeek" Title="Количество занятий в неделю"/>
