@@ -55,7 +55,7 @@
     private int? TeacherId { get; set; }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if(!firstRender)
+        if (!firstRender)
         {
             return;
         }
@@ -75,17 +75,16 @@
     }
 
     private readonly MudTheme _theme = new()
-    {
-        Palette = new PaletteLight
         {
-            Primary = "#5D9C59",
-            Secondary = "#C7E8CA",
-            AppbarBackground = "#5D9C59",
-            AppbarText = "#FFFFFF",
-            TableHover = "#C7E8CA"
-        }
-    };
-
+            Palette = new PaletteLight
+            {
+                Primary = "#5D9C59",
+                Secondary = "#C7E8CA",
+                AppbarBackground = "#5D9C59",
+                AppbarText = "#FFFFFF",
+                TableHover = "#C7E8CA"
+            }
+        };
 
     private void Logout()
     {
