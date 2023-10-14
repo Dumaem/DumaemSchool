@@ -9,11 +9,12 @@
 @using DumaemSchool.Core.Queries.Teacher
 @using MediatR
 @using ButtonType = MudBlazor.ButtonType
-@using System.Collections.ObjectModel
 @using System.Globalization
+@using DumaemSchool.BlazorWeb.Shared.Windows
 @using DialogOptions = MudBlazor.DialogOptions
 
 @inject ISender Sender;
+@inject ISnackbar Snackbar
 @inject IDialogService DialogService
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
@@ -41,22 +42,26 @@
                            OnClick="@AddSchedule" Class="add-item-btn mt-3">
                     Добавить расписание
                 </MudButton>
-                <MudDataGrid Items="@_items" T="SectionSchedule" Class="mt-3">
+                <MudDataGrid @ref="@_mudDataGrid" Items="@_items" T="SectionSchedule"
+                             Filterable="true" SortMode="@SortMode.Multiple"
+                             Groupable="false" Hideable="true" Class="mt-3">
                     <Columns>
-                        <PropertyColumn Property="x => x.DayOfWeek" Title="День недели" Culture="@(new CultureInfo("ru"))"/>
-                        <PropertyColumn Property="x => x.Time" Title="Время"/>
-                        <PropertyColumn Property="x => x.Duration" Title="Продолжительность"/>
-                        <PropertyColumn Property="x => x.Cabinet" Title="Кабинет"/>
+                        <PropertyColumn Filterable="true" Property="x => (DateTimeFormatInfo.CurrentInfo.GetDayName(x.DayOfWeek))"
+                                        Title="День недели" SortBy="x => DateTimeFormatInfo.CurrentInfo.GetDayName(x.DayOfWeek)"/>
+                        <PropertyColumn Filterable="false" Property="x => x.Time"
+                                        SortBy="x => x.Time" Title="Время проведения занятия"/>
+                        <PropertyColumn Filterable="false" Property="x => x.Duration"
+                                        SortBy="x => x.Duration" Title="Продолжительность занятия (мин.)"/>
+                        <PropertyColumn Filterable="true" Property="x => x.Cabinet"
+                                        SortBy="x => x.Cabinet" Title="Кабинет"/>
+
                         <TemplateColumn Sortable="false" Filterable="false">
                             <CellTemplate>
-                                <MudContainer MaxWidth="MaxWidth.ExtraLarge" style="margin-top: 2%">
 
-                                    <MudIconButton Style="margin-left: 53%" Size="@Size.Small" Variant="@Variant.Filled"
-                                                   Color="@Color.Error" Icon="@Icons.Material.Filled.Delete"
-                                                   OnClick="@(async () => await RemoveSchedule())">
-                                        Уволить
-                                    </MudIconButton>
-                                </MudContainer>
+                                <MudIconButton Style="margin-left: 53%" Size="@Size.Small" Variant="@Variant.Filled"
+                                               Color="@Color.Error" Icon="@Icons.Material.Filled.Delete"
+                                               OnClick="@(async () => await RemoveSchedule())"/>
+
                             </CellTemplate>
                         </TemplateColumn>
                     </Columns>
@@ -70,6 +75,7 @@
 </MudContainer>
 
 @code {
+    private MudDataGrid<SectionSchedule> _mudDataGrid = null!;
     RegisterAccountForm model = new RegisterAccountForm();
     bool success;
 
@@ -77,25 +83,27 @@
 
     async Task AddSchedule()
     {
-    // var options = new DialogOptions
-    // {
-    //     CloseButton = true, DisableBackdropClick = true,
-    //     MaxWidth = MaxWidth.Medium, FullWidth = true
-    // };
-    //
-    // var dialog = await DialogService.ShowAsync<TeacherCreateWindow>("Новый учитель", options);
-    //
-    // var result = await dialog.Result;
-    //
-    // if (!result.Canceled)
-    // {
-    //     Snackbar.Add("Учитель успешно добавлен!", Severity.Success);
-    //     await _mudDataGrid.ReloadServerData();
-    // }
-    //
-    // //DialogService.Show<DialogKeyboardNavigationExample_Dialog>("Simple Dialog", closeOnEscapeKey);
-    //
-        _items.Add(new SectionSchedule());
+        var options = new DialogOptions
+        {
+            CloseButton = true, DisableBackdropClick = true,
+            MaxWidth = MaxWidth.Medium, FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<ScheduleCreateWindow>("Новое расписание", options);
+
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            _items.Add((SectionSchedule)result.Data);
+
+            Snackbar.Add("Расписание добавлено!", Severity.Normal);
+            await _mudDataGrid.ReloadServerData();
+        }
+
+    //DialogService.Show<DialogKeyboardNavigationExample_Dialog>("Simple Dialog", closeOnEscapeKey);
+
+    //_items.Add(new SectionSchedule());
     }
 
     async Task RemoveSchedule()
