@@ -6,7 +6,7 @@
 <Sections TeacherId="_teacherId"></Sections>
 
 @code{
-    private int? _teacherId;
+    private int _teacherId;
     protected override async Task OnInitializedAsync()
     {
         var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;

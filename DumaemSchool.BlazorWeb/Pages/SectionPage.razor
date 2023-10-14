@@ -23,7 +23,7 @@
             <MudButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary">Получить статистику</MudButton>
 
             <MudAutocomplete Variant="MudBlazor.Variant.Outlined" Class="ml-4" T="TeacherDto" Label="Преподаватель кружка" @bind-Value="_selectedTeacher" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" SearchFunc="@SearchTeachersToSelect" CoerceText="true"  />
-            <MudButton Class="ml-2" Disabled="@(_oldTeacher == _selectedTeacher)" OnClick="@AddTeacherToSection" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">Сохранить</MudButton>
+            <MudButton Class="ml-2" Disabled="@(_oldTeacherId == _selectedTeacher?.Id)" OnClick="@AddTeacherToSection" Variant="MudBlazor.Variant.Filled" Color="Color.Primary">Сохранить</MudButton>
         </MudContainer>
     </Authorized>
 </AuthorizeView>
@@ -57,31 +57,28 @@
     private bool _initialized;
     private TeacherDto? _selectedTeacher;
 
-    private TeacherDto? _oldTeacher;
+    private int _oldTeacherId;
 
-    private HashSet<TeacherDto>? _teachersToSelect;
-
+    private List<TeacherDto>? _teachersToSelect;
 
     protected override async Task OnInitializedAsync()
     { 
         _selectedTeacher = await Sender.Send(new GetTeacherFromSectionQuery(Id));
-        _oldTeacher = _selectedTeacher;
+        _oldTeacherId = _selectedTeacher.Id;
         _initialized = true;
     }
-
-
 
     private async Task<IEnumerable<TeacherDto>> SearchTeachersToSelect(string value)
     {
         if (string.IsNullOrEmpty(value))
         {
-            return _teachersToSelect = (await Sender.Send(new TeachersQuery(new ListParam()))).Items.ToHashSet();
+            return _teachersToSelect = (await Sender.Send(new TeachersQuery(new ListParam()))).Items.ToList();
         }
 
         return _teachersToSelect = (await Sender.Send(new TeachersQuery(new ListParam
             {
-                Filters = new[] { new FilterDefinition { Value = value, Operand = FilterOperand.Contains, FieldName = "Name" } }
-            }))).Items.ToHashSet();
+                Filters = new[] { new FilterDefinition { Value = value, Operand = FilterOperand.Contains, FieldName = nameof(TeacherDto.Name) } }
+            }))).Items.ToList();
     }
 
     private async Task<bool> IsTeacherAvailable()
@@ -90,7 +87,7 @@
             {
                 Filters = new[]
                         {
-                new FilterDefinition {Value = Id, Operand = FilterOperand.Equal, FieldName = "SectionId"}
+                new FilterDefinition {Value = Id, Operand = FilterOperand.Equal, FieldName = nameof(SectionSchedule.SectionId)}
             }
             }))).Items.ToList();
 
@@ -117,14 +114,14 @@
             return;
         }
 
-        var addStudentToSectionCommand = new AddTeacherToSectionCommand(_selectedTeacher!.Id, Id, _oldTeacher!.Id);
+        var addStudentToSectionCommand = new AddTeacherToSectionCommand(_selectedTeacher!.Id, Id);
         var res = await Sender.Send(addStudentToSectionCommand);
 
         Snackbar.Clear();
         Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomLeft;
         Snackbar.Add("Преподаватель успешно закреплен за кружком!", Severity.Success);
 
-        _oldTeacher = _selectedTeacher;
+        _oldTeacherId = _selectedTeacher.Id;
     }
 
     private async Task<bool> IsSuccessAddDialogResult()

@@ -22,7 +22,7 @@ namespace DumaemSchool.Database.Handlers.Teacher
         public async Task<bool> Handle(AddTeacherToSectionCommand request,
         CancellationToken token)
         {
-            return await _repository.AddTeacherToSection(request.TeacherId, request.SectionId, request.OldTeacherId);
+            return await _repository.AddTeacherToSection(request.TeacherId, request.SectionId);
         }
     }
 }

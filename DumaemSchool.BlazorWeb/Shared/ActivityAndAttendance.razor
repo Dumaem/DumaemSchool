@@ -12,9 +12,9 @@
 @inject ISender Sender;
 @inject IDialogService DialogService
 
-<MudDatePicker Style="margin-left: 80%; margin-right: 1%" PickerVariant="PickerVariant.Dialog" 
-    IsDateDisabledFunc="@( dt => !_lessonDateTimes.Contains(dt))" 
-    DateChanged="@((e) => OnDateChange(e!.Value))">
+<MudDatePicker Style="margin-left: 80%; margin-right: 1%" PickerVariant="PickerVariant.Dialog"
+               IsDateDisabledFunc="@( dt => !_lessonDateTimes.Contains(dt))"
+               DateChanged="@((e) => OnDateChange(e!.Value))">
 </MudDatePicker>
 
 
@@ -48,40 +48,36 @@
 
 
 @code {
-    [Parameter] public int? SectionId { get; set; }
+    [Parameter] public int SectionId { get; set; }
 
-    private MudDataGrid<StudentLessonStatistics> _mudDataGrid = null!;
-
-    private LessonDate[] _lessonDates = null!;
-    private HashSet<DateTime> _lessonDateTimes = null!;
-
-    private DateTime? selectedDateTime;
-    private LessonDate? selectedLessonDate;
-    private Dictionary<LessonActivityMark, string> MarksOnRussianLanguage = new Dictionary<LessonActivityMark, string>()
+    private static Dictionary<LessonActivityMark, string> MarksOnRussianLanguage = new Dictionary<LessonActivityMark, string>()
     {
         {LessonActivityMark.Negative, "-"},
         {LessonActivityMark.Default, "Нет оценки"},
         {LessonActivityMark.Positive, "+"}
     };
 
-    private Dictionary<bool, string> AttendanceOnRussianLanguage = new Dictionary<bool, string>()
+    private static Dictionary<bool, string> AttendanceOnRussianLanguage = new Dictionary<bool, string>()
     {
         {true, "Присутствовал"},
         {false, "Отсутствовал"},
     };
+
+    private MudDataGrid<StudentLessonStatistics> _mudDataGrid = null!;
+
+    private LessonDate[] _lessonDates = null!;
+    private List<DateTime> _lessonDateTimes = null!;
+
+    private DateTime? selectedDateTime;
+    private LessonDate? selectedLessonDate;
 
     private string _searchString = "";
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        _lessonDates = (await Sender.Send(new LessonDatesQuery(SectionId!.Value))).ToArray();
-        _lessonDateTimes = _lessonDates.Select(x => x.ConductionDate.ToDateTime(TimeOnly.MinValue)).ToHashSet();
-    }
-
-    protected override Task OnAfterRenderAsync(bool firstRender)
-    {
-        return base.OnAfterRenderAsync(firstRender);
+        _lessonDates = (await Sender.Send(new LessonDatesQuery(SectionId))).ToArray();
+        _lessonDateTimes = _lessonDates.Select(x => x.ConductionDate.ToDateTime(TimeOnly.MinValue)).ToList();
     }
 
     private void OnDateChange(DateTime date)
@@ -105,17 +101,16 @@
         {
             return new GridData<StudentLessonStatistics> { Items = Array.Empty<StudentLessonStatistics>(), TotalItems = 0 };
         }
-        else
-        {
-            filters.Add(new FilterDefinition
-                {
-                    FieldName = nameof(StudentLessonStatistics.LessonId),
-                    Value = selectedLessonDate?.LessonId,
-                    Operand = FilterOperand.Equal
-                });
-        }
 
-        filters.Add(new FilterDefinition { FieldName = nameof(StudentLessonStatistics.StudentName), Value = _searchString, Operand = FilterOperand.Contains });
+        filters.Add(new FilterDefinition
+            {
+                FieldName = nameof(StudentLessonStatistics.LessonId),
+                Value = selectedLessonDate?.LessonId,
+                Operand = FilterOperand.Equal
+            });
+
+        filters.Add(new FilterDefinition { FieldName = nameof(StudentLessonStatistics.StudentName), Value = _searchString, 
+                    Operand = FilterOperand.Contains });
 
         var result = await Sender.Send(new StudentLessonStatisticsQuery(FilterConverter.GenerateParamsFromGrid(state, filters)));
 

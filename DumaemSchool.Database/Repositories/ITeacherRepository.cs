@@ -11,5 +11,5 @@ public interface ITeacherRepository
     public Task<bool> UpdateTeacherNameAsync(int teacherId, string name);
     public Task<bool> DeleteTeacherAsync(int id);
     public Task<bool> CheckTeacherAvailabilityToSection(int teacherId, List<SectionSchedule> sectionSchedule);
-    public Task<bool> AddTeacherToSection(int teacherId, int sectionId, int oldTeacherId);
+    public Task<bool> AddTeacherToSection(int teacherId, int sectionId);
 }

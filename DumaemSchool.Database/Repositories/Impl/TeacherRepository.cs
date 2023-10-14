@@ -34,7 +34,8 @@ public sealed class TeacherRepository : ITeacherRepository
 
         return new ListDataResult<TeacherDto>
         {
-            Items = result, TotalItemsCount = count
+            Items = result,
+            TotalItemsCount = count
         };
     }
 
@@ -90,16 +91,16 @@ public sealed class TeacherRepository : ITeacherRepository
             TimeEnd = x.Time.Add(x.Duration),
         });
 
-        var busyTimeRangesForStudent = await(from schedule in _context.Schedules
-                                             join sectionTeacher in _context.SectionTeachers
-                                             on schedule.SectionId equals sectionTeacher.SectionId
-                                             where sectionTeacher.IsActual == true && sectionTeacher.TeacherId == teacherId
-                                             select new TimeRange
-                                             {
-                                                 DayOfWeek = (DayOfWeek)schedule.DayOfWeek,
-                                                 TimeStart = schedule.Time,
-                                                 TimeEnd = schedule.Time.Add(schedule.Duration)
-                                             }).ToArrayAsync();
+        var busyTimeRangesForStudent = await (from schedule in _context.Schedules
+                                              join sectionTeacher in _context.SectionTeachers
+                                              on schedule.SectionId equals sectionTeacher.SectionId
+                                              where sectionTeacher.IsActual == true && sectionTeacher.TeacherId == teacherId
+                                              select new TimeRange
+                                              {
+                                                  DayOfWeek = (DayOfWeek)schedule.DayOfWeek,
+                                                  TimeStart = schedule.Time,
+                                                  TimeEnd = schedule.Time.Add(schedule.Duration)
+                                              }).ToArrayAsync();
 
         if (busyTimeRangesForStudent.Any(busyTimeRange =>
         sectionTimeRanges.Any(sectionTimeRange =>
@@ -110,27 +111,25 @@ public sealed class TeacherRepository : ITeacherRepository
 
         return true;
     }
-
-    public async Task<bool> AddTeacherToSection(int teacherId, int sectionId, int oldTeacherId)
+ 
+    public async Task<bool> AddTeacherToSection(int teacherId, int sectionId)
     {
         var foundTeacher = await _context.Teachers.FindAsync(teacherId);
-        var foundOldTeacher = await _context.Teachers.FindAsync(oldTeacherId);
         var foundSection = await _context.Sections.FindAsync(sectionId);
+        var foundOldSectionTeacherRecord = await _context.SectionTeachers
+                                    .FirstOrDefaultAsync(x => x.IsActual == true && x.SectionId == sectionId);
 
-        if (foundTeacher is null || foundSection is null || foundOldTeacher is null) return false;
+        if (foundTeacher is null || foundSection is null || foundOldSectionTeacherRecord is null) return false;
 
-        var sectionTeacher = new Database.Entities.SectionTeacher
+        var sectionTeacher = new SectionTeacher
         {
             TeacherId = teacherId,
             SectionId = sectionId,
         };
 
-        var oldSectionTeacherRecord = await _context.SectionTeachers.FirstOrDefaultAsync(x => x.IsActual == true && x.Teacher.Id == oldTeacherId 
-                                                                                        && x.SectionId == sectionId);
-        oldSectionTeacherRecord!.IsActual = false;
+        foundOldSectionTeacherRecord!.IsActual = false;
 
-
-        _context.SectionTeachers.Update(oldSectionTeacherRecord);
+        _context.SectionTeachers.Update(foundOldSectionTeacherRecord);
         await _context.SectionTeachers.AddAsync(sectionTeacher);
         await _context.SaveChangesAsync();
         _context.ChangeTracker.Clear();

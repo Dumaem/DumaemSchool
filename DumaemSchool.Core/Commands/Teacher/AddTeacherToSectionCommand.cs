@@ -7,5 +7,5 @@ using System.Threading.Tasks;
 
 namespace DumaemSchool.Core.Commands.Teacher
 {
-    public sealed record AddTeacherToSectionCommand(int TeacherId, int SectionId, int OldTeacherId) : IRequest<bool>;
+    public sealed record AddTeacherToSectionCommand(int TeacherId, int SectionId) : IRequest<bool>;
 }
