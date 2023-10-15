@@ -12,6 +12,7 @@
 @using DumaemSchool.BlazorWeb.Data
 @using DumaemSchool.BlazorWeb.Shared.Windows
 @using DumaemSchool.Core.Commands.Section
+@using DumaemSchool.Core.Commands.Teacher
 @using DialogOptions = MudBlazor.DialogOptions
 
 @inject ISender Sender
@@ -82,7 +83,7 @@
 
 @code {
     MudForm? _form;
-    private MudDataGrid<SectionSchedule> _mudDataGrid = null!;
+    MudDataGrid<SectionSchedule> _mudDataGrid = null!;
     readonly SectionCreateCredentials _model = new();
 
     async Task AddSchedule()
@@ -94,15 +95,39 @@
         };
 
         var dialog = await DialogService.ShowAsync<ScheduleCreateWindow>("Новое расписание", options);
-
         var result = await dialog.Result;
 
         if (!result.Canceled)
         {
-            _model.Schedules.Add((SectionSchedule)result.Data);
+            var schedule = (SectionSchedule)result.Data;
 
-            Snackbar.Add("Расписание добавлено!");
-            await _mudDataGrid.ReloadServerData();
+            var sectionTimeRanges = _model.Schedules.Select(x => new TimeRange
+            {
+                DayOfWeek = x.DayOfWeek,
+                TimeStart = x.Time,
+                TimeEnd = x.Time.Add(x.Duration),
+            });
+
+            var scheduleTimeRange = new TimeRange
+            {
+                DayOfWeek = schedule.DayOfWeek,
+                TimeStart = schedule.Time,
+                TimeEnd = schedule.Time.Add(schedule.Duration),
+            };
+
+            // Проверка, добавляемого расписание на пересечение с уже добавленными
+            if (sectionTimeRanges.Any(sectionTimeRange =>
+                scheduleTimeRange.Overlaps(sectionTimeRange)))
+            {
+                Snackbar.Add("Новое расписание пересекается с уже добавленными", Severity.Error);
+                await AddSchedule();
+            }
+            else
+            {
+                _model.Schedules.Add(schedule);
+                Snackbar.Add("Расписание добавлено!");
+                await _mudDataGrid.ReloadServerData();
+            }
         }
     }
 
@@ -113,7 +138,7 @@
         return Task.CompletedTask;
     }
 
-    private async Task<IEnumerable<SectionType>> SearchSectionTypes(string searchString)
+    async Task<IEnumerable<SectionType>> SearchSectionTypes(string searchString)
     {
     // if text is null or empty, show complete list
         if (string.IsNullOrEmpty(searchString))
@@ -135,7 +160,7 @@
         }
     }
 
-    private async Task<IEnumerable<TeacherDto>> SearchTeachers(string searchString)
+    async Task<IEnumerable<TeacherDto>> SearchTeachers(string searchString)
     {
     // if text is null or empty, show complete list
         if (string.IsNullOrEmpty(searchString))
@@ -157,7 +182,7 @@
         }
     }
 
-    private async Task Submit()
+    async Task Submit()
     {
         await _form?.Validate()!;
 
@@ -166,9 +191,30 @@
             Snackbar.Add("Добавьте расписание", Severity.Error);
             _form.IsValid = false;
         }
-        
+
         if (_form.IsValid)
         {
+            // Проверка, свободен ли учитель в выбранное расписание
+            var checkTeacherCommand = new CheckTeacherAvailabilityToSectionCommand(_model.Teacher!.Id, _model.Schedules);
+            var isTeacherAvailable = await Sender.Send(checkTeacherCommand);
+
+            if (!isTeacherAvailable)
+            {
+                Snackbar.Add("У учителя в это время уже есть назначенный кружок", Severity.Error);
+                return;
+            }
+
+            // Проверка, занято ли название группы
+            var filters = new List<FilterDefinition> { new() { FieldName = "GroupName", Value = _model.GroupName, Operand = FilterOperand.Equal } };
+
+            var result = await Sender.Send(new SectionsInfoQuery(new ListParam() { Filters = filters.ToArray() }));
+
+            if (result.Items.Any())
+            {
+                Snackbar.Add("Группа с таким названием уже существует", Severity.Error);
+                return;
+            }
+
             var section = new SectionWithSchedule()
             {
                 Schedules = _model.Schedules.ToArray(),
@@ -176,12 +222,10 @@
                 TeacherId = _model.Teacher!.Id,
                 SectionTypeId = _model.SectionType!.Id
             };
-            
             var createSectionCommand = new CreateSectionCommand(section);
             await Sender.Send(createSectionCommand);
-            
+
             NavigationManager.NavigateTo($"/sections");
-            
             Snackbar.Add("Кружок успешно добавлен!", Severity.Success);
         }
     }
