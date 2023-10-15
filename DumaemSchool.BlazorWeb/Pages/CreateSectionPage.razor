@@ -64,7 +64,7 @@
 
                                 <MudIconButton Style="margin-left: 53%" Size="@Size.Small" Variant="@Variant.Filled"
                                                Color="@Color.Error" Icon="@Icons.Material.Filled.Delete"
-                                               OnClick="@(async () => await RemoveSchedule())"/>
+                                               OnClick="@RemoveSchedule"/>
 
                             </CellTemplate>
                         </TemplateColumn>
@@ -82,104 +82,96 @@
 </MudContainer>
 
 @code {
-    MudForm? _form;
+    MudForm _form = null!;
     MudDataGrid<SectionSchedule> _mudDataGrid = null!;
     readonly SectionCreateCredentials _model = new();
 
-    async Task AddSchedule()
+    private async Task AddSchedule()
     {
-        var options = new DialogOptions
+        while (true)
         {
-            CloseButton = true, DisableBackdropClick = true,
-            MaxWidth = MaxWidth.Medium, FullWidth = true
-        };
-
-        var dialog = await DialogService.ShowAsync<ScheduleCreateWindow>("Новое расписание", options);
-        var result = await dialog.Result;
-
-        if (!result.Canceled)
-        {
-            var schedule = (SectionSchedule)result.Data;
-
-            var sectionTimeRanges = _model.Schedules.Select(x => new TimeRange
+            var options = new DialogOptions
             {
-                DayOfWeek = x.DayOfWeek,
-                TimeStart = x.Time,
-                TimeEnd = x.Time.Add(x.Duration),
-            });
-
-            var scheduleTimeRange = new TimeRange
-            {
-                DayOfWeek = schedule.DayOfWeek,
-                TimeStart = schedule.Time,
-                TimeEnd = schedule.Time.Add(schedule.Duration),
+                CloseButton = true, DisableBackdropClick = true, MaxWidth = MaxWidth.Medium, FullWidth = true
             };
 
-            // Проверка, добавляемого расписание на пересечение с уже добавленными
-            if (sectionTimeRanges.Any(sectionTimeRange =>
-                scheduleTimeRange.Overlaps(sectionTimeRange)))
+            var dialog = await DialogService.ShowAsync<ScheduleCreateWindow>("Новое расписание", options);
+            var result = await dialog.Result;
+
+            if (!result.Canceled)
             {
-                Snackbar.Add("Новое расписание пересекается с уже добавленными", Severity.Error);
-                await AddSchedule();
+                var schedule = (SectionSchedule)result.Data;
+
+                var sectionTimeRanges = _model.Schedules.Select(x => new TimeRange
+                {
+                    DayOfWeek = x.DayOfWeek, TimeStart = x.Time, TimeEnd = x.Time.Add(x.Duration),
+                });
+
+                var scheduleTimeRange = new TimeRange
+                {
+                    DayOfWeek = schedule.DayOfWeek, TimeStart = schedule.Time, TimeEnd = schedule.Time.Add(schedule.Duration),
+                };
+
+    // Проверка, добавляемого расписание на пересечение с уже добавленными
+                if (sectionTimeRanges.Any(sectionTimeRange => scheduleTimeRange.Overlaps(sectionTimeRange)))
+                {
+                    Snackbar.Add("Новое расписание пересекается с уже добавленными", Severity.Error);
+                    continue;
+                }
+                else
+                {
+                    _model.Schedules.Add(schedule);
+                    Snackbar.Add("Расписание добавлено!");
+                }
             }
-            else
-            {
-                _model.Schedules.Add(schedule);
-                Snackbar.Add("Расписание добавлено!");
-                await _mudDataGrid.ReloadServerData();
-            }
+            break;
         }
     }
 
-    Task RemoveSchedule()
+    void RemoveSchedule()
     {
         if (_model.Schedules.Any())
             _model.Schedules.RemoveAt(0);
-        return Task.CompletedTask;
     }
 
     async Task<IEnumerable<SectionType>> SearchSectionTypes(string searchString)
     {
-    // if text is null or empty, show complete list
+        // if text is null or empty, show complete list
+        ListDataResult<SectionType>? result;
+
         if (string.IsNullOrEmpty(searchString))
         {
-            var result = await Sender.Send(new SectionTypesQuery(new ListParam()));
+            result = await Sender.Send(new SectionTypesQuery(new ListParam()));
             return result.Items;
         }
-        else
+        
+        var filters = new List<FilterDefinition> { new() { FieldName = "Name", Value = searchString, Operand = FilterOperand.Contains } };
+        result = await Sender.Send(new SectionTypesQuery(new ListParam()
         {
-            var filters = new List<FilterDefinition>();
-            filters.Add(new FilterDefinition { FieldName = "Name", Value = searchString, Operand = FilterOperand.Contains });
+            Filters = filters.ToArray()
+        }));
 
-            var result = await Sender.Send(new SectionTypesQuery(new ListParam()
-            {
-                Filters = filters.ToArray()
-            }));
-
-            return result.Items;
-        }
+        return result.Items;
     }
 
     async Task<IEnumerable<TeacherDto>> SearchTeachers(string searchString)
     {
-    // if text is null or empty, show complete list
+        // if text is null or empty, show complete list
+        ListDataResult<TeacherDto>? result;
+
         if (string.IsNullOrEmpty(searchString))
         {
-            var result = await Sender.Send(new TeachersQuery(new ListParam()));
+            result = await Sender.Send(new TeachersQuery(new ListParam()));
             return result.Items;
         }
-        else
+        
+        var filters = new List<FilterDefinition> { new() { FieldName = "Name", Value = searchString, Operand = FilterOperand.Contains } };
+        result = await Sender.Send(new TeachersQuery(new ListParam()
         {
-            var filters = new List<FilterDefinition>();
-            filters.Add(new FilterDefinition { FieldName = "Name", Value = searchString, Operand = FilterOperand.Contains });
+            Filters = filters.ToArray()
+        }));
 
-            var result = await Sender.Send(new TeachersQuery(new ListParam()
-            {
-                Filters = filters.ToArray()
-            }));
-
-            return result.Items;
-        }
+        return result.Items;
     }
 
     async Task Submit()

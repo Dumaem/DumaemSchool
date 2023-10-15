@@ -10,7 +10,7 @@ public class SectionScheduleCreateCredentials
     [Required(ErrorMessage = "Время проведения занятия должно быть заполнено")]
     public TimeSpan? Time { get; set; }
     
-    [Required(ErrorMessage = "Продолжительность занятия должно быть заполнено")]
+    [Required(ErrorMessage = "Продолжительность занятия должна быть заполнено")]
     public int? Duration { get; set; }
     
     [Required(ErrorMessage = "Кабинет должен быть заполнен")]
