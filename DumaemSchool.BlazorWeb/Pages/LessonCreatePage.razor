@@ -20,7 +20,7 @@
             <MudContainer Class="ma-0 pa-0" MaxWidth="MaxWidth.False">
                 <MudTextField InputType="InputType.Text" Variant="Variant.Outlined" T="string" ReadOnly="true" Label="Учитель" @bind-Value="@(_teacherForReplace.Name)"/>
             </MudContainer>
-            <MudButton Class="ml-3" Style="width: 10vw" Variant="Variant.Filled" OnClick="@ShowTeachers" Color="Color.Primary">Выбрать учителя</MudButton>
+            <MudButton Class="ml-3" Style="width: 10vw" Variant="Variant.Filled" OnClick="@(() => ShowTeachers(false))" Color="Color.Primary">Выбрать учителя</MudButton>
         </div>
     </AuthorizeView>
     <div class="d-flex justify-content-md-between align-items-middle mt-5">
@@ -60,6 +60,14 @@
         <MudDatePicker MinDate="@(DateTime.Now - TimeSpan.FromDays(1))" @bind-Date="_selectedDate" Disabled="@(_selectedSectionSchedule.Count <= 0)" PickerVariant="PickerVariant.Dialog" Variant="Variant.Outlined" Label="Дата проведения"
                        IsDateDisabledFunc="@((DateTime dt) => dt.DayOfWeek != _selectedSectionSchedule.First().DayOfWeek)"/>
     </MudContainer>
+    <AuthorizeView Roles="@Role.DeputyDirector">
+        <div class="d-flex justify-content-md-between align-items-middle mt-5">
+            <MudContainer Class="ma-0 pa-0" MaxWidth="MaxWidth.False">
+                <MudTextField InputType="InputType.Text" Variant="Variant.Outlined" T="string" ReadOnly="true" Label="Учитель" @bind-Value="@(_newTeacher.Name)"/>
+            </MudContainer>
+            <MudButton Disabled="@(_teacherForReplace.Id == 0 && IsCanCreate)" Class="ml-3" Style="width: 10vw" Variant="Variant.Filled" OnClick="@(() => ShowTeachers(true))" Color="Color.Primary">Выбрать учителя</MudButton>
+        </div>
+    </AuthorizeView>
     <div class="d-flex flex-row mt-5">
         <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="IsCanCreate" OnClick="@(async () => await CreateLesson())">Создать занятие</MudButton>
         <MudButton Class="ml-5" Color="Color.Error" Variant="Variant.Filled" Disabled="IsCanCreate" OnClick="@(async () => await RevokeLesson())">Отменить занятие</MudButton>
@@ -73,8 +81,10 @@
     private bool IsCanCreate => !(_selectedSection.Id != 0 && _selectedSectionSchedule.Count > 0 && _selectedDate is not null);
     private int _teacherId;
     private TeacherDto _teacherForReplace = new();
+    private TeacherDto _newTeacher = new();
     private bool _isConducted = true;
-    
+    private bool IsReplace => _newTeacher.Id != 0 && _teacherForReplace.Id != 0;
+
     private async Task ShowSections()
     {
         var options = new MudBlazor.DialogOptions
@@ -132,7 +142,7 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    private async Task ShowTeachers()
+    private async Task ShowTeachers(bool isForNew)
     {
         var options = new MudBlazor.DialogOptions
         {
@@ -148,10 +158,18 @@
 
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (result.Canceled)
+            return;
+        
+        if (!isForNew)
         {
             _teacherForReplace = (TeacherDto) result.Data;
         }
+        else
+        {
+            _newTeacher = (TeacherDto) result.Data;
+        }
+        
         await InvokeAsync(StateHasChanged);
     }
 
@@ -159,11 +177,20 @@
     {
         var checkLessonCreatedCommand = new CheckLessonCreatedCommand(_selectedSectionSchedule.First().Id,
             DateOnly.FromDateTime(_selectedDate ?? DateTime.Now));
-        var checkResult = await Sender.Send(checkLessonCreatedCommand);
+        var checkCreationResult = await Sender.Send(checkLessonCreatedCommand);
 
-        if (checkResult)
+        if (checkCreationResult)
         {
             Snackbar.Add("Занятие на этот день уже создано!", Severity.Error);
+            return;
+        }
+
+        var checkLessonTeacherCommand = new CheckLessonTeacherCommand(_newTeacher.Id, DateOnly.FromDateTime(_selectedDate ?? DateTime.Now));
+        var checkTeacherResult = await Sender.Send(checkLessonTeacherCommand);
+
+        if (checkTeacherResult)
+        {
+            Snackbar.Add("У этого учителя уже есть занятие на эту дату!", Severity.Error);
             return;
         }
 
@@ -171,8 +198,9 @@
         {
             ScheduleId = _selectedSectionSchedule.First().Id,
             Date = DateOnly.FromDateTime(_selectedDate ?? DateTime.Now),
-            TeacherId = _teacherForReplace.Id == 0 ? _teacherId : _teacherForReplace.Id, IsConducted = _isConducted
+            TeacherId = _teacherForReplace.Id == 0 ? _teacherId : _newTeacher.Id, IsConducted = _isConducted
         };
+
         var createLessonCommand = new CreateLessonCommand(newLesson);
         var result = await Sender.Send(createLessonCommand);
 
