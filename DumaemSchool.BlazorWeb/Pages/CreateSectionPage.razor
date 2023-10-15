@@ -4,7 +4,6 @@
 @using DumaemSchool.Core.Models
 @using DumaemSchool.Core.Queries.Section
 @using Variant = MudBlazor.Variant
-@using System.ComponentModel.DataAnnotations
 @using DumaemSchool.Core.OutputModels
 @using DumaemSchool.Core.Queries.Teacher
 @using MediatR
@@ -12,11 +11,12 @@
 @using System.Globalization
 @using DumaemSchool.BlazorWeb.Data
 @using DumaemSchool.BlazorWeb.Shared.Windows
-@using DumaemSchool.Database.Repositories
+@using DumaemSchool.Core.Commands.Section
 @using DialogOptions = MudBlazor.DialogOptions
 
-@inject ISender Sender;
+@inject ISender Sender
 @inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
 @inject IDialogService DialogService
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
@@ -27,16 +27,16 @@
             </CardHeaderContent>
         </MudCardHeader>
         <MudCardContent>
-            <MudForm Model="@model" @ref="@_form">
+            <MudForm Model="@_model" @ref="@_form">
                 <MudTextField Label="Название группы" HelperText="Введите название группы" Variant="Variant.Outlined"
-                              @bind-Value="model.GroupName" For="@(() => model.GroupName)"/>
+                              @bind-Value="_model.GroupName" For="@(() => _model.GroupName)"/>
                 <div class="d-flex justify-content-between">
-                    <MudAutocomplete T="SectionType" Label="Вид кружка" @bind-Value="model.SectionType" class="mr-3"
-                                     SearchFunc="@SearchSectionTypes" Variant="Variant.Outlined" For="@(() => model.SectionType)"
+                    <MudAutocomplete T="SectionType" Label="Вид кружка" @bind-Value="_model.SectionType" class="mr-3"
+                                     SearchFunc="@SearchSectionTypes" Variant="Variant.Outlined" For="@(() => _model.SectionType)"
                                      ToStringFunc="@(e => e == null ? null : $"{e.Name}")">
                     </MudAutocomplete>
-                    <MudAutocomplete T="TeacherDto" Label="Учитель" @bind-Value="model.Teacher" class="ml-3"
-                                     SearchFunc="@SearchTeachers" Variant="Variant.Outlined" For="@(() => model.Teacher)"
+                    <MudAutocomplete T="TeacherDto" Label="Учитель" @bind-Value="_model.Teacher" class="ml-3"
+                                     SearchFunc="@SearchTeachers" Variant="Variant.Outlined" For="@(() => _model.Teacher)"
                                      ToStringFunc="@(e => e == null ? null : $"{e.Name}")">
                     </MudAutocomplete>
                 </div>
@@ -45,7 +45,7 @@
                            OnClick="@AddSchedule" Class="add-item-btn mt-3">
                     Добавить расписание
                 </MudButton>
-                <MudDataGrid @ref="@_mudDataGrid" Items="@model.Schedules" T="SectionSchedule"
+                <MudDataGrid @ref="@_mudDataGrid" Items="@_model.Schedules" T="SectionSchedule"
                              Filterable="true" SortMode="@SortMode.Multiple"
                              Groupable="false" Hideable="true" Class="mt-3">
                     <Columns>
@@ -81,13 +81,9 @@
 </MudContainer>
 
 @code {
-    private readonly ISectionRepository _repository;
-    MudForm _form;
+    MudForm? _form;
     private MudDataGrid<SectionSchedule> _mudDataGrid = null!;
-    SectionCreateCredentials model = new();
-    //bool _success;
-
-    //List<SectionSchedule> _items = new();
+    readonly SectionCreateCredentials _model = new();
 
     async Task AddSchedule()
     {
@@ -103,17 +99,17 @@
 
         if (!result.Canceled)
         {
-            model.Schedules.Add((SectionSchedule)result.Data);
+            _model.Schedules.Add((SectionSchedule)result.Data);
 
-            Snackbar.Add("Расписание добавлено!", Severity.Normal);
+            Snackbar.Add("Расписание добавлено!");
             await _mudDataGrid.ReloadServerData();
         }
     }
 
     Task RemoveSchedule()
     {
-        if (model.Schedules.Any())
-            model.Schedules.RemoveAt(0);
+        if (_model.Schedules.Any())
+            _model.Schedules.RemoveAt(0);
         return Task.CompletedTask;
     }
 
@@ -161,28 +157,32 @@
         }
     }
 
-    private void OnValidSubmit(EditContext context)
-    {
-    // bind-IsValid="@(model.SectionType is null && model.Teacher is null && model.GroupName == string.Empty)"
-    //_success = true;
-        StateHasChanged();
-    }
-
     private async Task Submit()
     {
-        await _form.Validate();
+        await _form?.Validate()!;
 
+        if (_model.Schedules.Count == 0)
+        {
+            Snackbar.Add("Добавьте расписание", Severity.Error);
+            _form.IsValid = false;
+        }
+        
         if (_form.IsValid)
         {
-            // var section = new SectionWithSchedule()
-            // {
-            //     Schedules = model.Schedules.ToArray(),
-            //     GroupName = model.GroupName,
-            //     TeacherId = model.Teacher.Id,
-            //     SectionTypeId = model.SectionType.Id
-            // };
-            // _repository.CreateSection(section);
-            Snackbar.Add("Submited!");
+            var section = new SectionWithSchedule()
+            {
+                Schedules = _model.Schedules.ToArray(),
+                GroupName = _model.GroupName,
+                TeacherId = _model.Teacher!.Id,
+                SectionTypeId = _model.SectionType!.Id
+            };
+            
+            var createSectionCommand = new CreateSectionCommand(section);
+            await Sender.Send(createSectionCommand);
+            
+            NavigationManager.NavigateTo($"/sections");
+            
+            Snackbar.Add("Кружок успешно добавлен!", Severity.Success);
         }
     }
 

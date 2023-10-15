@@ -136,9 +136,16 @@ public sealed class SectionRepository : ISectionRepository
         {
             Section = sectionDb, TeacherId = section.TeacherId
         };
-
-        var schedules = section.Schedules.Select(x => _mapper.Map(x));
-
+        
+        var schedules = section.Schedules.Select(x => new Entities.Schedule
+        {
+            Section = sectionDb, 
+            Cabinet = x.Cabinet, 
+            Duration = x.Duration, 
+            Time = x.Time, 
+            DayOfWeek = (int)x.DayOfWeek
+        });
+    
         await _context.Sections.AddAsync(sectionDb);
         await _context.SectionTeachers.AddAsync(sectionTeacher);
         await _context.Schedules.AddRangeAsync(schedules);
