@@ -189,7 +189,7 @@
         if (_model.Schedules.Count == 0)
         {
             Snackbar.Add("Добавьте расписание", Severity.Error);
-            _form.IsValid = false;
+            return;
         }
 
         if (_form.IsValid)
