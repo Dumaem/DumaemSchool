@@ -8,16 +8,34 @@
 @using MediatR;
 
 @inject ISender Sender;
+@inject ISnackbar Snackbar;
 @inject IDialogService DialogService
 
+<MudContainer Style="margin-left: 0%; margin-top: 2%">
+    <MudItem xs="6" sm="6" md="4">
+        <MudText Typo="Typo.h6">Добавление учеников на кружок</MudText>
+        <MudSpacer />
+
+        <MudAutocomplete Variant="MudBlazor.Variant.Outlined" T="StudentToAddToSection" Label="ФИО ученика" @bind-Value="_selectedStudent" SearchFunc="@SearchStudentsToAdd"
+                         ResetValueOnEmptyText="@true" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" />
+
+        <MudButton Disabled="@(_selectedStudent is null)"
+                   Style="margin-top: 2%" Variant="MudBlazor.Variant.Filled" OnClick="@AddStudentToSection" Color="Color.Primary">Записать студента на кружок</MudButton>
+    </MudItem>
+</MudContainer>
+
+
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
+
     <MudDataGrid @ref="@_mudDataGrid" ServerData="@GetData" T="SectionStudent" Filterable="true" SortMode="@SortMode.Multiple"
-        Groupable="false" Hideable="true">
+                 Groupable="false" Hideable="true">
 
         <ToolBarContent>
-            <MudTextField Style="margin-left: 70%" ValueChanged="@(EventCallback.Factory.Create<string>(this, OnSearch))"
-                    Placeholder="Поиск" Adornment="Adornment.Start" Immediate="true"
-                    AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            <MudText Typo="Typo.h6">Список учеников, записанных на кружок</MudText>
+            <MudSpacer />
+            <MudTextField Style="margin-left: 60%" ValueChanged="@(EventCallback.Factory.Create<string>(this, OnSearch))"
+                          Placeholder="Поиск" Adornment="Adornment.Start" Immediate="true"
+                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
         </ToolBarContent>
 
 
@@ -28,9 +46,9 @@
             <TemplateColumn Sortable="false" Filterable="false">
                 <CellTemplate>
                     <MudStack Row>
-                        <MudButton Style="margin-left: 53%" Size="@Size.Small" Variant="@MudBlazor.Variant.Filled" 
-                            OnClick="@(async() => await DeleteStudentFromSection(context.Item.StudentId, context.Item.SectionId))" 
-                            Color="@Color.Error">Удалить студента с кружка</MudButton>
+                        <MudButton Style="margin-left: 53%" Size="@Size.Small" Variant="@MudBlazor.Variant.Filled"
+                                   OnClick="@(async() => await DeleteStudentFromSection(context.Item.StudentId, context.Item.SectionId))"
+                                   Color="@Color.Error">Удалить студента с кружка</MudButton>
                     </MudStack>
                 </CellTemplate>
             </TemplateColumn>
@@ -41,12 +59,13 @@
 
 
 @code {
-    [Parameter] public int? SectionId { get; set; }
+    [Parameter] public int SectionId { get; set; }
 
     private MudDataGrid<SectionStudent> _mudDataGrid = null!;
 
     private string _searchString = "";
 
+    private StudentToAddToSection? _selectedStudent;
 
     private void OnSearch(string text)
     {
@@ -70,14 +89,99 @@
 
     }
 
+    private async Task<IEnumerable<StudentToAddToSection>> SearchStudentsToAdd(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return (await Sender.Send(new SectionStudentsToAddQuery(new ListParam
+                {
+                    Filters = new[]
+                                {
+                                    new FilterDefinition { Value = SectionId, Operand = FilterOperand.Equal,
+                                        FieldName = nameof(StudentToAddToSection.SectionId) }
+                                }
+                }))).Items.ToList();
+        }
+
+        return (await Sender.Send(new SectionStudentsToAddQuery(new ListParam
+            {
+                Filters = new[]
+                            {   new FilterDefinition { Value = SectionId, Operand = FilterOperand.Equal,
+                                    FieldName = nameof(StudentToAddToSection.SectionId) },
+                                new FilterDefinition { Value = value, Operand = FilterOperand.Contains,
+                                    FieldName = nameof(StudentToAddToSection.Name) }
+                            }
+            }
+        ))).Items.ToList();
+    }
+
+    private async Task<bool> IsStudentAvailable()
+    {
+        var listSchedulesForSection = (await Sender.Send(new SectionScheduleQuery(new ListParam
+            {
+                Filters = new[]
+                    {
+                    new FilterDefinition {Value = SectionId, Operand = FilterOperand.Equal,
+                        FieldName = nameof(SectionSchedule.SectionId)}
+                }
+            }))).Items.ToList();
+
+        var checkStudentCommand = new CheckStudentAvailabilityToSectionCommand(_selectedStudent!.Id, listSchedulesForSection);
+        var res = await Sender.Send(checkStudentCommand);
+
+        return res;
+    }
+
+    public async Task AddStudentToSection()
+    {
+        if (!await IsStudentAvailable())
+        {
+            Snackbar.Add("Расписание кружков, на которые записан студент, пересекается с расписанием данного кружка!", Severity.Warning);
+            return;
+        }
+
+        var isAgreedToAdd = await IsSuccessAddDialogResult();
+
+        if (!isAgreedToAdd)
+        {
+            return;
+        }
+
+        var addStudentToSectionCommand = new AddStudentToSectionCommand(_selectedStudent!.Id, SectionId);
+        var res = await Sender.Send(addStudentToSectionCommand);
+
+        Snackbar.Add("Студент успешно записан на кружок!", Severity.Success);
+
+        _selectedStudent = null;
+
+        await _mudDataGrid.ReloadServerData();
+    }
+
     private async Task<bool> IsSuccessDeleteDialogResult()
     {
         var options = new MudBlazor.DialogOptions { CloseOnEscapeKey = true };
         var parameters = new DialogParameters
             {
-                ["DialogContent"] = "Вы уверены, что хотите удалить данного студента с кружка?"
+                ["DialogContent"] = "Вы уверены, что хотите удалить данного студента с кружка?",
+                ["Color"] = MudBlazor.Color.Error
             };
         var dialog = await DialogService.ShowAsync<DialogWindow>("Подтверждение удаления", parameters, options);
+
+        var result = await dialog.Result;
+
+        return !result.Canceled;
+    }
+
+    private async Task<bool> IsSuccessAddDialogResult()
+    {
+        var options = new MudBlazor.DialogOptions { CloseOnEscapeKey = true };
+        var parameters = new DialogParameters
+            {
+                ["DialogContent"] = "Вы уверены, что хотите записать данного студента на кружок?",
+                ["Color"] = MudBlazor.Color.Primary
+            };
+
+        var dialog = await DialogService.ShowAsync<DialogWindow>("Подтверждение записи", parameters, options);
 
         var result = await dialog.Result;
 
@@ -87,15 +191,12 @@
     private async Task<GridData<SectionStudent>> GetData(GridState<SectionStudent> state)
     {
         var filters = new List<FilterDefinition>();
-        if (SectionId is not null)
-        {
-            filters.Add(new FilterDefinition { FieldName = nameof(SectionStudent.SectionId), Value = SectionId, Operand = FilterOperand.Equal });
-        }
+
+        filters.Add(new FilterDefinition { FieldName = nameof(SectionStudent.SectionId), Value = SectionId, Operand = FilterOperand.Equal });
         filters.Add(new FilterDefinition { FieldName = nameof(SectionStudent.StudentName), Value = _searchString, Operand = FilterOperand.Contains });
 
         var result = await Sender.Send(new SectionStudentQuery(FilterConverter.GenerateParamsFromGrid(state, filters)));
 
         return new GridData<SectionStudent> { Items = result.Items, TotalItems = result.TotalItemsCount };
     }
-
 }

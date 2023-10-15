@@ -13,9 +13,9 @@
             <MudText Typo="Typo.h6">Список кружков</MudText>
         </ToolBarContent>
         <Columns>
-            @if (TeacherId is null)
+            @if(TeacherId is null)
             {
-                <PropertyColumn Filterable="true" Property="x => x.TeacherName" SortBy="x => x.TeacherName" Title="ФИО преподавателя"/>
+                <PropertyColumn Filterable="true" Property="x => x.TeacherName" SortBy="x => x.TeacherName" Title="ФИО преподавателя" />
             }
             <PropertyColumn Filterable="true" Property="x => x.GroupName" SortBy="x => x.GroupName" Title="Наименование группы"/>
             <PropertyColumn Filterable="true" Property="x => x.TypeName" SortBy="x => x.TypeName" Title="Наименование вида кружка"/>
@@ -40,11 +40,10 @@
     private async Task<GridData<SectionInfo>> GetData(GridState<SectionInfo> state)
     {
         var filters = new List<FilterDefinition>();
-        if (TeacherId is not null)
+        if(TeacherId is not null)
         {
-            filters.Add(new FilterDefinition { FieldName = nameof(SectionInfo.TeacherId), Value = TeacherId, Operand = FilterOperand.Equal });
+            filters.Add(new FilterDefinition { FieldName = nameof(SectionInfo.TeacherId), Value = TeacherId, Operand = FilterOperand.Equal });  
         }
-
         var result = await Sender.Send(new SectionsInfoQuery(FilterConverter.GenerateParamsFromGrid(state, filters)));
 
         return new GridData<SectionInfo> { Items = result.Items, TotalItems = result.TotalItemsCount };

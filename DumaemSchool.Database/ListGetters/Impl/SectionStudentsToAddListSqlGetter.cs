@@ -32,7 +32,7 @@ public sealed class SectionStudentsToAddListSqlGetter : AbstractListSqlGenerator
         {
             SelectSql = $@"WITH section_students AS (SELECT ss.student_id, ss.section_id
                                                      FROM public.section_student ss
-                                                     WHERE {sectionIdFilter.SqlText})
+                                                     WHERE {sectionIdFilter.SqlText} AND ss.is_actual)
                            SELECT {SelectString}, @{sectionIdFilter.ParameterName} ""SectionId""
                            FROM public.student s
                                 LEFT JOIN section_students ss ON s.id = ss.student_id
@@ -41,7 +41,7 @@ public sealed class SectionStudentsToAddListSqlGetter : AbstractListSqlGenerator
                            {pagination}",
             CountSql = $@"WITH section_students AS (SELECT ss.student_id, ss.section_id
                                                      FROM public.section_student ss
-                                                     WHERE {sectionIdFilter})
+                                                     WHERE {sectionIdFilter.SqlText} AND ss.is_actual)
                            SELECT {SelectString} 
                            FROM public.student s
                                 LEFT JOIN section_students ss ON s.id = ss.student_id

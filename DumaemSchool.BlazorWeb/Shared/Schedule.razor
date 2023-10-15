@@ -16,15 +16,6 @@
             <PropertyColumn Filterable="false" Property="x => x.Time" SortBy="x => x.Time" Title="Время проведения занятия" />
             <PropertyColumn Filterable="false" Property="x => x.Duration" SortBy="x => x.Duration" Title="Продолжительность занятия (мин.)" />
             <PropertyColumn Filterable="true" Property="x => x.Cabinet" SortBy="x => x.Cabinet" Title="Кабинет" />
-
-            @*             <TemplateColumn Sortable="false" Filterable="false">
-                <CellTemplate>
-                    <MudStack Row>
-                        // На будущее
-                        <MudButton Style="margin-left: 53%" Disabled="@(context.Item.IsDeleted)" Size="@Size.Small" Variant="@MudBlazor.Variant.Filled" OnClick="@(async() => await FireTeacher(context.Item.Id))" Color="@Color.Error">Уволить</MudButton>
-                    </MudStack>
-                </CellTemplate>
-            </TemplateColumn> *@
         </Columns>
 
     </MudDataGrid>
@@ -32,18 +23,14 @@
 
 
 @code {
-    [Parameter] public int? SectionId { get; set; }
+    [Parameter] public int SectionId { get; set; }
 
     private MudDataGrid<SectionSchedule> _mudDataGrid = null!;
-
 
     private async Task<GridData<SectionSchedule>> GetData(GridState<SectionSchedule> state)
     {
         var filters = new List<FilterDefinition>();
-        if (SectionId is not null)
-        {
-            filters.Add(new FilterDefinition { FieldName = nameof(SectionSchedule.SectionId), Value = SectionId, Operand = FilterOperand.Equal });
-        }
+        filters.Add(new FilterDefinition { FieldName = nameof(SectionSchedule.SectionId), Value = SectionId, Operand = FilterOperand.Equal });
 
         var result = await Sender.Send(new SectionScheduleQuery(FilterConverter.GenerateParamsFromGrid(state, filters)));
 

@@ -1,6 +1,8 @@
 ﻿using Dapper;
 using DumaemSchool.Core.DataManipulation;
+using DumaemSchool.Core.Models;
 using DumaemSchool.Core.OutputModels;
+using DumaemSchool.Database.Entities;
 using DumaemSchool.Database.ListGetters;
 using DumaemSchool.Database.Mappers;
 using Microsoft.EntityFrameworkCore;
@@ -32,7 +34,8 @@ public sealed class TeacherRepository : ITeacherRepository
 
         return new ListDataResult<TeacherDto>
         {
-            Items = result, TotalItemsCount = count
+            Items = result,
+            TotalItemsCount = count
         };
     }
 
@@ -76,6 +79,60 @@ public sealed class TeacherRepository : ITeacherRepository
         teacher.DateDeleted = deleteDate;
         _context.Teachers.Update(teacher);
         await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> CheckTeacherAvailabilityToSection(int teacherId, List<SectionSchedule> sectionSchedule)
+    {
+        var sectionTimeRanges = sectionSchedule.Select(x => new TimeRange
+        {
+            DayOfWeek = x.DayOfWeek,
+            TimeStart = x.Time,
+            TimeEnd = x.Time.Add(x.Duration),
+        });
+
+        var busyTimeRangesForStudent = await (from schedule in _context.Schedules
+                                              join sectionTeacher in _context.SectionTeachers
+                                              on schedule.SectionId equals sectionTeacher.SectionId
+                                              where sectionTeacher.IsActual == true && sectionTeacher.TeacherId == teacherId
+                                              select new TimeRange
+                                              {
+                                                  DayOfWeek = (DayOfWeek)schedule.DayOfWeek,
+                                                  TimeStart = schedule.Time,
+                                                  TimeEnd = schedule.Time.Add(schedule.Duration)
+                                              }).ToArrayAsync();
+
+        if (busyTimeRangesForStudent.Any(busyTimeRange =>
+        sectionTimeRanges.Any(sectionTimeRange =>
+        busyTimeRange.Overlaps(sectionTimeRange))))
+        {
+            return false;
+        }
+
+        return true;
+    }
+ 
+    public async Task<bool> AddTeacherToSection(int teacherId, int sectionId)
+    {
+        var foundTeacher = await _context.Teachers.FindAsync(teacherId);
+        var foundSection = await _context.Sections.FindAsync(sectionId);
+        var foundOldSectionTeacherRecord = await _context.SectionTeachers
+                                    .FirstOrDefaultAsync(x => x.IsActual == true && x.SectionId == sectionId);
+
+        if (foundTeacher is null || foundSection is null || foundOldSectionTeacherRecord is null) return false;
+
+        var sectionTeacher = new SectionTeacher
+        {
+            TeacherId = teacherId,
+            SectionId = sectionId,
+        };
+
+        foundOldSectionTeacherRecord!.IsActual = false;
+
+        _context.SectionTeachers.Update(foundOldSectionTeacherRecord);
+        await _context.SectionTeachers.AddAsync(sectionTeacher);
+        await _context.SaveChangesAsync();
+        _context.ChangeTracker.Clear();
         return true;
     }
 }

@@ -1,8 +1,10 @@
 ﻿using Dapper;
 using DumaemSchool.Core.DataManipulation;
+using DumaemSchool.Core.Models;
 using DumaemSchool.Core.OutputModels;
 using DumaemSchool.Database.ListGetters;
 using LanguageExt;
+using LanguageExt.ClassInstances;
 using Microsoft.EntityFrameworkCore;
 using System.Xml.Linq;
 using DumaemSchool.Core.Models;
@@ -21,10 +23,10 @@ public sealed class SectionRepository : ISectionRepository
     private readonly IListSqlGenerator<SectionSchedule> _sectionScheduleSqlGenerator;
     private readonly IListSqlGenerator<StudentToAddToSection> _studentToAddSqlGenerator;
 
-    public SectionRepository(IListSqlGenerator<SectionInfo> sectionInfoSqlGenerator, 
-        ApplicationContext context, 
-        IListSqlGenerator<SectionStudent> sectionStudentSqlGenerator, 
-        IListSqlGenerator<SectionSchedule> sectionScheduleSqlGenerator, 
+    public SectionRepository(IListSqlGenerator<SectionInfo> sectionInfoSqlGenerator,
+        ApplicationContext context,
+        IListSqlGenerator<SectionStudent> sectionStudentSqlGenerator,
+        IListSqlGenerator<SectionSchedule> sectionScheduleSqlGenerator,
         IListSqlGenerator<StudentToAddToSection> studentToAddSqlGenerator)
     {
         _mapper = new DatabaseMapper();
@@ -90,7 +92,8 @@ public sealed class SectionRepository : ISectionRepository
 
         return new ListDataResult<StudentToAddToSection>
         {
-            Items = result, TotalItemsCount = result.Count
+            Items = result,
+            TotalItemsCount = result.Count
         };
     }
 
@@ -113,17 +116,56 @@ public sealed class SectionRepository : ISectionRepository
 
         if (foundStudent is null || foundSection is null) return false;
 
-        var sectionStudent = new SectionStudent
+        var sectionStudent = new Database.Entities.SectionStudent
         {
             StudentId = studentId,
             SectionId = sectionId,
             DateAdded = DateOnly.FromDateTime(DateTime.Now)
         };
 
-        await _context.AddAsync(sectionStudent);
+        await _context.SectionStudents.AddAsync(sectionStudent);
         await _context.SaveChangesAsync();
         return true;
     }
+
+    public async Task<bool> CheckStudentAvailabilityToSection(int studentId, List<SectionSchedule> sectionSchedule)
+    {
+        var sectionTimeRanges = sectionSchedule.Select(x => new TimeRange
+        {
+            DayOfWeek = x.DayOfWeek,
+            TimeStart = x.Time,
+            TimeEnd = x.Time.Add(x.Duration),
+        });
+
+        var busyTimeRangesForStudent = await (from schedule in _context.Schedules
+                                       join sectionStudent in _context.SectionStudents
+                                       on schedule.SectionId equals sectionStudent.SectionId
+                                       where sectionStudent.IsActual == true && sectionStudent.StudentId == studentId
+                                       select new TimeRange
+                                       {
+                                           DayOfWeek = (DayOfWeek)schedule.DayOfWeek,
+                                           TimeStart = schedule.Time,
+                                           TimeEnd = schedule.Time.Add(schedule.Duration)
+                                       }).ToArrayAsync();
+
+        if (busyTimeRangesForStudent.Any(busyTimeRange => 
+        sectionTimeRanges.Any(sectionTimeRange =>
+        busyTimeRange.Overlaps(sectionTimeRange))))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    public async Task<TeacherDto> GetTeacherFromSection(int sectionId)
+    {
+        var teacher = (await _context.SectionTeachers.Include(x => x.Teacher).FirstOrDefaultAsync(x => x.IsActual == true 
+        && x.SectionId == sectionId))!.Teacher;
+        return new TeacherDto { Id = teacher.Id, Name = teacher.Name };
+    }
+
+
 
     public async Task<Section> CreateSection(SectionWithSchedule section)
     {
