@@ -2,7 +2,7 @@
 using Dapper;
 using DumaemSchool.Core.DataManipulation;
 
-namespace DumaemSchool.Database.Mappers;
+namespace DumaemSchool.Database.DataManipulation;
 
 public static class SqlUtility
 {
@@ -26,7 +26,7 @@ public static class SqlUtility
         FilterOperand.EndsWith,
     };
 
-    public static string? GetFilterToSql(FilterDefinition filter, DynamicParameters parameters,
+    public static SqlFilterDefinition? GetFilterToSql(FilterDefinition filter, DynamicParameters parameters,
         IReadOnlyDictionary<string, string>? propertyMap = null)
     {
         var parameterKey = filter.ToString();
@@ -35,13 +35,22 @@ public static class SqlUtility
         if (filter.Operand is FilterOperand.IsEmpty or FilterOperand.IsNotEmpty)
         {
             var addNot = filter.Operand == FilterOperand.IsNotEmpty; 
-            return $"{fieldName} is {(addNot ? "NOT" : "")} null";
+            return new SqlFilterDefinition
+            {
+                SqlText = $"{fieldName} is {(addNot ? "NOT" : "")} null",
+            };
+        }
+
+        var filterValue = filter.Value;
+        if (filter.Value?.GetType().IsEnum is true)
+        {
+            filterValue = (int)filter.Value;
         }
 
         string? operandString = default;
-        switch (filter.Value)
+        switch (filterValue)
         {
-            case int integerValue:
+            case int or double or DateTime:
             {
                 if (!IntegerOperands.Contains(filter.Operand))
                     return null;
@@ -56,26 +65,12 @@ public static class SqlUtility
                     _ => throw new UnreachableException()
                 };
 
-                parameters.Add(parameterKey, integerValue);
-                return $"{fieldName} {operandString} @{parameterKey}";
-            }
-            case double doubleValue:
-            {
-                if (!IntegerOperands.Contains(filter.Operand))
-                    return null;
-                operandString = filter.Operand switch
+                parameters.Add(parameterKey, filter.Value);
+                return new SqlFilterDefinition
                 {
-                    FilterOperand.Equal => "=",
-                    FilterOperand.NotEqual => "<>",
-                    FilterOperand.GreaterThan => ">",
-                    FilterOperand.LessThan => "<",
-                    FilterOperand.GreaterThanOrEqual => ">=",
-                    FilterOperand.LessThanOrEqual => "<=",
-                    _ => throw new UnreachableException()
+                    SqlText = $"{fieldName} {operandString} @{parameterKey}",
+                    ParameterName = parameterKey
                 };
-
-                parameters.Add(parameterKey, doubleValue);
-                return $"{fieldName} {operandString} @{parameterKey}";
             }
             case string stringValue:
                 if (!StringOperands.Contains(filter.Operand))
@@ -108,12 +103,19 @@ public static class SqlUtility
                 }
 
                 parameters.Add(parameterKey, stringValue);
-                return $"{fieldName} {operandString} @{parameterKey}";
+                return new SqlFilterDefinition
+                {
+                    SqlText = $"{fieldName} {operandString} @{parameterKey}",
+                    ParameterName = parameterKey
+                };
             case bool boolValue:
                 if (filter.Operand != FilterOperand.Equal)
                     return null;
 
-                return $"{(!boolValue ? "NOT" : "")} {fieldName}";
+                return new SqlFilterDefinition
+                {
+                    SqlText = $"{(!boolValue ? "NOT" : "")} {fieldName}"
+                };
             default:
                 return null;
         }

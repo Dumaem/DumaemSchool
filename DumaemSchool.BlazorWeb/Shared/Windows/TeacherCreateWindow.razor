@@ -1,0 +1,50 @@
+﻿@using DumaemSchool.BlazorWeb.Data
+@using DumaemSchool.Core.Commands.Teacher
+@using DumaemSchool.Core.Models
+@using MediatR
+
+@inject ISender Sender;
+@inject ISnackbar Snackbar;
+
+<MudForm @bind-IsValid="_isValid" @ref="@_form" @onsubmit="@(async() => await CreateTeacher())">
+    <MudDialog>
+        <DialogContent>
+            <MudStack>
+                <MudTextField Label="Почта" Class="mt-3" Required="true" FullWidth="true"
+                              @bind-Value="_newTeacher.Email" InputType="InputType.Email" Immediate For="@(() => _newTeacher.Email)"/>
+
+                <MudTextField FullWidth="true" Label="ФИО" Immediate For="@(() => _newTeacher.Name)" InputType="InputType.Text" @bind-Value="_newTeacher.Name"/>
+            </MudStack>
+        </DialogContent>
+        <DialogActions>
+            <MudButton Disabled="@(!_isValid)" ButtonType="MudBlazor.ButtonType.Submit"
+                       Variant="MudBlazor.Variant.Filled" Color="Color.Primary" Class="ml-auto" Style="width: 8vw">
+                Создать
+            </MudButton>
+        </DialogActions>
+    </MudDialog>
+</MudForm>
+
+@code {
+
+    [CascadingParameter]
+    MudDialogInstance? MudDialog { get; set; }
+
+    private MudForm? _form;
+    private TeacherCreateCredentials _newTeacher = new();
+    private bool _isValid;
+
+    private async Task CreateTeacher()
+    {
+        var teacher = new Teacher
+        { Name = _newTeacher.Name };
+        var addTeacherCommand = new AddTeacherCommand(teacher, _newTeacher.Email);
+        var result = await Sender.Send(addTeacherCommand);
+        if (!result.IsSuccess)
+        {
+            Snackbar.Add("Не удалось добавить преподавателя!", Severity.Error);
+            return;
+        }
+        MudDialog?.Close(DialogResult.Ok(true));
+    }
+}

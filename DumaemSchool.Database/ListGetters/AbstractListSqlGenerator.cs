@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using Dapper;
 using DumaemSchool.Core.DataManipulation;
-using DumaemSchool.Database.Mappers;
+using DumaemSchool.Database.DataManipulation;
 using DumaemSchool.Database.Mappers.EntityMapping.Base;
 
 namespace DumaemSchool.Database.ListGetters;
@@ -40,7 +40,8 @@ public abstract class AbstractListSqlGenerator<T> : IListSqlGenerator<T> where T
             return "";
 
         return
-            $" AND {string.Join(" AND ", presentFilters.Select(x => SqlUtility.GetFilterToSql(x, dynamicParams, PropertyToSqlMapping)).Where(x => !string.IsNullOrEmpty(x)))} ";
+            $" AND {string.Join(" AND ", presentFilters.Select(x => SqlUtility.GetFilterToSql(x, dynamicParams, PropertyToSqlMapping)?.SqlText)
+                .Where(x => x is not null))} ";
     }
 
     protected string GetHavingExpression(FilterDefinition[] filters, DynamicParameters dynamicParams)
@@ -55,8 +56,8 @@ public abstract class AbstractListSqlGenerator<T> : IListSqlGenerator<T> where T
             return "";
 
         return $" {string.Join(" AND ", presentFilters
-                .Select(x => SqlUtility.GetFilterToSql(x, dynamicParams, PropertyToSqlMapping))
-                .Where(x => !string.IsNullOrEmpty(x)))} ";
+            .Select(x => SqlUtility.GetFilterToSql(x, dynamicParams, PropertyToSqlMapping)?.SqlText)
+            .Where(x => x is not null))} ";
     }
 
     protected string GetOrderByExpression(SortingDefinition[] sortingDefinitions)

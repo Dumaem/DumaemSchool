@@ -30,10 +30,8 @@ internal sealed class TeacherCreatedNotificationHandler : INotificationHandler<T
             }
 
             var user = new SchoolUser { Email = notification.Email, UserName = notification.Email };
-            // TODO: генерация пароля
-            var password = "kredit200";
 
-            var res = await _userManager.CreateAsync(user, password);
+            var res = await _userManager.CreateAsync(user);
             if (!res.Succeeded)
             {
                 throw new TeacherCreationException($"Could not create a user: {string.Join("; ", res.Errors.Select(x => $"{x.Code} - {x.Description}"))}");
@@ -41,6 +39,7 @@ internal sealed class TeacherCreatedNotificationHandler : INotificationHandler<T
 
             await _userManager.AddToRoleAsync(user, Role.Teacher);
             await _userManager.AddClaimAsync(user, new Claim(UserClaims.TeacherId, notification.Teacher.Id.ToString()));
+            await transaction.CommitAsync(cancellationToken);
         }
         catch (Exception)
         {

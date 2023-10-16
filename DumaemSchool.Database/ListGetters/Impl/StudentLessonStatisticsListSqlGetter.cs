@@ -1,7 +1,7 @@
 ﻿using Dapper;
 using DumaemSchool.Core.DataManipulation;
 using DumaemSchool.Core.OutputModels;
-using DumaemSchool.Database.Mappers;
+using DumaemSchool.Database.DataManipulation;
 using DumaemSchool.Database.Mappers.EntityMapping.Base;
 
 namespace DumaemSchool.Database.ListGetters.Impl;
@@ -34,10 +34,10 @@ public sealed class StudentLessonStatisticsListSqlGetter : AbstractListSqlGenera
                                     JOIN public.schedule sch 
                                         ON sch.id = l.schedule_id 
                                     JOIN public.section_student ss
-                                        ON ss.section_id = sch.section_id
+                                        ON ss.section_id = sch.section_id AND ss.is_actual
                                     JOIN public.student s
                                         ON s.id = ss.student_id
-                                WHERE {lessonIdFilter} AND ss.date_added <= l.date
+                                WHERE {lessonIdFilter.SqlText} AND ss.date_added <= l.date
                            )
                            SELECT {SelectString} 
                            FROM section_students ss

@@ -21,6 +21,12 @@ public static class FilterConverter
         {FilterOperator.Number.GreaterThanOrEqual, FilterOperand.GreaterThanOrEqual},
         {FilterOperator.Number.LessThan, FilterOperand.LessThan},
         {FilterOperator.Number.LessThanOrEqual, FilterOperand.LessThanOrEqual},
+        {FilterOperator.DateTime.Is, FilterOperand.Equal},
+        {FilterOperator.DateTime.IsNot, FilterOperand.NotEqual},
+        {FilterOperator.DateTime.After, FilterOperand.GreaterThan},
+        {FilterOperator.DateTime.OnOrAfter, FilterOperand.GreaterThanOrEqual},
+        {FilterOperator.DateTime.Before, FilterOperand.LessThan},
+        {FilterOperator.DateTime.OnOrBefore, FilterOperand.LessThanOrEqual},
     };
 
     public static IEnumerable<FilterDefinition> Convert<T>(IEnumerable<IFilterDefinition<T>> mudFilters)
