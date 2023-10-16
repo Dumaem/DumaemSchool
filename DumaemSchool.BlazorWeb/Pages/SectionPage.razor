@@ -62,9 +62,15 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await CheckAccessToWatchPage();
         _selectedTeacher = await Sender.Send(new GetTeacherFromSectionQuery(Id));
+        if(_selectedTeacher is null)
+        {
+            NavigationManager.NavigateTo($"/sections");
+            return;
+        }
+
         _oldTeacherId = _selectedTeacher.Id;
+        await CheckAccessToWatchPage();
         _initialized = true;
     }
 
