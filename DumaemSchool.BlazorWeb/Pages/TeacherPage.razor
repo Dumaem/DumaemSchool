@@ -8,10 +8,17 @@
 
 @inject ISender Sender;
 @inject NavigationManager NavigationManager;
-@inject UserManager<SchoolUser> UserManager
+@inject UserManager<SchoolUser> UserManager;
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
+
 
 
 @if (currentTeacher is null)
+{
+    return;
+}
+
+@if(!IsAccessedToWatchPage().Result)
 {
     return;
 }
@@ -42,7 +49,7 @@
 
 <Sections TeacherId="Id"></Sections>
 
- @code {
+@code {
 
     [Parameter]
     public int Id { get; set; }
@@ -65,6 +72,18 @@
             currentTeacher = result;
             savedTeacherName = currentTeacher.Name;
         }
+    }
+
+    private async Task<bool> IsAccessedToWatchPage()
+    {
+        var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+
+        if (userIdentity.IsInRole(Role.DeputyDirector))
+        {
+            return true;
+        }
+
+        return (int.Parse(userIdentity.Claims.First(x => x.Type == UserClaims.TeacherId).Value)) == Id;
     }
 
     private async Task EditTeacher(Teacher teacher)

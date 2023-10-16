@@ -7,10 +7,12 @@
 @using DumaemSchool.Core.OutputModels
 @using DumaemSchool.Core.DataManipulation
 @using DumaemSchool.Core.Queries.Section
+
 @inject NavigationManager NavigationManager;
 @inject ISender Sender;
 @inject ISnackbar Snackbar;
 @inject IDialogService DialogService;
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
 
 
 <AuthorizeView Roles="@Role.DeputyDirector">
@@ -23,6 +25,11 @@
         </MudContainer>
     </Authorized>
 </AuthorizeView>
+
+@if (!IsAccessedToWatchPage().Result)
+{
+    return;
+}
 
 <MudTabs Elevation="4" Rounded="false" Color="@Color.Primary">
     @if (_initialized)
@@ -91,6 +98,18 @@
         var res = await Sender.Send(checkTeacherCommand);
 
         return res;
+    }
+
+    private async Task<bool> IsAccessedToWatchPage()
+    {
+        var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+
+        if (userIdentity.IsInRole(Role.DeputyDirector))
+        {
+            return true;
+        }
+
+        return (int.Parse(userIdentity.Claims.First(x => x.Type == UserClaims.TeacherId).Value)) == _oldTeacherId;
     }
 
     public async Task AddTeacherToSection()
