@@ -91,7 +91,7 @@ public sealed class TeacherRepository : ITeacherRepository
             TimeEnd = x.Time.Add(x.Duration),
         });
 
-        var busyTimeRangesForStudent = await (from schedule in _context.Schedules
+        var busyTimeRanges = await (from schedule in _context.Schedules
                                               join sectionTeacher in _context.SectionTeachers
                                               on schedule.SectionId equals sectionTeacher.SectionId
                                               where sectionTeacher.IsActual == true && sectionTeacher.TeacherId == teacherId
@@ -102,14 +102,9 @@ public sealed class TeacherRepository : ITeacherRepository
                                                   TimeEnd = schedule.Time.Add(schedule.Duration)
                                               }).ToArrayAsync();
 
-        if (busyTimeRangesForStudent.Any(busyTimeRange =>
-        sectionTimeRanges.Any(sectionTimeRange =>
-        busyTimeRange.Overlaps(sectionTimeRange))))
-        {
-            return false;
-        }
-
-        return true;
+        return !busyTimeRanges.Any(busyTimeRange =>
+            sectionTimeRanges.Any(sectionTimeRange =>
+                busyTimeRange.Overlaps(sectionTimeRange)));
     }
  
     public async Task<bool> AddTeacherToSection(int teacherId, int sectionId)

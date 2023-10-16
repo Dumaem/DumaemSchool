@@ -4,6 +4,7 @@
 @using System.Globalization
 @using DumaemSchool.Auth.Models
 @using DumaemSchool.Core.Commands.Lesson
+@using DumaemSchool.Core.Commands.Teacher
 @using DumaemSchool.Core.Models
 @using MediatR
 @using Role = DumaemSchool.Auth.Models.Role
@@ -63,7 +64,7 @@
     <AuthorizeView Roles="@Role.DeputyDirector">
         <div class="d-flex justify-content-md-between align-items-middle mt-5">
             <MudContainer Class="ma-0 pa-0" MaxWidth="MaxWidth.False">
-                <MudTextField InputType="InputType.Text" Variant="Variant.Outlined" T="string" ReadOnly="true" Label="Учитель" @bind-Value="@(_newTeacher.Name)"/>
+                <MudTextField InputType="InputType.Text" Variant="Variant.Outlined" T="string" ReadOnly="true" Label="Заменяющий учитель" @bind-Value="@(_newTeacher.Name)"/>
             </MudContainer>
             <MudButton Disabled="@(_teacherForReplace.Id == 0 && IsCanCreate)" Class="ml-3" Style="width: 10vw" Variant="Variant.Filled" OnClick="@(() => ShowTeachers(true))" Color="Color.Primary">Выбрать учителя</MudButton>
         </div>
@@ -83,7 +84,6 @@
     private TeacherDto _teacherForReplace = new();
     private TeacherDto _newTeacher = new();
     private bool _isConducted = true;
-    private bool IsReplace => _newTeacher.Id != 0 && _teacherForReplace.Id != 0;
 
     private async Task ShowSections()
     {
@@ -104,7 +104,9 @@
 
         if (!result.Canceled)
         {
-            _selectedSection = (SectionInfo) result.Data;
+            _selectedSection = (SectionInfo)result.Data;
+            _selectedSectionSchedule.Clear();
+            _selectedDate = null;
         }
     }
 
@@ -137,7 +139,8 @@
         if (!result.Canceled)
         {
             _selectedSectionSchedule.Clear();
-            _selectedSectionSchedule.Add((SectionSchedule) result.Data);
+            _selectedSectionSchedule.Add((SectionSchedule)result.Data);
+            _selectedDate = null;
         }
         await InvokeAsync(StateHasChanged);
     }
@@ -160,16 +163,20 @@
 
         if (result.Canceled)
             return;
-        
+
         if (!isForNew)
         {
-            _teacherForReplace = (TeacherDto) result.Data;
+            _teacherForReplace = (TeacherDto)result.Data;
+            _selectedSection = new SectionInfo();
+            _selectedSectionSchedule.Clear();
+            _selectedDate = null;
+            _newTeacher = new TeacherDto();
         }
         else
         {
-            _newTeacher = (TeacherDto) result.Data;
+            _newTeacher = (TeacherDto)result.Data;
         }
-        
+
         await InvokeAsync(StateHasChanged);
     }
 
@@ -185,12 +192,12 @@
             return;
         }
 
-        var checkLessonTeacherCommand = new CheckLessonTeacherCommand(_newTeacher.Id, DateOnly.FromDateTime(_selectedDate ?? DateTime.Now));
+        var checkLessonTeacherCommand = new CheckTeacherAvailabilityToSectionCommand(_newTeacher.Id, _selectedSectionSchedule);
         var checkTeacherResult = await Sender.Send(checkLessonTeacherCommand);
-
-        if (checkTeacherResult)
+        
+        if (!checkTeacherResult)
         {
-            Snackbar.Add("У этого учителя уже есть занятие на эту дату!", Severity.Error);
+            Snackbar.Add("У этого учителя уже есть занятие на это время!", Severity.Error);
             return;
         }
 
@@ -209,6 +216,7 @@
             Snackbar.Add(!_isConducted ? "Занятие успешно отменено!" : "Занятие успешно создано!",
                 !_isConducted ? Severity.Normal : Severity.Success);
         }
+        RefreshData();
     }
 
     private async Task RevokeLesson()
@@ -217,4 +225,12 @@
         await CreateLesson();
     }
 
+    private void RefreshData()
+    {
+        _selectedSection = new SectionInfo();
+        _selectedSectionSchedule = new List<SectionSchedule>();
+        _selectedDate = null;
+        _teacherForReplace = new TeacherDto();
+        _newTeacher = new TeacherDto();
+    }
 }
