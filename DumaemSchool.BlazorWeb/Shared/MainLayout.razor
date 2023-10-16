@@ -17,26 +17,39 @@
         <AuthorizeView Context="Authorized">
             <Authorized>
                 <div class="d-flex justify-content-end rounded-3 mr-5">
-                    <MudTooltip Text="Кружки">
-                        <MudIconButton Href="/sections" Size="Size.Medium" Icon="@Icons.Material.Filled.TheaterComedy" Color="Color.Inherit" />
-                    </MudTooltip>
-                    <MudTooltip Text="Виды кружков">
-                        <MudIconButton Href="/section-types" Size="Size.Medium" Icon="@Icons.Material.Filled.Category" Color="Color.Inherit"/>
-                    </MudTooltip>
-                    <MudTooltip Text="Учителя">
-                        <MudIconButton Href="/teachers" Size="Size.Medium" Icon="@Icons.Material.Filled.People" Color="Color.Inherit" />
-                    </MudTooltip>
-                    <MudTooltip Text="Расписание">
-                        <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.EditCalendar" Color="Color.Inherit" />
-                    </MudTooltip>
-                    <MudTooltip Text="Статистика">
-                        <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.Insights" Color="Color.Inherit" />
-                    </MudTooltip>
+                    <AuthorizeView Roles="@Role.DeputyDirector">
+                        <MudTooltip Text="Кружки">
+                            <MudIconButton Href="/sections" Size="Size.Medium" Icon="@Icons.Material.Filled.TheaterComedy" Color="Color.Inherit" />
+                        </MudTooltip>
+                        <MudTooltip Text="Виды кружков">
+                            <MudIconButton Href="/section-types" Size="Size.Medium" Icon="@Icons.Material.Filled.Category" Color="Color.Inherit"/>
+                        </MudTooltip>
+                        <MudTooltip Text="Учителя">
+                            <MudIconButton Href="/teachers" Size="Size.Medium" Icon="@Icons.Material.Filled.People" Color="Color.Inherit" />
+                        </MudTooltip>
+                        <MudTooltip Text="Расписание">
+                            <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.EditCalendar" Color="Color.Inherit" />
+                        </MudTooltip>
+                        <MudTooltip Text="Статистика">
+                            <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.Insights" Color="Color.Inherit" />
+                        </MudTooltip>
+                    </AuthorizeView>
+
                     <AuthorizeView Roles="@Role.Teacher">
+                        <MudTooltip Text="Кружки преподавателя">
+                            <MudIconButton Href="/sections" Size="Size.Medium" Icon="@Icons.Material.Filled.TheaterComedy" Color="Color.Inherit" />
+                        </MudTooltip>
+                        <MudTooltip Text="Расписание">
+                            <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.EditCalendar" Color="Color.Inherit" />
+                        </MudTooltip>
+                        <MudTooltip Text="Статистика по занятиям">
+                            <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.Insights" Color="Color.Inherit" />
+                        </MudTooltip>
                         <MudTooltip Text="Профиль">
                         <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.AccountCircle" OnClick="@GoToTeacherPage" Color="Color.Inherit" />
                         </MudTooltip>
                     </AuthorizeView>
+
                     <MudTooltip Text="Выход из системы">
                         <MudIconButton Class="ml-5" Size="Size.Medium" OnClick="@Logout" Icon="@Icons.Material.Filled.ExitToApp" Color="Color.Inherit" />
                     </MudTooltip>
