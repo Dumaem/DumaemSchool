@@ -26,10 +26,6 @@
     </Authorized>
 </AuthorizeView>
 
-@if (!IsAccessedToWatchPage().Result)
-{
-    return;
-}
 
 <MudTabs Elevation="4" Rounded="false" Color="@Color.Primary">
     @if (_initialized)
@@ -65,9 +61,16 @@
     private List<TeacherDto>? _teachersToSelect;
 
     protected override async Task OnInitializedAsync()
-    { 
+    {
         _selectedTeacher = await Sender.Send(new GetTeacherFromSectionQuery(Id));
+        if(_selectedTeacher is null)
+        {
+            NavigationManager.NavigateTo($"/sections", true);
+            return;
+        }
+
         _oldTeacherId = _selectedTeacher.Id;
+        await CheckAccessToWatchPage();
         _initialized = true;
     }
 
@@ -100,16 +103,19 @@
         return res;
     }
 
-    private async Task<bool> IsAccessedToWatchPage()
+    private async Task CheckAccessToWatchPage()
     {
         var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
 
         if (userIdentity.IsInRole(Role.DeputyDirector))
         {
-            return true;
+            return;
         }
 
-        return (int.Parse(userIdentity.Claims.First(x => x.Type == UserClaims.TeacherId).Value)) == _oldTeacherId;
+        if (!((int.Parse(userIdentity.Claims.First(x => x.Type == UserClaims.TeacherId).Value)) == _oldTeacherId))
+        {
+            NavigationManager.NavigateTo($"/sections", true);
+        }
     }
 
     public async Task AddTeacherToSection()

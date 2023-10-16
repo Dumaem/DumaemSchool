@@ -18,11 +18,6 @@
     return;
 }
 
-@if(!IsAccessedToWatchPage().Result)
-{
-    return;
-}
-
 <MudContainer Style="margin-left: 0%;margin-top: 2%; width:30%">
     <MudText Typo="Typo.h4">Информация об учителе:</MudText>
     <MudSpacer></MudSpacer>
@@ -37,8 +32,6 @@
         </Authorized>
     </AuthorizeView>
 
-
-
     <AuthorizeView Roles="@Role.Teacher">
         <Authorized>
             <MudText Style="margin-top: 2%" Typo="Typo.h5">@currentTeacher.Name</MudText>
@@ -49,7 +42,7 @@
 
 <Sections TeacherId="Id"></Sections>
 
-@code {
+ @code {
 
     [Parameter]
     public int Id { get; set; }
@@ -59,8 +52,10 @@
 
     private bool TeacherNameChanged => currentTeacher?.Name != savedTeacherName;
 
+
     protected override async Task OnInitializedAsync()
     {
+        await CheckAccessToWatchPage();
         await GetTeacherData();
     }
 
@@ -74,16 +69,21 @@
         }
     }
 
-    private async Task<bool> IsAccessedToWatchPage()
+    private async Task CheckAccessToWatchPage()
     {
         var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
 
         if (userIdentity.IsInRole(Role.DeputyDirector))
         {
-            return true;
+            return;
         }
 
-        return (int.Parse(userIdentity.Claims.First(x => x.Type == UserClaims.TeacherId).Value)) == Id;
+        var teacherId = int.Parse(userIdentity.Claims.First(x => x.Type == UserClaims.TeacherId).Value);
+
+        if(!((teacherId) == Id))
+        {
+            NavigationManager.NavigateTo($"teacher/{teacherId}", true);
+        }
     }
 
     private async Task EditTeacher(Teacher teacher)
