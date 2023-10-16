@@ -65,7 +65,7 @@
         _selectedTeacher = await Sender.Send(new GetTeacherFromSectionQuery(Id));
         if(_selectedTeacher is null)
         {
-            NavigationManager.NavigateTo($"/sections");
+            NavigationManager.NavigateTo($"/sections", true);
             return;
         }
 
@@ -114,7 +114,7 @@
 
         if (!((int.Parse(userIdentity.Claims.First(x => x.Type == UserClaims.TeacherId).Value)) == _oldTeacherId))
         {
-            NavigationManager.NavigateTo($"/sections");
+            NavigationManager.NavigateTo($"/sections", true);
         }
     }
 
