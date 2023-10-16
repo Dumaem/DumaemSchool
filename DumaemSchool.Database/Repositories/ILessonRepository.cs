@@ -7,4 +7,5 @@ public interface ILessonRepository
 {
     public Task<IEnumerable<LessonDate>> ListSectionLessonDates(int sectionId);
     public Task<ListDataResult<StudentLessonStatistics>> ListLessonStatistics(ListParam param);
+    public Task<ListDataResult<LessonForScheduler>> ListTeacherLessonSchedule(ListParam param);
 }
