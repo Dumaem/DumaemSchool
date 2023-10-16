@@ -1,0 +1,73 @@
+﻿@using DumaemSchool.BlazorWeb.Data
+@using ButtonType = MudBlazor.ButtonType
+@using Variant = MudBlazor.Variant
+@using System.Globalization
+@using DumaemSchool.Core.OutputModels
+
+<MudForm @bind-IsValid="_isValid" @onsubmit="@(async () => await CreateSchedule())">
+    <MudDialog>
+        <DialogContent>
+            <MudStack>
+                <MudAutocomplete T="DayOfWeek" Label="День недели" @bind-Value="_newSchedule.DayOfWeek" class="mt-3"
+                                 ToStringFunc="@(e => DateTimeFormatInfo.CurrentInfo.GetDayName(e))"
+                                 SearchFunc="@SearchDaysOfWeek" Variant="Variant.Outlined">
+                </MudAutocomplete>
+
+                <MudTimePicker Label="Время проведения занятия" Class="mt-3" Required="true"
+                               @bind-Time="_newSchedule.Time" Variant="Variant.Outlined" PickerVariant="PickerVariant.Dialog"/>
+
+                <MudNumericField Label="Продолжительность занятия (мин.)" Class="mt-3" Required="true" FullWidth="true"
+                                 @bind-Value="_newSchedule.Duration" Variant="Variant.Outlined" Step="10"
+                                 Immediate For="@(() => _newSchedule.Duration)"/>
+
+                <MudNumericField Label="Кабинет" Class="mt-3" Required="true" FullWidth="true"
+                                 @bind-Value="_newSchedule.Cabinet" Variant="Variant.Outlined"
+                                 Immediate For="@(() => _newSchedule.Cabinet)"/>
+            </MudStack>
+        </DialogContent>
+        <DialogActions>
+            <MudButton Disabled="@(!_isValid)" ButtonType="ButtonType.Submit"
+                       Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" Style="width: 8vw">
+                Добавить
+            </MudButton>
+        </DialogActions>
+    </MudDialog>
+</MudForm>
+
+@code {
+
+    [CascadingParameter]
+    MudDialogInstance? MudDialog { get; set; }
+
+    private readonly SectionScheduleCreateCredentials _newSchedule = new();
+    private bool _isValid;
+
+    private Task CreateSchedule()
+    {
+        var result = new SectionSchedule()
+        {
+            DayOfWeek = _newSchedule.DayOfWeek,
+            Time = TimeOnly.FromTimeSpan((TimeSpan)_newSchedule.Time!),
+            Duration = TimeSpan.FromMinutes((int)_newSchedule.Duration!),
+            Cabinet = (int)_newSchedule.Cabinet!,
+        };
+        MudDialog?.Close(DialogResult.Ok(result));
+        return Task.CompletedTask;
+    }
+
+    readonly DayOfWeek[] _days =
+    {
+        DayOfWeek.Monday,
+        DayOfWeek.Tuesday,
+        DayOfWeek.Wednesday,
+        DayOfWeek.Thursday,
+        DayOfWeek.Friday,
+        DayOfWeek.Saturday,
+        DayOfWeek.Sunday
+    };
+
+    private Task<IEnumerable<DayOfWeek>> SearchDaysOfWeek(string searchString)
+    {
+        return Task.FromResult<IEnumerable<DayOfWeek>>(_days);
+    }
+}

@@ -1,15 +1,11 @@
 ﻿@page "/section/{id:int}"
 @using DumaemSchool.Auth.Models;
 @using DumaemSchool.BlazorWeb.Shared.Dialogs;
-@using DumaemSchool.Core.Commands.Section;
 @using DumaemSchool.Core.Commands.Teacher;
-@using DumaemSchool.Core.Models;
 @using DumaemSchool.Core.Queries.Teacher;
 @using MediatR
 @using DumaemSchool.Core.OutputModels
-@using DumaemSchool.Core.Queries
 @using DumaemSchool.Core.DataManipulation
-@using DumaemSchool.BlazorWeb.Data.Converters
 @using DumaemSchool.Core.Queries.Section
 @inject NavigationManager NavigationManager;
 @inject ISender Sender;

@@ -3,16 +3,16 @@ using DumaemSchool.Core.DataManipulation;
 using DumaemSchool.Core.Models;
 using DumaemSchool.Core.OutputModels;
 using DumaemSchool.Database.ListGetters;
-using LanguageExt;
-using LanguageExt.ClassInstances;
 using Microsoft.EntityFrameworkCore;
-using System.Xml.Linq;
+using DumaemSchool.Database.Mappers;
+using Section = DumaemSchool.Core.Models.Section;
 using SectionStudent = DumaemSchool.Core.OutputModels.SectionStudent;
 
 namespace DumaemSchool.Database.Repositories.Impl;
 
 public sealed class SectionRepository : ISectionRepository
 {
+    private readonly DatabaseMapper _mapper;
     private readonly ApplicationContext _context;
     private readonly IListSqlGenerator<SectionInfo> _sectionInfoSqlGenerator;
     private readonly IListSqlGenerator<SectionStudent> _sectionStudentSqlGenerator;
@@ -25,6 +25,7 @@ public sealed class SectionRepository : ISectionRepository
         IListSqlGenerator<SectionSchedule> sectionScheduleSqlGenerator,
         IListSqlGenerator<StudentToAddToSection> studentToAddSqlGenerator)
     {
+        _mapper = new DatabaseMapper();
         _sectionInfoSqlGenerator = sectionInfoSqlGenerator;
         _context = context;
         _sectionStudentSqlGenerator = sectionStudentSqlGenerator;
@@ -161,4 +162,34 @@ public sealed class SectionRepository : ISectionRepository
     }
 
 
+
+    public async Task<Section> CreateSection(SectionWithSchedule section)
+    {
+        var sectionDb = new Entities.Section
+        {
+            GroupName = section.GroupName, SectionTypeId = section.SectionTypeId
+        };
+
+        var sectionTeacher = new SectionTeacher
+        {
+            Section = sectionDb, TeacherId = section.TeacherId
+        };
+        
+        var schedules = section.Schedules.Select(x => new Entities.Schedule
+        {
+            Section = sectionDb, 
+            Cabinet = x.Cabinet, 
+            Duration = x.Duration, 
+            Time = x.Time, 
+            DayOfWeek = (int)x.DayOfWeek
+        });
+    
+        await _context.Sections.AddAsync(sectionDb);
+        await _context.SectionTeachers.AddAsync(sectionTeacher);
+        await _context.Schedules.AddRangeAsync(schedules);
+
+        await _context.SaveChangesAsync();
+
+        return _mapper.Map(sectionDb);
+    }
 }
