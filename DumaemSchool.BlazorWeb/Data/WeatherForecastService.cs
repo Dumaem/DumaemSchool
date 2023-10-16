@@ -1,6 +1,3 @@
-using DumaemSchool.Auth.Models;
-using Microsoft.AspNetCore.Identity;
-
 namespace DumaemSchool.BlazorWeb.Data;
 
 public class WeatherForecastService
