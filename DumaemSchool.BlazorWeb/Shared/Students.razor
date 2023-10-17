@@ -16,8 +16,9 @@
         <MudText Typo="Typo.h6">Добавление учеников на кружок</MudText>
         <MudSpacer />
 
-        <MudAutocomplete Variant="MudBlazor.Variant.Outlined" T="StudentToAddToSection" Label="ФИО ученика" @bind-Value="_selectedStudent" SearchFunc="@SearchStudentsToAdd"
-                         ResetValueOnEmptyText="@true" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" />
+        <MudAutocomplete Variant="MudBlazor.Variant.Outlined" T="StudentToAddToSection" Label="ФИО ученика" 
+                         @bind-Value="_selectedStudent" SearchFunc="@SearchStudentsToAdd" ResetValueOnEmptyText="@true"
+                         ToStringFunc="@(e=> e==null?null : $"{e.Name}")" />
 
         <MudButton Disabled="@(_selectedStudent is null)"
                    Style="margin-top: 2%" Variant="MudBlazor.Variant.Filled" OnClick="@AddStudentToSection" Color="Color.Primary">Записать студента на кружок</MudButton>
@@ -28,7 +29,7 @@
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
 
     <MudDataGrid @ref="@_mudDataGrid" ServerData="@GetData" T="SectionStudent" Filterable="true" SortMode="@SortMode.Multiple"
-                 Groupable="false" Hideable="true">
+                 Groupable="false" Hideable="true" Striped="true">
 
         <ToolBarContent>
             <MudText Typo="Typo.h6">Список учеников, записанных на кружок</MudText>
@@ -46,9 +47,9 @@
             <TemplateColumn Sortable="false" Filterable="false">
                 <CellTemplate>
                     <MudStack Row>
-                        <MudButton Style="margin-left: 53%" Size="@Size.Small" Variant="@MudBlazor.Variant.Filled"
+                        <MudIconButton Style="margin-left: 53%" Size="@Size.Small" Variant="@MudBlazor.Variant.Filled"
                                    OnClick="@(async() => await DeleteStudentFromSection(context.Item.StudentId, context.Item.SectionId))"
-                                   Color="@Color.Error">Удалить студента с кружка</MudButton>
+                                   Color="@Color.Error" Icon="@Icons.Material.Filled.Delete"/>
                     </MudStack>
                 </CellTemplate>
             </TemplateColumn>

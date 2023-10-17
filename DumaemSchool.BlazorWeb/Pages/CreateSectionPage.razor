@@ -61,11 +61,9 @@
 
                         <TemplateColumn Sortable="false" Filterable="false">
                             <CellTemplate>
-
                                 <MudIconButton Style="margin-left: 53%" Size="@Size.Small" Variant="@Variant.Filled"
                                                Color="@Color.Error" Icon="@Icons.Material.Filled.Delete"
                                                OnClick="@RemoveSchedule"/>
-
                             </CellTemplate>
                         </TemplateColumn>
                     </Columns>
@@ -112,7 +110,7 @@
                     DayOfWeek = schedule.DayOfWeek, TimeStart = schedule.Time, TimeEnd = schedule.Time.Add(schedule.Duration),
                 };
 
-    // Проверка, добавляемого расписание на пересечение с уже добавленными
+                // Проверка, добавляемого расписание на пересечение с уже добавленными
                 if (sectionTimeRanges.Any(sectionTimeRange => scheduleTimeRange.Overlaps(sectionTimeRange)))
                 {
                     Snackbar.Add("Новое расписание пересекается с уже добавленными", Severity.Error);

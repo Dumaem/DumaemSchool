@@ -22,12 +22,14 @@
             <PropertyColumn Filterable="true" Property="x => x.LessonPerWeek" SortBy="x => x.LessonPerWeek" Title="Количество занятий в неделю"/>
             <TemplateColumn Sortable="false" Filterable="false">
                 <CellTemplate>
-                    <MudButton Style="margin-left: 5%" Size="@Size.Small" Variant="@MudBlazor.Variant.Filled" OnClick="@(() => GoToSectionDetailed(context.Item.Id))" Color="@Color.Primary">Перейти</MudButton>
+                    <MudIconButton Style="margin-left: 5%" Size="@Size.Small" Variant="@MudBlazor.Variant.Filled" 
+                                   OnClick="@(() => GoToSectionDetailed(context.Item.Id))" 
+                                   Color="@Color.Primary" Icon="@Icons.Material.Filled.ArrowForward"/>
                 </CellTemplate>
             </TemplateColumn>
         </Columns>
         <PagerContent>
-            <MudDataGridPager T="SectionInfo"/>
+            <MudDataGridPager InfoFormat="{first_item}-{last_item} из {all_items}" RowsPerPageString="Отображать строк:"></MudDataGridPager>
         </PagerContent>
     </MudDataGrid>
 </MudContainer>
