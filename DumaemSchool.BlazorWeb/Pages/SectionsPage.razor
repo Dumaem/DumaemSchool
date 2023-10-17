@@ -1,9 +1,7 @@
 ﻿@page "/sections"
 
-@using DumaemSchool.Auth.Models
-@using Variant = MudBlazor.Variant
-
 @attribute [Authorize]
+
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
 @inject NavigationManager NavigationManager;
 
@@ -29,9 +27,10 @@
             _teacherId = int.Parse(user.Claims.First(x => x.Type == UserClaims.TeacherId).Value);
         }
     }
-    
+
     private void GoToCreateSection()
     {
         NavigationManager.NavigateTo($"/create-section");
     }
+
 }

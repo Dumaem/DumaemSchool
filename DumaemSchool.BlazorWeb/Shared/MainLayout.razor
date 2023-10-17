@@ -1,5 +1,5 @@
-﻿@using DumaemSchool.Auth.Models;
-@inherits LayoutComponentBase
+﻿@inherits LayoutComponentBase
+
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
 @inject NavigationManager NavigationManager;
 
@@ -40,7 +40,7 @@
                             <MudIconButton Href="/sections" Size="Size.Medium" Icon="@Icons.Material.Filled.TheaterComedy" Color="Color.Inherit" />
                         </MudTooltip>
                         <MudTooltip Text="Расписание">
-                            <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.EditCalendar" Color="Color.Inherit" />
+                            <MudIconButton Href="/lessons" Size="Size.Medium" Icon="@Icons.Material.Filled.EditCalendar" Color="Color.Inherit" />
                         </MudTooltip>
                         <MudTooltip Text="Статистика по занятиям">
                             <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.Insights" Color="Color.Inherit" />

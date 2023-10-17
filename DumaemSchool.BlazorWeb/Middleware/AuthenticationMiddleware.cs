@@ -1,7 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using DumaemSchool.Auth.Models;
-using DumaemSchool.BlazorWeb.Data;
-using Microsoft.AspNetCore.Identity;
 
 namespace DumaemSchool.BlazorWeb.Middleware;
 

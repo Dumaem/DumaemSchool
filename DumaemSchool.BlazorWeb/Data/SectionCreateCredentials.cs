@@ -1,8 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using DumaemSchool.Core.Models;
-using DumaemSchool.Core.OutputModels;
-
-namespace DumaemSchool.BlazorWeb.Data;
+﻿namespace DumaemSchool.BlazorWeb.Data;
 
 public class SectionCreateCredentials
 {

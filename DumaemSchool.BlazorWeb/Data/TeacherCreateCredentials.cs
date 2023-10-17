@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace DumaemSchool.BlazorWeb.Data;
+﻿namespace DumaemSchool.BlazorWeb.Data;
 
 public class TeacherCreateCredentials
 {

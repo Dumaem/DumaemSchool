@@ -1,8 +1,4 @@
-﻿@using DumaemSchool.BlazorWeb.Data
-@using ButtonType = MudBlazor.ButtonType
-@using Variant = MudBlazor.Variant
-@using System.Globalization
-@using DumaemSchool.Core.OutputModels
+﻿@using System.Globalization
 
 <MudForm @bind-IsValid="_isValid" @onsubmit="@(async () => await CreateSchedule())">
     <MudDialog>
