@@ -1,12 +1,6 @@
 ﻿@page "/lesson/{id:int}"
-@using DumaemSchool.Core.Models
-@using DumaemSchool.Core.OutputModels
 @using DumaemSchool.Core.Queries.Lesson
 @using MediatR
-@using Variant = MudBlazor.Variant
-@using DumaemSchool.Core.DataManipulation
-@using DumaemSchool.BlazorWeb.Data.Converters
-@using DataGridEditMode = MudBlazor.DataGridEditMode
 
 @attribute [Authorize]
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
@@ -74,15 +68,15 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var lessonInfoQuery = new LessonInfoQuery(Id);
-        var lesson = await Sender.Send(lessonInfoQuery);
-        if (lesson is null)
-        {
-            return;
-        }
-        _lesson = lesson;
-        var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User; 
-        _isInitialized = true;
+        // var lessonInfoQuery = new LessonInfoQuery(Id);
+        // var lesson = await Sender.Send(lessonInfoQuery);
+        // if (lesson is null)
+        // {
+            // return;
+        // }
+        // _lesson = lesson;
+        // var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User; 
+        // _isInitialized = true;
     }
 
     private async Task<GridData<StudentLessonStatistics>> GetData(GridState<StudentLessonStatistics> state)

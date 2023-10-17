@@ -10,5 +10,4 @@ public interface ILessonRepository
     public Task<ListDataResult<StudentLessonStatistics>> ListLessonStatistics(ListParam param);
     public Task<ListDataResult<LessonForScheduler>> ListTeacherLessonSchedule(ListParam param);
     public Task<Lesson> CreateLesson(Lesson lesson);
-    public Task<Lesson?> GetLessonInfo(int lessonId);
 }

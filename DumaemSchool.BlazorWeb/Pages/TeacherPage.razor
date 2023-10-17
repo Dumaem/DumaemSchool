@@ -21,7 +21,7 @@
         <Authorized>
             <MudStack>
                 <MudTextField Immediate @bind-Value="_currentTeacher.Name"></MudTextField>
-                 <MudButton Disabled="@(!TeacherNameChanged)" Variant="@MudBlazor.Variant.Filled"
+                 <MudButton Disabled="@(!TeacherNameChanged)" Variant="@Variant.Filled"
                             OnClick="@(() => EditTeacher(_currentTeacher))" Color="@Color.Primary">Изменить</MudButton>
              </MudStack>
         </Authorized>

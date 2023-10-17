@@ -46,7 +46,7 @@
                                 </MudLink>
                             }
                             <MudButton Disabled="@(_isSendButtonClick ? _restorationCode.Length < 4 : string.IsNullOrEmpty(Model.Email))"
-                                       Variant="MudBlazor.Variant.Filled" Color="Color.Primary"
+                                       Variant="Variant.Filled" Color="Color.Primary"
                                        ButtonType="ButtonType.Submit"
                                        Style="{width: 12vw}">
                                 @(_isCodeSent ? "Войти" : "Отправить код")

@@ -54,12 +54,6 @@ public sealed class LessonRepository : ILessonRepository
         return _mapper.Map(lessonDb);
     }
 
-    public async Task<Lesson?> GetLessonInfo(int lessonId)
-    {
-        var lessonDb = await _context.Lessons.FindAsync(lessonId);
-        return lessonDb is null ? null : _mapper.Map(lessonDb);
-    }
-
     public async Task<ListDataResult<LessonForScheduler>> ListTeacherLessonSchedule(ListParam param)
     {
         var listQuery = _lessonScheduleListSqlGenerator.GetListSql(param);

@@ -1,14 +1,7 @@
 ﻿@page "/lesson"
-@using DumaemSchool.Core.OutputModels
-@using Variant = MudBlazor.Variant
 @using System.Globalization
-@using DumaemSchool.Auth.Models
 @using DumaemSchool.Core.Commands.Lesson
 @using DumaemSchool.Core.Commands.Teacher
-@using DumaemSchool.Core.Models
-@using MediatR
-@using Role = DumaemSchool.Auth.Models.Role
-@using Schedule = DumaemSchool.BlazorWeb.Shared.Schedule
 
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
 @inject IDialogService DialogService;
@@ -87,7 +80,7 @@
 
     private async Task ShowSections()
     {
-        var options = new MudBlazor.DialogOptions
+        var options = new DialogOptions
         {
             CloseOnEscapeKey = true, DisableBackdropClick = true, FullWidth = true,
             CloseButton = true, MaxWidth = MaxWidth.Large
@@ -121,7 +114,7 @@
 
     private async Task ShowSchedule()
     {
-        var options = new MudBlazor.DialogOptions
+        var options = new DialogOptions
         {
             CloseOnEscapeKey = true, DisableBackdropClick = true, FullWidth = true,
             CloseButton = true, MaxWidth = MaxWidth.Large
@@ -147,7 +140,7 @@
 
     private async Task ShowTeachers(bool isForNew)
     {
-        var options = new MudBlazor.DialogOptions
+        var options = new DialogOptions
         {
             CloseOnEscapeKey = true, DisableBackdropClick = true, FullWidth = true,
             CloseButton = true, MaxWidth = MaxWidth.Large

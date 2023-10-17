@@ -10,11 +10,11 @@
         <MudText Typo="Typo.h6">Добавление учеников на кружок</MudText>
         <MudSpacer />
 
-        <MudAutocomplete Variant="MudBlazor.Variant.Outlined" T="StudentToAddToSection" Label="ФИО ученика" @bind-Value="_selectedStudent" SearchFunc="@SearchStudentsToAdd"
+        <MudAutocomplete Variant="Variant.Outlined" T="StudentToAddToSection" Label="ФИО ученика" @bind-Value="_selectedStudent" SearchFunc="@SearchStudentsToAdd"
                          ResetValueOnEmptyText="@true" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" />
 
         <MudButton Disabled="@(_selectedStudent is null)"
-                   Style="margin-top: 2%" Variant="MudBlazor.Variant.Filled" OnClick="@AddStudentToSection" Color="Color.Primary">Записать студента на кружок</MudButton>
+                   Style="margin-top: 2%" Variant="Variant.Filled" OnClick="@AddStudentToSection" Color="Color.Primary">Записать студента на кружок</MudButton>
     </MudItem>
 </MudContainer>
 
@@ -40,7 +40,7 @@
             <TemplateColumn Sortable="false" Filterable="false">
                 <CellTemplate>
                     <MudStack Row>
-                        <MudButton Style="margin-left: 53%" Size="@Size.Small" Variant="@MudBlazor.Variant.Filled"
+                        <MudButton Style="margin-left: 53%" Size="@Size.Small" Variant="@Variant.Filled"
                                    OnClick="@(async() => await DeleteStudentFromSection(context.Item.StudentId, context.Item.SectionId))"
                                    Color="@Color.Error">Удалить студента с кружка</MudButton>
                     </MudStack>
@@ -153,11 +153,11 @@
 
     private async Task<bool> IsSuccessDeleteDialogResult()
     {
-        var options = new MudBlazor.DialogOptions { CloseOnEscapeKey = true };
+        var options = new DialogOptions { CloseOnEscapeKey = true };
         var parameters = new DialogParameters
             {
                 ["DialogContent"] = "Вы уверены, что хотите удалить данного студента с кружка?",
-                ["Color"] = MudBlazor.Color.Error
+                ["Color"] = Color.Error
             };
         var dialog = await DialogService.ShowAsync<DialogWindow>("Подтверждение удаления", parameters, options);
 
@@ -168,11 +168,11 @@
 
     private async Task<bool> IsSuccessAddDialogResult()
     {
-        var options = new MudBlazor.DialogOptions { CloseOnEscapeKey = true };
+        var options = new DialogOptions { CloseOnEscapeKey = true };
         var parameters = new DialogParameters
             {
                 ["DialogContent"] = "Вы уверены, что хотите записать данного студента на кружок?",
-                ["Color"] = MudBlazor.Color.Primary
+                ["Color"] = Color.Primary
             };
 
         var dialog = await DialogService.ShowAsync<DialogWindow>("Подтверждение записи", parameters, options);
