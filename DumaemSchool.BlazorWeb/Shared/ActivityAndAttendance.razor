@@ -21,14 +21,11 @@
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
     <MudDataGrid @ref="@_mudDataGrid" ServerData="@GetData" T="StudentLessonStatistics" Filterable="true" SortMode="@SortMode.Multiple"
                  Groupable="false" Hideable="true">
-
         <ToolBarContent>
             <MudTextField Style="margin-left: 70%" ValueChanged="@(EventCallback.Factory.Create<string>(this, OnSearch))"
                           Placeholder="Поиск" Adornment="Adornment.Start" Immediate="true"
                           AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
         </ToolBarContent>
-
-
         <Columns>
             <PropertyColumn Filterable="true" Property="x => x.StudentName" SortBy="x => x.StudentName" Title="ФИО учащегося" />
             <PropertyColumn Filterable="true" Property="x => x.WasAttended" SortBy="x => x.WasAttended" Title="Присутствовал ли ученик на уроке">
@@ -42,7 +39,6 @@
                 </CellTemplate>
             </PropertyColumn>
         </Columns>
-
     </MudDataGrid>
 </MudContainer>
 

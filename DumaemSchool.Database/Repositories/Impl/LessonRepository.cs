@@ -50,4 +50,10 @@ public sealed class LessonRepository : ILessonRepository
         await _context.SaveChangesAsync();
         return _mapper.Map(lessonDb);
     }
+
+    public async Task<Lesson?> GetLessonInfo(int lessonId)
+    {
+        var lessonDb = await _context.Lessons.FindAsync(lessonId);
+        return lessonDb is null ? null : _mapper.Map(lessonDb);
+    }
 }

@@ -1,5 +1,4 @@
-﻿using DumaemSchool.Core.OutputModels;
-using Riok.Mapperly.Abstractions;
+﻿using Riok.Mapperly.Abstractions;
 
 namespace DumaemSchool.Database.Mappers;
 

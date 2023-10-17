@@ -3,10 +3,7 @@ using DumaemSchool.Core.DataManipulation;
 using DumaemSchool.Core.Models;
 using DumaemSchool.Core.OutputModels;
 using DumaemSchool.Database.ListGetters;
-using LanguageExt;
-using LanguageExt.ClassInstances;
 using Microsoft.EntityFrameworkCore;
-using System.Xml.Linq;
 using SectionStudent = DumaemSchool.Core.OutputModels.SectionStudent;
 
 namespace DumaemSchool.Database.Repositories.Impl;

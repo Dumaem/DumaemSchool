@@ -1,0 +1,105 @@
+﻿@page "/lesson/{id:int}"
+@using DumaemSchool.Core.Models
+@using DumaemSchool.Core.OutputModels
+@using DumaemSchool.Core.Queries.Lesson
+@using MediatR
+@using Variant = MudBlazor.Variant
+@using DumaemSchool.Core.DataManipulation
+@using DumaemSchool.BlazorWeb.Data.Converters
+@using DataGridEditMode = MudBlazor.DataGridEditMode
+
+@attribute [Authorize]
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
+@inject ISender Sender;
+<MudContainer Style="height:70vh; margin-top: 2%">
+    <div>
+        @if (_lesson.IsConducted is not null && !(bool)_lesson.IsConducted)
+        {
+            <MudChip Variant="Variant.Filled" Color="Color.Error">Отмененное занятие</MudChip>
+        }
+    </div>
+    @if (_isInitialized)
+    {
+        <MudDataGrid ReadOnly="false" EditMode="DataGridEditMode.Cell" @ref="@_mudDataGrid" ServerData="@GetData" T="StudentLessonStatistics" Filterable="true" SortMode="@SortMode.Multiple"
+                     Groupable="false" Hideable="true">
+            <Columns>
+                <PropertyColumn Filterable="true" Property="x => x.StudentName" SortBy="x => x.StudentName" Title="ФИО учащегося"/>
+                <PropertyColumn IsEditable="true" Filterable="true" Property="x => x.WasAttended" SortBy="x => x.WasAttended" Title="Присутствовал ли ученик на уроке">
+                    <EditTemplate>
+                        <MudCheckBox T="bool" @bind-Checked="context.Item.WasAttended"
+                                     Color="Color.Primary" CheckedIcon="@Icons.Material.Filled.RadioButtonChecked"
+                                     UncheckedIcon="@Icons.Material.Filled.RadioButtonUnchecked">
+                            @AttendanceOnRussianLanguage[context.Item.WasAttended]
+                        </MudCheckBox>
+                    </EditTemplate>
+                </PropertyColumn>
+                <PropertyColumn IsEditable="true" Filterable="true" Property="x => x.ActivityMark" SortBy="x => x.ActivityMark" Title="Оценка за урок">
+                    <EditTemplate>
+                        <MudSelect @bind-Value="context.Item.ActivityMark" T="LessonActivityMark" ToStringFunc="MarkConverter">
+                            @foreach (LessonActivityMark lessonActivityMark in Enum.GetValues(typeof(LessonActivityMark)))
+                            {
+                                <MudSelectItem Value="lessonActivityMark"/>
+                            }
+                        </MudSelect>
+                    </EditTemplate>
+                </PropertyColumn>
+            </Columns>
+        </MudDataGrid>
+    }
+</MudContainer>
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    private Lesson _lesson = new();
+    private MudDataGrid<StudentLessonStatistics> _mudDataGrid = null!;
+    private bool _isInitialized;
+
+    private static readonly Dictionary<LessonActivityMark, string> MarksOnRussianLanguage = new()
+    {
+        { LessonActivityMark.Negative, "-" },
+        { LessonActivityMark.Default, "Нет оценки" },
+        { LessonActivityMark.Positive, "+" }
+    };
+
+    private static readonly Dictionary<bool, string> AttendanceOnRussianLanguage = new()
+    {
+        { true, "Присутствовал" },
+        { false, "Отсутствовал" },
+    };
+
+    private static Func<LessonActivityMark, string> MarkConverter => x => MarksOnRussianLanguage[x];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var lessonInfoQuery = new LessonInfoQuery(Id);
+        var lesson = await Sender.Send(lessonInfoQuery);
+        if (lesson is null)
+        {
+            return;
+        }
+        _lesson = lesson;
+        var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User; 
+        _isInitialized = true;
+    }
+
+    private async Task<GridData<StudentLessonStatistics>> GetData(GridState<StudentLessonStatistics> state)
+    {
+        var filters = new List<FilterDefinition>
+        {
+            new()
+            {
+                FieldName = nameof(StudentLessonStatistics.LessonId),
+                Value = Id,
+                Operand = FilterOperand.Equal
+            }
+        };
+
+        var result = await Sender.Send(new StudentLessonStatisticsQuery(FilterConverter.GenerateParamsFromGrid(state, filters)));
+
+        return new GridData<StudentLessonStatistics> { Items = result.Items, TotalItems = result.TotalItemsCount };
+    }
+
+}

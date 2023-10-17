@@ -2,7 +2,6 @@
 using DumaemSchool.Core.DataManipulation;
 using DumaemSchool.Core.Models;
 using DumaemSchool.Core.OutputModels;
-using DumaemSchool.Database.Entities;
 using DumaemSchool.Database.ListGetters;
 using DumaemSchool.Database.Mappers;
 using Microsoft.EntityFrameworkCore;
