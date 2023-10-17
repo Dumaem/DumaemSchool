@@ -14,7 +14,7 @@
                       style='background-color: #5D9C59'
                       Click="@InsertRow" Disabled=@(sectionTypeToInsert != null || sectionTypeToUpdate != null) col/>
         <RadzenDataGrid @ref="sectionTypesGrid" AllowAlternatingRows="true" AllowFiltering="false" AllowPaging="true" PageSize="8"
-                        AllowSorting="true" EditMode="DataGridEditMode.Single" Data="@sectionTypes" TItem="SectionType"
+                        AllowSorting="true" EditMode="Radzen.DataGridEditMode.Single" Data="@sectionTypes" TItem="SectionType"
                         RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow" Sort="@Reset"
                         Page="@Reset" Filter="@Reset" ColumnWidth="200px">
             <Columns>

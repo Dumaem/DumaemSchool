@@ -1,7 +1,6 @@
 ﻿@page "/teachers"
 @using DumaemSchool.Core.Commands.Teacher
 @using DumaemSchool.Core.Queries.Teacher
-@using DumaemSchool.Database.Entities
 
 @inject ISender Sender;
 @inject NavigationManager NavigationManager;
@@ -10,7 +9,7 @@
 
 <PageTitle>Учителя</PageTitle>
 
-<AuthorizeView Roles="@Role.DeputyDirector">
+<AuthorizeView Roles="@Role.DeputyDirector" Context="auth">
     <MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
         
         <MudButton Variant="Variant.Filled" OnClick="@CreateTeacher" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AddCircleOutline">
