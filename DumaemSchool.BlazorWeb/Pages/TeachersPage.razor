@@ -7,41 +7,48 @@
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar;
 
-<AuthorizeView Roles="@Role.DeputyDirector" Context="Authorized">
+<PageTitle>Учителя</PageTitle>
+
+<AuthorizeView Roles="@Role.DeputyDirector" Context="auth">
     <MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
-    
+        
         <MudButton Variant="Variant.Filled" OnClick="@CreateTeacher" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AddCircleOutline">
                 Создать нового учителя
             </MudButton>
-        <div class="d-flex flex-wrap mt-4">
+        <div class="d-flex flex-wrap mt-2 mb-2">
             <MudSwitch CheckedChanged="@(EventCallback.Factory.Create<bool>(this, OnShowDeletedChange))"  Color="Color.Primary">Отображать уволенных</MudSwitch>
         </div>
-
-        <MudDataGrid RowStyleFunc="RowStyleFunc" @ref="@_mudDataGrid" ServerData="@GetData" T="TeacherDto" Filterable="true" SortMode="@SortMode.Multiple" Groupable="false" Hideable="true">
+    
+        <MudDataGrid RowStyleFunc="RowStyleFunc" @ref="@_mudDataGrid" ServerData="@GetData" T="TeacherDto" 
+                     Filterable="true" SortMode="@SortMode.Multiple" Groupable="false" Hideable="true" Striped="true">
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Список учителей</MudText>
                 <MudSpacer />
                 <MudTextField ValueChanged="@(EventCallback.Factory.Create<string>(this, OnSearch))" Placeholder="Поиск" Adornment="Adornment.Start" Immediate="true"
                               AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
             </ToolBarContent>
-  
-
-            <Columns>
-                <PropertyColumn Filterable="false" Property="x => x.Name" SortBy="x => x.Name" Title="ФИО" />
-                <PropertyColumn Filterable="false" Property="x => x.SectionsCount" SortBy="x => x.SectionsCount" Title="Кол-во проводимых кружков" />
-
+      
+    
+                <Columns>
+                    <PropertyColumn Filterable="false" Property="x => x.Name" SortBy="x => x.Name" Title="ФИО" />
+                    <PropertyColumn Filterable="false" Property="x => x.SectionsCount" SortBy="x => x.SectionsCount" Title="Кол-во проводимых кружков" />
+    
                 <TemplateColumn Sortable="false" Filterable="false">
                     <CellTemplate>
                         <MudStack Row>
-                            <MudButton Style="margin-left: 53%" Disabled="@(context.Item.IsDeleted)" Size="@Size.Small" Variant="@Variant.Filled" OnClick="@(async() => await FireTeacher(context.Item.Id))" Color="@Color.Error">Уволить</MudButton>
-                            <MudButton Style="margin-left: 5%" Size="@Size.Small" Variant="@Variant.Filled" OnClick="@(() => GoToTeacherDetailed(context.Item.Id))" Color="@Color.Primary">Перейти</MudButton>
+                            <MudIconButton Style="margin-left: 53%" Disabled="@(context.Item.IsDeleted)" Size="@Size.Small" 
+                                           Variant="@Variant.Filled" OnClick="@(async() => await FireTeacher(context.Item.Id))"
+                                            Color="@Color.Error" Icon="@Icons.Material.Filled.Delete"/>
+                            <MudIconButton Style="margin-left: 5%" Size="@Size.Small" Variant="@Variant.Filled" 
+                                           Icon="@Icons.Material.Filled.ArrowForward" Color="@Color.Primary"
+                                           OnClick="@(() => GoToTeacherDetailed(context.Item.Id))" />
                         </MudStack>
                     </CellTemplate>
                 </TemplateColumn>
             </Columns>
-
+    
             <PagerContent>
-                <MudDataGridPager T="TeacherDto" />
+                <MudDataGridPager InfoFormat="{first_item}-{last_item} из {all_items}" RowsPerPageString="Отображать строк:"></MudDataGridPager>
             </PagerContent>
         </MudDataGrid>
     </MudContainer>
