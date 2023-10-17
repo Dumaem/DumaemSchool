@@ -1,19 +1,10 @@
 ﻿@page "/create-section"
-
-@using DumaemSchool.Core.DataManipulation;
-@using DumaemSchool.Core.Models
 @using DumaemSchool.Core.Queries.Section
-@using Variant = MudBlazor.Variant
 @using DumaemSchool.Core.OutputModels
-@using DumaemSchool.Core.Queries.Teacher
-@using MediatR
-@using ButtonType = MudBlazor.ButtonType
 @using System.Globalization
-@using DumaemSchool.BlazorWeb.Data
-@using DumaemSchool.BlazorWeb.Shared.Windows
+@using DumaemSchool.Core.Queries.Teacher
 @using DumaemSchool.Core.Commands.Section
 @using DumaemSchool.Core.Commands.Teacher
-@using DialogOptions = MudBlazor.DialogOptions
 
 @inject ISender Sender
 @inject ISnackbar Snackbar

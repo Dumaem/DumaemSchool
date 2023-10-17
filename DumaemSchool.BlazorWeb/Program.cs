@@ -1,7 +1,5 @@
 using DumaemSchool.Auth;
-using DumaemSchool.BlazorWeb.Data;
 using DumaemSchool.BlazorWeb.Localization;
-using DumaemSchool.BlazorWeb.Middleware;
 using DumaemSchool.Core;
 using DumaemSchool.Database;
 using DumaemSchool.Migrator;

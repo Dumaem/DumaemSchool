@@ -155,8 +155,14 @@ public sealed class SectionRepository : ISectionRepository
         return true;
     }
 
-    public async Task<TeacherDto> GetTeacherFromSection(int sectionId)
+    public async Task<TeacherDto?> GetTeacherFromSection(int sectionId)
     {
+        var section = await _context.Sections.FindAsync(sectionId);
+
+        if(section is null)
+        {
+            return null;
+        }    
         var teacher = (await _context.SectionTeachers.Include(x => x.Teacher).FirstOrDefaultAsync(x => x.IsActual == true 
         && x.SectionId == sectionId))!.Teacher;
         return new TeacherDto { Id = teacher.Id, Name = teacher.Name };

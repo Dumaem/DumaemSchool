@@ -1,14 +1,11 @@
 ﻿@page "/teacher/{id:int}"
-@using DumaemSchool.Auth.Models;
-@using DumaemSchool.Core.Models;
-@using MediatR;
-@using Microsoft.AspNetCore.Identity;
 @using DumaemSchool.Core.Commands.Teacher
 @using DumaemSchool.Core.Queries.Teacher
 
 @inject ISender Sender;
 @inject NavigationManager NavigationManager;
-@inject UserManager<SchoolUser> UserManager
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
+
 
 <PageTitle>Учитель</PageTitle>
 
@@ -31,8 +28,6 @@
         </Authorized>
     </AuthorizeView>
 
-
-
     <AuthorizeView Roles="@Role.Teacher">
         <Authorized>
             <MudText Style="margin-top: 2%" Typo="Typo.h5">@currentTeacher.Name</MudText>
@@ -53,8 +48,10 @@
 
     private bool TeacherNameChanged => currentTeacher?.Name != savedTeacherName;
 
+
     protected override async Task OnInitializedAsync()
     {
+        await CheckAccessToWatchPage();
         await GetTeacherData();
     }
 
@@ -65,6 +62,23 @@
         {
             currentTeacher = result;
             savedTeacherName = currentTeacher.Name;
+        }
+    }
+
+    private async Task CheckAccessToWatchPage()
+    {
+        var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+
+        if (userIdentity.IsInRole(Role.DeputyDirector))
+        {
+            return;
+        }
+
+        var teacherId = int.Parse(userIdentity.Claims.First(x => x.Type == UserClaims.TeacherId).Value);
+
+        if(!((teacherId) == Id))
+        {
+            NavigationManager.NavigateTo($"teacher/{teacherId}", true);
         }
     }
 

@@ -3,4 +3,4 @@ using MediatR;
 
 namespace DumaemSchool.Core.Queries.Section;
 
-public sealed record GetTeacherFromSectionQuery(int SectionId) : IRequest<TeacherDto>;
+public sealed record GetTeacherFromSectionQuery(int SectionId) : IRequest<TeacherDto?>;
