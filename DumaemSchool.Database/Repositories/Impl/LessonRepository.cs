@@ -13,12 +13,15 @@ public sealed class LessonRepository : ILessonRepository
     private readonly ApplicationContext _context;
     private readonly DatabaseMapper _mapper;
     private readonly IListSqlGenerator<StudentLessonStatistics> _statisticsListSqlGenerator;
+    private readonly IListSqlGenerator<LessonForScheduler> _lessonScheduleListSqlGenerator;
 
     public LessonRepository(ApplicationContext context, 
-        IListSqlGenerator<StudentLessonStatistics> statisticsListSqlGenerator)
+        IListSqlGenerator<StudentLessonStatistics> statisticsListSqlGenerator, 
+        IListSqlGenerator<LessonForScheduler> lessonScheduleListSqlGenerator)
     {
         _context = context;
         _statisticsListSqlGenerator = statisticsListSqlGenerator;
+        _lessonScheduleListSqlGenerator = lessonScheduleListSqlGenerator;
         _mapper = new DatabaseMapper();
     }
 
@@ -55,5 +58,19 @@ public sealed class LessonRepository : ILessonRepository
     {
         var lessonDb = await _context.Lessons.FindAsync(lessonId);
         return lessonDb is null ? null : _mapper.Map(lessonDb);
+    }
+
+    public async Task<ListDataResult<LessonForScheduler>> ListTeacherLessonSchedule(ListParam param)
+    {
+        var listQuery = _lessonScheduleListSqlGenerator.GetListSql(param);
+        var connection = _context.Database.GetDbConnection();
+        var result = (await connection
+                .QueryAsync<LessonForScheduler>(listQuery.SelectSql, listQuery.Parameters)
+            ).AsList();
+
+        return new ListDataResult<LessonForScheduler>
+        {
+            Items = result, TotalItemsCount = result.Count
+        };
     }
 }

@@ -1,4 +1,5 @@
-﻿using Riok.Mapperly.Abstractions;
+using Riok.Mapperly.Abstractions;
+using Section = DumaemSchool.Core.Models.Section;
 
 namespace DumaemSchool.Database.Mappers;
 
@@ -14,4 +15,7 @@ public sealed partial class DatabaseMapper
     public partial DumaemSchool.Core.Models.Lesson Map(Lesson lesson);
     
     public partial Lesson Map(DumaemSchool.Core.Models.Lesson lesson);
+
+    public partial Schedule Map(SectionSchedule schedule);
+    public partial Section Map(Entities.Section section);
 }
