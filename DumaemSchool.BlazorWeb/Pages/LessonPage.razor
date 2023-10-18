@@ -92,7 +92,7 @@
         var lessonInfoQuery = new TeacherLessonScheduleQuery(new ListParam
         { Filters = filters.ToArray() });
 
-        var lesson = (await Sender.Send(lessonInfoQuery)).Items.FirstOrDefault();
+        var lesson = (await Sender.Send(lessonInfoQuery)).Items.SingleOrDefault();
 
         if (lesson is null)
         {
