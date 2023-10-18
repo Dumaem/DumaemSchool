@@ -18,7 +18,7 @@
             <MudSwitch CheckedChanged="@(EventCallback.Factory.Create<bool>(this, OnShowDeletedChange))" Color="Color.Primary">Отображать уволенных</MudSwitch>
         </div>
 
-        <MudDataGrid RowClick="OnRowClick" RowStyleFunc="RowStyleFunc" @ref="@_mudDataGrid" ServerData="@GetData" T="TeacherDto" Filterable="true" SortMode="@SortMode.Multiple" Groupable="false" Hideable="true">
+        <MudDataGrid Striped="true" RowClick="OnRowClick" RowStyleFunc="RowStyleFunc" @ref="@_mudDataGrid" ServerData="@GetData" T="TeacherDto" Filterable="true" SortMode="@SortMode.Multiple" Groupable="false" Hideable="true">
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Список учителей</MudText>
                 <MudSpacer/>
@@ -37,8 +37,8 @@
                     <TemplateColumn Sortable="false" Filterable="false">
                         <CellTemplate>
                             <MudStack Row>
-                                <MudButton Style="margin-left: 53%" Disabled="@(context.Item.IsDeleted)" Size="@Size.Small" Variant="@Variant.Filled" OnClick="@(async () => await FireTeacher(context.Item.Id))" Color="@Color.Error">Уволить</MudButton>
-                                <MudButton Style="margin-left: 5%" Size="@Size.Small" Variant="@Variant.Filled" OnClick="@(() => GoToTeacherDetailed(context.Item.Id))" Color="@Color.Primary">Перейти</MudButton>
+                                <MudIconButton Style="margin-left: 53%" Disabled="@(context.Item.IsDeleted)" Size="@Size.Small" Variant="@Variant.Filled" OnClick="@(async () => await FireTeacher(context.Item.Id))" Color="@Color.Error" Color="@Color.Error" Icon="@Icons.Material.Filled.Delete"/>
+                                <MudIconButton Style="margin-left: 5%" Size="@Size.Small" Variant="@Variant.Filled" OnClick="@(() => GoToTeacherDetailed(context.Item.Id))" Color="@Color.Primary" Icon="@Icons.Material.Filled.ArrowForward"/>
                             </MudStack>
                         </CellTemplate>
                     </TemplateColumn>
@@ -46,7 +46,7 @@
             </Columns>
 
             <PagerContent>
-                <MudDataGridPager T="TeacherDto"/>
+                <MudDataGridPager T="TeacherDto" InfoFormat="{first_item}-{last_item} из {all_items}" RowsPerPageString="Отображать строк:"/>
             </PagerContent>
         </MudDataGrid>
     </MudContainer>
