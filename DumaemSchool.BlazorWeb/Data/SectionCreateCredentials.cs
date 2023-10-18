@@ -5,7 +5,7 @@ public class SectionCreateCredentials
     [Required(ErrorMessage = "Требуется указать учителя")]
     public TeacherDto? Teacher { get; set; }
 
-    [Required(ErrorMessage = "Требуется указать вид секции")]
+    [Required(ErrorMessage = "Требуется указать вид кружка")]
     public SectionType? SectionType { get; set; }
 
     [Required(ErrorMessage = "Требуется указать название группы")]

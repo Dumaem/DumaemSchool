@@ -6,13 +6,15 @@
 @inject ISender Sender;
 @inject IDialogService DialogService
 
-<MudToolBar>
+<MudContainer Style="margin-left: 0%; margin-top: 2%">
+    <MudItem xs="6" sm="6" md="4">
         <MudText Typo="Typo.h6">Дата проведения занятия</MudText>
-        <MudDatePicker Style="margin-left: 80%; margin-right: 1%" PickerVariant="PickerVariant.Dialog"
+        <MudDatePicker PickerVariant="PickerVariant.Dialog" Style="margin-right: 35%"
                        IsDateDisabledFunc="@(dt => !_lessonDateTimes.Contains(dt))"
                        DateChanged="@((e) => OnDateChange(e!.Value))">
         </MudDatePicker>
-</MudToolBar>
+    </MudItem>
+</MudContainer>
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 1%">
     <MudDataGrid @ref="@_mudDataGrid" ServerData="@GetData" T="StudentLessonStatistics" Filterable="true" SortMode="@SortMode.Multiple"
@@ -26,7 +28,6 @@
                           AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0">
             </MudTextField>
         </ToolBarContent>
-
 
         <Columns>
             <PropertyColumn Filterable="true" Property="x => x.StudentName" SortBy="x => x.StudentName" Title="ФИО учащегося"/>
