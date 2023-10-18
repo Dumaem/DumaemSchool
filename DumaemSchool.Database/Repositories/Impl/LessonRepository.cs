@@ -82,7 +82,7 @@ public sealed class LessonRepository : ILessonRepository
     {
         var attendance =
             await _context.Attendances.FirstOrDefaultAsync(x => x.LessonId == lessonId && x.StudentId == studentId);
-        if (!wasAttended)
+        if (wasAttended)   
         {
             if (attendance is null)
             {

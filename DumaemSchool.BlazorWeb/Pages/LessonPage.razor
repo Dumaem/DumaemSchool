@@ -6,6 +6,7 @@
 @attribute [Authorize]
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
 @inject ISender Sender;
+@inject NavigationManager NavigationManager;
 <MudContainer Style="height:70vh; margin-top: 2%">
     <div class="d-flex flex-row justify-content-between flex-wrap">
         @if (_lesson.IsCancelled)
@@ -91,7 +92,14 @@
         var lessonInfoQuery = new TeacherLessonScheduleQuery(new ListParam
         { Filters = filters.ToArray() });
 
-        var lesson = (await Sender.Send(lessonInfoQuery)).Items.First();
+        var lesson = (await Sender.Send(lessonInfoQuery)).Items.FirstOrDefault();
+
+        if (lesson is null)
+        {
+            //Перенаправление на страницу с занятиями
+            NavigationManager.NavigateTo("/");
+            return;
+        }
         _lesson = lesson;
         _isInitialized = true;
     }
