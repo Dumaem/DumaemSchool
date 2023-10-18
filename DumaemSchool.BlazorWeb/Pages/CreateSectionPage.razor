@@ -22,7 +22,7 @@
         </MudCardHeader>
         <MudCardContent>
             <MudForm Model="@_model" @ref="@_form">
-                <MudTextField Label="Название группы" HelperText="Введите название группы" Variant="Variant.Outlined"
+                <MudTextField Label="Название группы" Variant="Variant.Outlined"
                               @bind-Value="_model.GroupName" For="@(() => _model.GroupName)"/>
                 <div class="d-flex justify-content-between">
                     <MudAutocomplete T="SectionType" Label="Вид кружка" @bind-Value="_model.SectionType" class="mr-3"

@@ -14,12 +14,16 @@
 <AuthorizeView Roles="@Role.DeputyDirector">
     <Authorized>
         <MudContainer Class="d-inline-flex justify-content-between mt-3 mb-3 align-items-center">
-            <MudIconButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary" Icon="@Icons.Material.Filled.Insights"/>
-            <MudAutocomplete Variant="MudBlazor.Variant.Outlined" Class="ml-4 align-content-center" T="TeacherDto" Label="Преподаватель кружка" 
-                             @bind-Value="_selectedTeacher" ToStringFunc="@(e=> e==null?null : $"{e.Name}")" 
-                             SearchFunc="@SearchTeachersToSelect" CoerceText="true" />
-            <MudButton Class="ml-4" Disabled="@(_oldTeacherId == _selectedTeacher?.Id)" OnClick="@AddTeacherToSection" 
-                       Variant="MudBlazor.Variant.Filled" Color="Color.Primary">Сохранить</MudButton>
+            <MudTooltip Text="Статистика">
+                <MudIconButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary" Icon="@Icons.Material.Filled.Insights"/>
+            </MudTooltip>
+            <MudAutocomplete Variant="MudBlazor.Variant.Outlined" Class="ml-4 align-content-center" T="TeacherDto" Label="Преподаватель кружка"
+                             @bind-Value="_selectedTeacher" ToStringFunc="@(e => e == null ? null : $"{e.Name}")"
+                             SearchFunc="@SearchTeachersToSelect" CoerceText="true"/>
+            <MudButton Class="ml-4" Disabled="@(_oldTeacherId == _selectedTeacher?.Id)" OnClick="@AddTeacherToSection"
+                       Variant="MudBlazor.Variant.Filled" Color="Color.Primary">
+                Сохранить
+            </MudButton>
         </MudContainer>
     </Authorized>
 </AuthorizeView>
@@ -36,7 +40,7 @@
             <Schedule SectionId="@Id"></Schedule>
         </MudTabPanel>
 
-        <MudTabPanel Icon="@Icons.Material.Filled.LocalActivity" Text="Активность и посещаемость"> 
+        <MudTabPanel Icon="@Icons.Material.Filled.LocalActivity" Text="Активность и посещаемость">
             <ActivityAndAttendance SectionId="@Id"></ActivityAndAttendance>
         </MudTabPanel>
     }
@@ -48,6 +52,7 @@
 
 
 @code {
+
     [Parameter]
     public int Id { get; set; }
 
@@ -61,7 +66,7 @@
     protected override async Task OnInitializedAsync()
     {
         _selectedTeacher = await Sender.Send(new GetTeacherFromSectionQuery(Id));
-        if(_selectedTeacher is null)
+        if (_selectedTeacher is null)
         {
             NavigationManager.NavigateTo($"/sections", true);
             return;
@@ -80,20 +85,20 @@
         }
 
         return _teachersToSelect = (await Sender.Send(new TeachersQuery(new ListParam
-            {
-                Filters = new[] { new FilterDefinition { Value = value, Operand = FilterOperand.Contains, FieldName = nameof(TeacherDto.Name) } }
-            }))).Items.ToList();
+        {
+            Filters = new[] { new FilterDefinition { Value = value, Operand = FilterOperand.Contains, FieldName = nameof(TeacherDto.Name) } }
+        }))).Items.ToList();
     }
 
     private async Task<bool> IsTeacherAvailable()
     {
         var listSchedulesForSection = (await Sender.Send(new SectionScheduleQuery(new ListParam
+        {
+            Filters = new[]
             {
-                Filters = new[]
-                        {
-                new FilterDefinition {Value = Id, Operand = FilterOperand.Equal, FieldName = nameof(SectionSchedule.SectionId)}
+                new FilterDefinition { Value = Id, Operand = FilterOperand.Equal, FieldName = nameof(SectionSchedule.SectionId) }
             }
-            }))).Items.ToList();
+        }))).Items.ToList();
 
         var checkTeacherCommand = new CheckTeacherAvailabilityToSectionCommand(_selectedTeacher!.Id, listSchedulesForSection);
         var res = await Sender.Send(checkTeacherCommand);
@@ -143,10 +148,10 @@
     {
         var options = new MudBlazor.DialogOptions { CloseOnEscapeKey = true };
         var parameters = new DialogParameters
-            {
-                ["DialogContent"] = "Вы уверены, что хотите записать данного преподавателя за этим кружком?",
-                ["Color"] = MudBlazor.Color.Primary
-            };
+        {
+            ["DialogContent"] = "Вы уверены, что хотите записать данного преподавателя за этим кружком?",
+            ["Color"] = MudBlazor.Color.Primary
+        };
 
         var dialog = await DialogService.ShowAsync<DialogWindow>("Подтверждение закрепления за кружком", parameters, options);
 
@@ -154,4 +159,5 @@
 
         return !result.Canceled;
     }
+
 }
