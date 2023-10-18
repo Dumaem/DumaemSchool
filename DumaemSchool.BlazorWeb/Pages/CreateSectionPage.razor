@@ -11,6 +11,8 @@
 @inject NavigationManager NavigationManager
 @inject IDialogService DialogService
 
+<PageTitle>Создание кружка</PageTitle>
+
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
     <MudCard>
         <MudCardHeader>
@@ -20,7 +22,7 @@
         </MudCardHeader>
         <MudCardContent>
             <MudForm Model="@_model" @ref="@_form">
-                <MudTextField Label="Название группы" HelperText="Введите название группы" Variant="Variant.Outlined"
+                <MudTextField Label="Название группы" Variant="Variant.Outlined"
                               @bind-Value="_model.GroupName" For="@(() => _model.GroupName)"/>
                 <div class="d-flex justify-content-between">
                     <MudAutocomplete T="SectionType" Label="Вид кружка" @bind-Value="_model.SectionType" class="mr-3"
@@ -52,11 +54,9 @@
 
                         <TemplateColumn Sortable="false" Filterable="false">
                             <CellTemplate>
-
                                 <MudIconButton Style="margin-left: 53%" Size="@Size.Small" Variant="@Variant.Filled"
                                                Color="@Color.Error" Icon="@Icons.Material.Filled.Delete"
                                                OnClick="@RemoveSchedule"/>
-
                             </CellTemplate>
                         </TemplateColumn>
                     </Columns>
@@ -103,7 +103,7 @@
                     DayOfWeek = schedule.DayOfWeek, TimeStart = schedule.Time, TimeEnd = schedule.Time.Add(schedule.Duration),
                 };
 
-    // Проверка, добавляемого расписание на пересечение с уже добавленными
+                // Проверка, добавляемого расписание на пересечение с уже добавленными
                 if (sectionTimeRanges.Any(sectionTimeRange => scheduleTimeRange.Overlaps(sectionTimeRange)))
                 {
                     Snackbar.Add("Новое расписание пересекается с уже добавленными", Severity.Error);

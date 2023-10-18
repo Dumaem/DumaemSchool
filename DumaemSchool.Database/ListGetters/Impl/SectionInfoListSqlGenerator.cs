@@ -19,6 +19,7 @@ public sealed class SectionInfoListSqlGenerator : AbstractListSqlGenerator<Secti
         var having = GetHavingExpression(param.Filters, dynamicParams);
         var sort = GetOrderByExpression(param.Sorting);
         var havingString = string.IsNullOrWhiteSpace(having) ? "" : $"HAVING {having}";
+        var pagination = GetPaginationExpression(param.Pagination);
 
         return new ListQuery
         {
@@ -57,6 +58,7 @@ public sealed class SectionInfoListSqlGenerator : AbstractListSqlGenerator<Secti
                          GROUP BY 1, 2, 3, 4, 5
                          {havingString}
                          ORDER BY {sort}
+                         {pagination}
                          """
         };
     }

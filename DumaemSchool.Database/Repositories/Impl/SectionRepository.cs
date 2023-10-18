@@ -40,11 +40,12 @@ public sealed class SectionRepository : ISectionRepository
         var result = (await connection
             .QueryAsync<SectionInfo>(listQuery.SelectSql, listQuery.Parameters)
             ).AsList();
+        var count = await connection.ExecuteScalarAsync<int>(listQuery.CountSql, listQuery.Parameters);
 
         return new ListDataResult<SectionInfo>
         {
             Items = result,
-            TotalItemsCount = result.Count
+            TotalItemsCount = count
         };
     }
 
