@@ -37,7 +37,7 @@
                     <TemplateColumn Sortable="false" Filterable="false">
                         <CellTemplate>
                             <MudStack Row>
-                                <MudIconButton Style="margin-left: 53%" Disabled="@(context.Item.IsDeleted)" Size="@Size.Small" Variant="@Variant.Filled" OnClick="@(async () => await FireTeacher(context.Item.Id))" Color="@Color.Error" Color="@Color.Error" Icon="@Icons.Material.Filled.Delete"/>
+                                <MudIconButton Style="margin-left: 53%" Disabled="@(context.Item.IsDeleted)" Size="@Size.Small" Variant="@Variant.Filled" OnClick="@(async () => await FireTeacher(context.Item.Id))" Color="@Color.Error" Icon="@Icons.Material.Filled.Delete"/>
                                 <MudIconButton Style="margin-left: 5%" Size="@Size.Small" Variant="@Variant.Filled" OnClick="@(() => GoToTeacherDetailed(context.Item.Id))" Color="@Color.Primary" Icon="@Icons.Material.Filled.ArrowForward"/>
                             </MudStack>
                         </CellTemplate>
