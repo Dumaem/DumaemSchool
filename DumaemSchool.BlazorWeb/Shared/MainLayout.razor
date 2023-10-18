@@ -12,7 +12,9 @@
 
 <MudLayout>
     <MudAppBar Elevation="1">
-        <MudText Typo="Typo.h5" Class="ml-3" Style="font-family: 'Century Gothic'">dumaem</MudText>
+        <a href="/">
+            <MudText Typo="Typo.h5" Class="ml-3" Style="font-family: 'Century Gothic'; color: white">dumaem</MudText>
+        </a>
         <MudSpacer />
         <AuthorizeView Context="Authorized">
             <Authorized>
@@ -26,9 +28,6 @@
                         </MudTooltip>
                         <MudTooltip Text="Учителя">
                             <MudIconButton Href="/teachers" Size="Size.Medium" Icon="@Icons.Material.Filled.People" Color="Color.Inherit" />
-                        </MudTooltip>
-                        <MudTooltip Text="Расписание">
-                            <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.EditCalendar" Color="Color.Inherit" />
                         </MudTooltip>
                         <MudTooltip Text="Статистика">
                             <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.Insights" Color="Color.Inherit" />
