@@ -59,7 +59,8 @@
             <MudContainer Class="ma-0 pa-0" MaxWidth="MaxWidth.False">
                 <MudTextField InputType="InputType.Text" Variant="Variant.Outlined" T="string" ReadOnly="true" Label="Заменяющий учитель" @bind-Value="@(_newTeacher.Name)"/>
             </MudContainer>
-            <MudButton Disabled="@(_teacherForReplace.Id == 0 && IsCanCreate)" Class="ml-3" Style="width: 10vw" Variant="Variant.Filled" OnClick="@(() => ShowTeachers(true))" Color="Color.Primary">Выбрать учителя</MudButton>
+            <MudButton Disabled="@(!(_teacherForReplace.Id != 0 && _selectedSection.Id != 0 
+                                   && _selectedSectionSchedule.Count > 0 && _selectedDate is not null))" Class="ml-3" Style="width: 10vw" Variant="Variant.Filled" OnClick="@(() => ShowTeachers(true))" Color="Color.Primary">Выбрать учителя</MudButton>
         </div>
     </AuthorizeView>
     <div class="d-flex flex-row mt-5">
@@ -69,11 +70,15 @@
 </MudContainer>
 
 @code {
+    private bool _isReplace;
     private SectionInfo _selectedSection = new();
     private List<SectionSchedule> _selectedSectionSchedule = new();
     private DateTime? _selectedDate;
-    private bool IsCanCreate => !(_selectedSection.Id != 0 && _selectedSectionSchedule.Count > 0 && _selectedDate is not null
-                                                            && _newTeacher.Id != 0);
+    private bool IsCanCreate => _isReplace ? 
+        !(_selectedSection.Id != 0 && _selectedSectionSchedule.Count > 0 && _selectedDate is not null 
+          && _teacherForReplace.Id != 0 && _newTeacher.Id != 0) 
+        : !(_selectedSection.Id != 0 && _selectedSectionSchedule.Count > 0 && _selectedDate is not null);
+    
     private int _teacherId;
     private TeacherDto _teacherForReplace = new();
     private TeacherDto _newTeacher = new();
@@ -110,6 +115,10 @@
         if (user.IsInRole(Role.Teacher))
         {
             _teacherId = int.Parse(user.Claims.First(x => x.Type == UserClaims.TeacherId).Value);
+        }
+        else
+        {
+            _isReplace = true;
         }
     }
 
@@ -188,7 +197,7 @@
 
         var checkLessonTeacherCommand = new CheckTeacherAvailabilityToSectionCommand(_newTeacher.Id, _selectedSectionSchedule);
         var checkTeacherResult = await Sender.Send(checkLessonTeacherCommand);
-        
+
         if (!checkTeacherResult)
         {
             Snackbar.Add("У этого учителя уже есть занятие на это время!", Severity.Error);
@@ -227,4 +236,5 @@
         _teacherForReplace = new TeacherDto();
         _newTeacher = new TeacherDto();
     }
+
 }
