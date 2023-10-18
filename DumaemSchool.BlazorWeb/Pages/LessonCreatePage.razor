@@ -72,7 +72,8 @@
     private SectionInfo _selectedSection = new();
     private List<SectionSchedule> _selectedSectionSchedule = new();
     private DateTime? _selectedDate;
-    private bool IsCanCreate => !(_selectedSection.Id != 0 && _selectedSectionSchedule.Count > 0 && _selectedDate is not null);
+    private bool IsCanCreate => !(_selectedSection.Id != 0 && _selectedSectionSchedule.Count > 0 && _selectedDate is not null
+                                                            && _newTeacher.Id != 0);
     private int _teacherId;
     private TeacherDto _teacherForReplace = new();
     private TeacherDto _newTeacher = new();

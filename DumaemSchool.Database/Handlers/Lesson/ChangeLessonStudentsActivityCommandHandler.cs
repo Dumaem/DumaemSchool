@@ -1,65 +1,21 @@
 ﻿using DumaemSchool.Core.Commands.Lesson;
+using DumaemSchool.Database.Repositories;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace DumaemSchool.Database.Handlers.Lesson;
 
-public sealed class
-    ChangeLessonStudentsActivityCommandHandler : IRequestHandler<ChangeLessonStudentsActivityCommand>
+public sealed class ChangeLessonStudentsActivityCommandHandler : IRequestHandler<ChangeLessonStudentActivityCommand>
 {
-    private readonly ApplicationContext _context;
+    private readonly ILessonRepository _repository;
 
-    public ChangeLessonStudentsActivityCommandHandler(ApplicationContext context)
+    public ChangeLessonStudentsActivityCommandHandler(ILessonRepository repository)
     {
-        _context = context;
+        _repository = repository;
     }
 
-    public async Task Handle(ChangeLessonStudentsActivityCommand request, CancellationToken cancellationToken)
+    public async Task Handle(ChangeLessonStudentActivityCommand request, CancellationToken cancellationToken)
     {
-        foreach (var studentActivityInfo in request.Activity)
-        {
-            var activity =
-                await _context.Activities.FirstOrDefaultAsync(
-                    x => x.LessonId == studentActivityInfo.LessonId && x.StudentId == studentActivityInfo.StudentId,
-                    cancellationToken: cancellationToken);
-            if (activity is not null)
-            {
-                activity.Mark = (int)studentActivityInfo.ActivityMark;
-                _context.Update(activity);
-            }
-            else
-            {
-                _context.Activities.Add(new Activity
-                {
-                    StudentId = studentActivityInfo.StudentId,
-                    LessonId = studentActivityInfo.LessonId,
-                    Mark = (int)studentActivityInfo.ActivityMark
-                });
-            }
-
-            var attendance = await _context.Attendances.FirstOrDefaultAsync(
-                x => x.LessonId == studentActivityInfo.LessonId && x.StudentId == studentActivityInfo.StudentId,
-                cancellationToken);
-            if (!studentActivityInfo.WasAttended)
-            {
-                if (attendance is null)
-                {
-                    _context.Attendances.Add(new Attendance
-                    {
-                        LessonId = studentActivityInfo.LessonId,
-                        StudentId = studentActivityInfo.StudentId
-                    });
-                }
-            }
-            else
-            {
-                if (attendance is not null)
-                {
-                    _context.Remove(attendance);
-                }
-            }
-        }
-
-        await _context.SaveChangesAsync(cancellationToken);
+        await _repository.ChangeLessonStudentActivity(request.LessonId, request.StudentId, request.Mark);
     }
 }

@@ -28,21 +28,19 @@
     @if (_isInitialized)
     {
         <MudDataGrid Class="mt-5" ReadOnly="false" EditMode="DataGridEditMode.Cell" @ref="@_mudDataGrid" ServerData="@GetData" T="StudentLessonStatistics" Filterable="true" SortMode="@SortMode.Multiple"
-                     Groupable="false" Hideable="true">
+                     Groupable="false" Hideable="true" >
             <Columns>
                 <PropertyColumn Filterable="true" Property="x => x.StudentName" SortBy="x => x.StudentName" Title="ФИО учащегося"/>
-                <PropertyColumn IsEditable="true" Filterable="true" Property="x => x.WasAttended" SortBy="x => x.WasAttended" Title="Присутствовал ли ученик на уроке">
+                <PropertyColumn IsEditable="true" Filterable="true" Property="x => x.WasAttended" SortBy="x => x.WasAttended" Title="Отсутствовал ли ученик на уроке">
                     <EditTemplate>
-                        <MudCheckBox T="bool" @bind-Checked="context.Item.WasAttended"
-                                     Color="Color.Primary" CheckedIcon="@Icons.Material.Filled.RadioButtonChecked"
-                                     UncheckedIcon="@Icons.Material.Filled.RadioButtonUnchecked">
-                            @AttendanceOnRussianLanguage[context.Item.WasAttended]
+                        <MudCheckBox T="bool" @bind-Checked:get=context.Item.WasAttended @bind-Checked:set=@(x => ChangeAttendance(x, context.Item))
+                                     Color="Color.Primary" >
                         </MudCheckBox>
                     </EditTemplate>
                 </PropertyColumn>
                 <PropertyColumn IsEditable="true" Filterable="true" Property="x => x.ActivityMark" SortBy="x => x.ActivityMark" Title="Оценка за урок">
                     <EditTemplate>
-                        <MudSelect @bind-Value="context.Item.ActivityMark" T="LessonActivityMark" ToStringFunc="MarkConverter">
+                        <MudSelect @bind-Value:get=context.Item.ActivityMark @bind-Value:set=@(x => ChangeActivity(x, context.Item)) T="LessonActivityMark" ToStringFunc="MarkConverter">
                             @foreach (LessonActivityMark lessonActivityMark in Enum.GetValues(typeof(LessonActivityMark)))
                             {
                                 <MudSelectItem Value="lessonActivityMark"/>
@@ -114,5 +112,20 @@
 
         return new GridData<StudentLessonStatistics> { Items = result.Items, TotalItems = result.TotalItemsCount };
     }
-    
+
+    private async Task ChangeAttendance(bool? value, StudentLessonStatistics lessonStudent)
+    {
+        var command = new ChangeLessonStudentAttendanceCommand(lessonStudent.LessonId, lessonStudent.StudentId, (bool)value!);
+        await Sender.Send(command);
+        lessonStudent.WasAttended = (bool)value;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ChangeActivity(LessonActivityMark value, StudentLessonStatistics lessonStudent)
+    {
+        var command = new ChangeLessonStudentActivityCommand(lessonStudent.LessonId, lessonStudent.StudentId, value);
+        await Sender.Send(command);
+        lessonStudent.ActivityMark = value;
+        await InvokeAsync(StateHasChanged);
+    }
 }

@@ -1,4 +1,5 @@
 ﻿using DumaemSchool.Core.DataManipulation;
+using DumaemSchool.Core.Models;
 using DumaemSchool.Core.OutputModels;
 using Lesson = DumaemSchool.Core.Models.Lesson;
 
@@ -10,4 +11,6 @@ public interface ILessonRepository
     public Task<ListDataResult<StudentLessonStatistics>> ListLessonStatistics(ListParam param);
     public Task<ListDataResult<LessonForScheduler>> ListTeacherLessonSchedule(ListParam param);
     public Task<Lesson> CreateLesson(Lesson lesson);
+    public Task ChangeLessonStudentActivity (int lessonId, int studentId, LessonActivityMark mark);
+    public Task ChangeLessonStudentAttendance (int lessonId, int studentId, bool wasAttended);
 }
