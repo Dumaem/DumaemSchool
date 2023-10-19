@@ -9,6 +9,7 @@
 @inject NavigationManager NavigationManager;
 <MudContainer Style="height:70vh; margin-top: 2%">
     <div class="d-flex flex-row justify-content-between flex-wrap">
+        <MudTextField InputType="InputType.Text" Variant="Variant.Outlined" T="DateTime" ReadOnly="true" Label="Дата проведения" @bind-Value="@(_lesson.LessonStart)" Format="dd.MM.yyyy"/>
         @if (_lesson.IsCancelled)
         {
             <MudChip Variant="Variant.Filled" Color="Color.Error">Отмененное занятие</MudChip>
@@ -71,16 +72,13 @@
         {LessonActivityMark.Positive, "+"}
     };
 
-    private static readonly Dictionary<bool, string> AttendanceOnRussianLanguage = new()
-    {
-        {true, "Присутствовал"},
-        {false, "Отсутствовал"},
-    };
-
     private static Func<LessonActivityMark, string> MarkConverter => x => MarksOnRussianLanguage[x];
 
     protected override async Task OnInitializedAsync()
     {
+        var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+        int.TryParse(userIdentity.Claims.First(x => x.Type == UserClaims.TeacherId).Value, out var teacherId);
+        
         var filters = new List<FilterDefinition>
         {
             new()
@@ -97,8 +95,12 @@
 
         if (lesson is null)
         {
-            //Перенаправление на страницу с расписанием
-            NavigationManager.NavigateTo("/");
+            NavigationManager.NavigateTo("/lessons");
+            return;
+        }
+        if (lesson.TeacherId != teacherId)
+        {
+            NavigationManager.NavigateTo("/lessons");
             return;
         }
         _lesson = lesson;
