@@ -13,6 +13,6 @@ public sealed class StudentLessonStatisticsEnityMapping : AbstractEntityMapping<
         Map(nameof(StudentLessonStatistics.LessonId), "ss.lesson_id");
 
         Map(nameof(StudentLessonStatistics.ActivityMark), "COALESCE(activity.mark, 0)");
-        Map(nameof(StudentLessonStatistics.WasAttended), "attendance.id is not null");
+        Map(nameof(StudentLessonStatistics.WasAttended), "attendance.id is null");
     }
 }
