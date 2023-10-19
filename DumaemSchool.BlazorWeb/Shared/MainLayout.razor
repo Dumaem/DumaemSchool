@@ -16,7 +16,10 @@
             <MudText Typo="Typo.h5" Class="ml-3" Style="font-family: 'Century Gothic'; color: white">dumaem</MudText>
         </a>
         <MudSpacer />
-        <AuthorizeView Context="Authorized">
+        <AuthorizeView Context="AuthorizeContext">
+            <NotAuthorized>
+                <MudButton Href="/login" Variant="Variant.Outlined" Color="Color.Secondary">Войти</MudButton>
+            </NotAuthorized>
             <Authorized>
                 <div class="d-flex justify-content-end rounded-3 mr-5">
                     <AuthorizeView Roles="@Role.DeputyDirector">
