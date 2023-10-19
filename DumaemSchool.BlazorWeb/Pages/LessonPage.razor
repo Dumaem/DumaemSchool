@@ -33,7 +33,7 @@
                      Groupable="false" Hideable="true">
             <Columns>
                 <PropertyColumn Filterable="true" Property="x => x.StudentName" SortBy="x => x.StudentName" Title="ФИО учащегося"/>
-                <PropertyColumn IsEditable="true" Filterable="true" Property="x => x.WasAttended" SortBy="x => x.WasAttended" Title="Отсутствовал ли ученик на уроке">
+                <PropertyColumn IsEditable="true" Filterable="true" Property="x => x.WasAttended" SortBy="x => x.WasAttended" Title="Присутствовал ли ученик на уроке">
                     <EditTemplate>
                         <MudCheckBox T="bool" @bind-Checked:get=context.Item.WasAttended @bind-Checked:set=@(x => ChangeAttendance(x, context.Item))
                                      Color="Color.Primary">
@@ -130,7 +130,7 @@
         {
             return;
         }
-        var command = new ChangeLessonStudentAttendanceCommand(lessonStudent.LessonId, lessonStudent.StudentId, (bool) value!);
+        var command = new ChangeLessonStudentAttendanceCommand(lessonStudent.LessonId, lessonStudent.StudentId, value!.Value);
         _lockValue = Interlocked.Exchange(ref _lockValue, 1);
         await Sender.Send(command);
         lessonStudent.WasAttended = value!.Value;

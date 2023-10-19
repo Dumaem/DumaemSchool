@@ -2,6 +2,7 @@
 @using System.Globalization
 @using DumaemSchool.Core.Commands.Lesson
 @using DumaemSchool.Core.Commands.Teacher
+@using DumaemSchool.Core.Queries.Section
 
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
 @inject IDialogService DialogService;
@@ -59,13 +60,12 @@
             <MudContainer Class="ma-0 pa-0" MaxWidth="MaxWidth.False">
                 <MudTextField InputType="InputType.Text" Variant="Variant.Outlined" T="string" ReadOnly="true" Label="Заменяющий учитель" @bind-Value="@(_newTeacher.Name)"/>
             </MudContainer>
-            <MudButton Disabled="@(!(_teacherForReplace.Id != 0 && _selectedSection.Id != 0 
-                                   && _selectedSectionSchedule.Count > 0 && _selectedDate is not null))" Class="ml-3" Style="width: 10vw" Variant="Variant.Filled" OnClick="@(() => ShowTeachers(true))" Color="Color.Primary">Выбрать учителя</MudButton>
+            <MudButton Disabled="@(!(_teacherForReplace.Id != 0 && _selectedSection.Id != 0 && _selectedSectionSchedule.Count > 0 && _selectedDate is not null))" Class="ml-3" Style="width: 10vw" Variant="Variant.Filled" OnClick="@(() => ShowTeachers(true))" Color="Color.Primary">Выбрать учителя</MudButton>
         </div>
     </AuthorizeView>
     <div class="d-flex flex-row mt-5">
-        <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="CanCreate" OnClick="@(async () => await CreateLesson())">Создать занятие</MudButton>
-        <MudButton Class="ml-5" Color="Color.Error" Variant="Variant.Filled" Disabled="CanCreate" OnClick="@(async () => await RevokeLesson())">Отменить занятие</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="CanCreate" OnClick="@(async () => await CreateLesson(true))">Создать занятие</MudButton>
+        <MudButton Class="ml-5" Color="Color.Error" Variant="Variant.Filled" Disabled="CanRevoke" OnClick="@(async () => await CreateLesson(false))">Отменить занятие</MudButton>
     </div>
 </MudContainer>
 
@@ -74,17 +74,19 @@
     private SectionInfo _selectedSection = new();
     private List<SectionSchedule> _selectedSectionSchedule = new();
     private DateTime? _selectedDate;
-    
+
     //Если производится замена учителя (создает зам.Директора), то выбранный кружок, расписание для него,
     //дата проведения, учитель, которого заменяют и сам заменяющий учитель не должны быть пустыми
     //Если же занятие создается учителем, то выбранный кружок, расписание для него,дата проведения не должны быть пустыми
-    private bool CanCreate => _isReplace ? !(_selectedSection.Id != 0 && _selectedSectionSchedule.Count > 0 && _selectedDate is not null 
-          && _teacherForReplace.Id != 0 && _newTeacher.Id != 0) : !(_selectedSection.Id != 0 && _selectedSectionSchedule.Count > 0 && _selectedDate is not null);
+    private bool CanCreate => _isReplace ? !(_selectedSection.Id != 0 && _selectedSectionSchedule.Count > 0 && _selectedDate is not null
+                                             && _teacherForReplace.Id != 0 && _newTeacher.Id != 0) : !(_selectedSection.Id != 0 && _selectedSectionSchedule.Count > 0 && _selectedDate is not null);
+        
+    private bool CanRevoke => _isReplace ? !(_selectedSection.Id != 0 && _selectedSectionSchedule.Count > 0 && _selectedDate is not null
+                                             && _teacherForReplace.Id != 0) : !(_selectedSection.Id != 0 && _selectedSectionSchedule.Count > 0 && _selectedDate is not null);
     
     private int _teacherId;
     private TeacherDto _teacherForReplace = new();
     private TeacherDto _newTeacher = new();
-    private bool _isConducted = true;
 
     private async Task ShowSections()
     {
@@ -118,7 +120,7 @@
         {
             _teacherId = int.Parse(user.Claims.First(x => x.Type == UserClaims.TeacherId).Value);
         }
-        else if(user.IsInRole(Role.DeputyDirector))
+        else if (user.IsInRole(Role.DeputyDirector))
         {
             _isReplace = true;
         }
@@ -168,8 +170,8 @@
 
         if (result.Canceled)
             return;
-        
-        //Если открыто окно для выбора учетеля (которого заменяют)
+
+    //Если открыто окно для выбора учетеля (которого заменяют)
         if (!isForNew)
         {
             _teacherForReplace = (TeacherDto)result.Data;
@@ -186,7 +188,7 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    private async Task CreateLesson()
+    private async Task CreateLesson(bool isConducted)
     {
         var checkLessonCreatedCommand = new CheckLessonCreatedCommand(_selectedSectionSchedule.First().Id,
             DateOnly.FromDateTime(_selectedDate ?? DateTime.Now));
@@ -207,11 +209,17 @@
             return;
         }
 
+        if (_newTeacher.Id == 0)
+        {
+            _teacherId = _teacherForReplace.Id;
+        }
+            
         var newLesson = new Lesson
         {
             ScheduleId = _selectedSectionSchedule.First().Id,
             Date = DateOnly.FromDateTime(_selectedDate ?? DateTime.Now),
-            TeacherId = _teacherForReplace.Id == 0 ? _teacherId : _newTeacher.Id, IsConducted = _isConducted
+            TeacherId = _teacherForReplace.Id == 0 ? _teacherId : _newTeacher.Id,
+            IsConducted = isConducted
         };
 
         var createLessonCommand = new CreateLessonCommand(newLesson);
@@ -219,17 +227,12 @@
 
         if (result.IsSuccess)
         {
-            Snackbar.Add(!_isConducted ? "Занятие успешно отменено!" : "Занятие успешно создано!",
-                !_isConducted ? Severity.Normal : Severity.Success);
+            Snackbar.Add(isConducted ? "Занятие успешно создано!" : "Занятие успешно отменено!",
+                isConducted ? Severity.Success : Severity.Normal);
         }
         RefreshData();
     }
 
-    private async Task RevokeLesson()
-    {
-        _isConducted = false;
-        await CreateLesson();
-    }
 
     private void RefreshData()
     {
