@@ -45,9 +45,9 @@
             <TemplateColumn Sortable="false" Filterable="false">
                 <CellTemplate>
                     <MudStack Row>
-                        <MudButton Style="margin-left: 53%" Size="@Size.Small" Variant="@MudBlazor.Variant.Filled"
-                                   OnClick="@(async() => await DeleteStudentFromSection(context.Item.StudentId, context.Item.SectionId))"
-                                   Color="@Color.Error">Удалить студента с кружка</MudButton>
+                        <MudIconButton Style="margin-left: 53%" Size="@Size.Small" Variant="@MudBlazor.Variant.Filled"
+                                       OnClick="@(async () => await DeleteStudentFromSection(context.Item.StudentId, context.Item.SectionId))"
+                                       Color="@Color.Error" Icon="@Icons.Material.Filled.Delete"/>
                     </MudStack>
                 </CellTemplate>
             </TemplateColumn>
@@ -172,12 +172,12 @@
 
     private async Task<bool> IsSuccessDeleteDialogResult()
     {
-        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var options = new DialogOptions {CloseOnEscapeKey = true};
         var parameters = new DialogParameters
-            {
-                ["DialogContent"] = "Вы уверены, что хотите удалить данного студента с кружка?",
-                ["Color"] = MudBlazor.Color.Error
-            };
+        {
+            ["DialogContent"] = "Вы уверены, что хотите удалить данного студента с кружка?",
+            ["Color"] = MudBlazor.Color.Error
+        };
         var dialog = await DialogService.ShowAsync<DialogWindow>("Подтверждение удаления", parameters, options);
 
         var result = await dialog.Result;
@@ -187,12 +187,12 @@
 
     private async Task<bool> IsSuccessAddDialogResult()
     {
-        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var options = new DialogOptions {CloseOnEscapeKey = true};
         var parameters = new DialogParameters
-            {
-                ["DialogContent"] = "Вы уверены, что хотите записать данного студента на кружок?",
-                ["Color"] = MudBlazor.Color.Primary
-            };
+        {
+            ["DialogContent"] = "Вы уверены, что хотите записать данного студента на кружок?",
+            ["Color"] = MudBlazor.Color.Primary
+        };
 
         var dialog = await DialogService.ShowAsync<DialogWindow>("Подтверждение записи", parameters, options);
 
@@ -205,12 +205,12 @@
     {
         var filters = new List<FilterDefinition>();
 
-        filters.Add(new FilterDefinition { FieldName = nameof(SectionStudent.SectionId), Value = SectionId, Operand = FilterOperand.Equal });
-        filters.Add(new FilterDefinition { FieldName = nameof(SectionStudent.StudentName), Value = _searchString, Operand = FilterOperand.Contains });
+        filters.Add(new FilterDefinition {FieldName = nameof(SectionStudent.SectionId), Value = SectionId, Operand = FilterOperand.Equal});
+        filters.Add(new FilterDefinition {FieldName = nameof(SectionStudent.StudentName), Value = _searchString, Operand = FilterOperand.Contains});
 
         var result = await Sender.Send(new SectionStudentQuery(FilterConverter.GenerateParamsFromGrid(state, filters)));
 
-        return new GridData<SectionStudent> { Items = result.Items, TotalItems = result.TotalItemsCount };
+        return new GridData<SectionStudent> {Items = result.Items, TotalItems = result.TotalItemsCount};
     }
 
 }
