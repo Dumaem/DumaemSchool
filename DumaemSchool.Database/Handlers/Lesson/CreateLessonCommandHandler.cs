@@ -16,8 +16,6 @@ public sealed class CreateLessonCommandHandler : IRequestHandler<CreateLessonCom
 
     public async Task<Result<Core.Models.Lesson>> Handle(CreateLessonCommand request, CancellationToken cancellationToken)
     {
-        var teacher = await _repository.CreateLesson(request.Lesson); 
-
-        return teacher;
+        return await _repository.CreateLesson(request.Lesson);
     }
 }

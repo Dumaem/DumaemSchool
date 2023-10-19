@@ -64,8 +64,8 @@
         </div>
     </AuthorizeView>
     <div class="d-flex flex-row mt-5">
-        <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="IsCanCreate" OnClick="@(async () => await CreateLesson())">Создать занятие</MudButton>
-        <MudButton Class="ml-5" Color="Color.Error" Variant="Variant.Filled" Disabled="IsCanCreate" OnClick="@(async () => await RevokeLesson())">Отменить занятие</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="CanCreate" OnClick="@(async () => await CreateLesson())">Создать занятие</MudButton>
+        <MudButton Class="ml-5" Color="Color.Error" Variant="Variant.Filled" Disabled="CanCreate" OnClick="@(async () => await RevokeLesson())">Отменить занятие</MudButton>
     </div>
 </MudContainer>
 
@@ -74,10 +74,12 @@
     private SectionInfo _selectedSection = new();
     private List<SectionSchedule> _selectedSectionSchedule = new();
     private DateTime? _selectedDate;
-    private bool IsCanCreate => _isReplace ? 
-        !(_selectedSection.Id != 0 && _selectedSectionSchedule.Count > 0 && _selectedDate is not null 
-          && _teacherForReplace.Id != 0 && _newTeacher.Id != 0) 
-        : !(_selectedSection.Id != 0 && _selectedSectionSchedule.Count > 0 && _selectedDate is not null);
+    
+    //Если производится замена учителя (создает зам.Директора), то выбранный кружок, расписание для него,
+    //дата проведения, учитель, которого заменяют и сам заменяющий учитель не должны быть пустыми
+    //Если же занятие создается учителем, то выбранный кружок, расписание для него,дата проведения не должны быть пустыми
+    private bool CanCreate => _isReplace ? !(_selectedSection.Id != 0 && _selectedSectionSchedule.Count > 0 && _selectedDate is not null 
+          && _teacherForReplace.Id != 0 && _newTeacher.Id != 0) : !(_selectedSection.Id != 0 && _selectedSectionSchedule.Count > 0 && _selectedDate is not null);
     
     private int _teacherId;
     private TeacherDto _teacherForReplace = new();
@@ -116,7 +118,7 @@
         {
             _teacherId = int.Parse(user.Claims.First(x => x.Type == UserClaims.TeacherId).Value);
         }
-        else
+        else if(user.IsInRole(Role.DeputyDirector))
         {
             _isReplace = true;
         }
@@ -166,7 +168,8 @@
 
         if (result.Canceled)
             return;
-
+        
+        //Если открыто окно для выбора учетеля (которого заменяют)
         if (!isForNew)
         {
             _teacherForReplace = (TeacherDto)result.Data;

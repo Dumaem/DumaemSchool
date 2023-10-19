@@ -3,7 +3,7 @@
 @using MediatR
 @using DumaemSchool.Core.Commands.Lesson
 
-@attribute [Authorize]
+@attribute [Authorize(Roles = Role.Teacher)]
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
 @inject ISender Sender;
 @inject NavigationManager NavigationManager;
@@ -21,21 +21,21 @@
     <div class="d-flex flex-column mt-5">
         <MudTextField InputType="InputType.Text" Variant="Variant.Outlined" T="string" ReadOnly="true" Label="Наименование группы" @bind-Value="@(_lesson.SectionGroupName)"/>
         <MudStack Row="true" Spacing="5" Class="d-flex flex-row mt-5 flex-wrap">
-            <MudTextField InputType="InputType.Text" Variant="Variant.Outlined" T="DateTime" ReadOnly="true" Label="Время начала" @bind-Value="@(_lesson.LessonStart)"/>
-            <MudTextField InputType="InputType.Text" Variant="Variant.Outlined" T="DateTime" ReadOnly="true" Label="Время окончания" Value="@(_lesson.LessonEnd)"/>
+            <MudTextField InputType="InputType.Text" Variant="Variant.Outlined" T="DateTime" ReadOnly="true" Label="Время начала" @bind-Value="@(_lesson.LessonStart)" Format="HH:mm"/>
+            <MudTextField InputType="InputType.Text" Variant="Variant.Outlined" T="DateTime" ReadOnly="true" Label="Время окончания" Value="@(_lesson.LessonEnd)" Format="HH:mm"/>
             <MudTextField InputType="InputType.Text" Variant="Variant.Outlined" T="TimeSpan" ReadOnly="true" Label="Длительность" @bind-Value="@(_lesson.Duration)"/>
         </MudStack>
     </div>
     @if (_isInitialized)
     {
         <MudDataGrid Class="mt-5" ReadOnly="false" EditMode="DataGridEditMode.Cell" @ref="@_mudDataGrid" ServerData="@GetData" T="StudentLessonStatistics" Filterable="true" SortMode="@SortMode.Multiple"
-                     Groupable="false" Hideable="true" >
+                     Groupable="false" Hideable="true">
             <Columns>
                 <PropertyColumn Filterable="true" Property="x => x.StudentName" SortBy="x => x.StudentName" Title="ФИО учащегося"/>
                 <PropertyColumn IsEditable="true" Filterable="true" Property="x => x.WasAttended" SortBy="x => x.WasAttended" Title="Отсутствовал ли ученик на уроке">
                     <EditTemplate>
                         <MudCheckBox T="bool" @bind-Checked:get=context.Item.WasAttended @bind-Checked:set=@(x => ChangeAttendance(x, context.Item))
-                                     Color="Color.Primary" >
+                                     Color="Color.Primary">
                         </MudCheckBox>
                     </EditTemplate>
                 </PropertyColumn>
@@ -62,18 +62,19 @@
     private LessonForScheduler _lesson = new();
     private MudDataGrid<StudentLessonStatistics> _mudDataGrid = null!;
     private bool _isInitialized;
+    private int _lockValue;
 
     private static readonly Dictionary<LessonActivityMark, string> MarksOnRussianLanguage = new()
     {
-        { LessonActivityMark.Negative, "-" },
-        { LessonActivityMark.Default, "Нет оценки" },
-        { LessonActivityMark.Positive, "+" }
+        {LessonActivityMark.Negative, "-"},
+        {LessonActivityMark.Default, "Нет оценки"},
+        {LessonActivityMark.Positive, "+"}
     };
 
     private static readonly Dictionary<bool, string> AttendanceOnRussianLanguage = new()
     {
-        { true, "Присутствовал" },
-        { false, "Отсутствовал" },
+        {true, "Присутствовал"},
+        {false, "Отсутствовал"},
     };
 
     private static Func<LessonActivityMark, string> MarkConverter => x => MarksOnRussianLanguage[x];
@@ -90,13 +91,13 @@
             }
         };
         var lessonInfoQuery = new TeacherLessonScheduleQuery(new ListParam
-        { Filters = filters.ToArray() });
+        {Filters = filters.ToArray()});
 
         var lesson = (await Sender.Send(lessonInfoQuery)).Items.SingleOrDefault();
 
         if (lesson is null)
         {
-            //Перенаправление на страницу с занятиями
+            //Перенаправление на страницу с расписанием
             NavigationManager.NavigateTo("/");
             return;
         }
@@ -118,22 +119,35 @@
 
         var result = await Sender.Send(new StudentLessonStatisticsQuery(FilterConverter.GenerateParamsFromGrid(state, filters)));
 
-        return new GridData<StudentLessonStatistics> { Items = result.Items, TotalItems = result.TotalItemsCount };
+        return new GridData<StudentLessonStatistics> {Items = result.Items, TotalItems = result.TotalItemsCount};
     }
 
     private async Task ChangeAttendance(bool? value, StudentLessonStatistics lessonStudent)
     {
-        var command = new ChangeLessonStudentAttendanceCommand(lessonStudent.LessonId, lessonStudent.StudentId, (bool)value!);
+        if (1 == _lockValue)
+        {
+            return;
+        }
+        var command = new ChangeLessonStudentAttendanceCommand(lessonStudent.LessonId, lessonStudent.StudentId, (bool) value!);
+        _lockValue = Interlocked.Exchange(ref _lockValue, 1);
         await Sender.Send(command);
-        lessonStudent.WasAttended = (bool)value;
+        lessonStudent.WasAttended = value!.Value;
         await InvokeAsync(StateHasChanged);
+        _lockValue = Interlocked.Exchange(ref _lockValue, 0);
     }
 
     private async Task ChangeActivity(LessonActivityMark value, StudentLessonStatistics lessonStudent)
     {
+        if (1 == _lockValue)
+        {
+            return;
+        }
         var command = new ChangeLessonStudentActivityCommand(lessonStudent.LessonId, lessonStudent.StudentId, value);
+        _lockValue = Interlocked.Exchange(ref _lockValue, 1);
         await Sender.Send(command);
         lessonStudent.ActivityMark = value;
         await InvokeAsync(StateHasChanged);
+        _lockValue = Interlocked.Exchange(ref _lockValue, 0);
     }
+
 }

@@ -82,23 +82,22 @@ public sealed class LessonRepository : ILessonRepository
     {
         var attendance =
             await _context.Attendances.FirstOrDefaultAsync(x => x.LessonId == lessonId && x.StudentId == studentId);
-        if (wasAttended)   
+        if (wasAttended)
         {
-            if (attendance is null)
+            if (attendance is not null)
+                return;
+
+            _context.Attendances.Add(new Attendance
             {
-                _context.Attendances.Add(new Attendance
-                {
-                    LessonId = lessonId,
-                    StudentId = studentId
-                });
-            }
+                LessonId = lessonId,
+                StudentId = studentId
+            });
         }
         else
         {
-            if (attendance is not null)
-            {
-                _context.Remove(attendance);
-            }
+            if (attendance is null)
+                return;
+            _context.Remove(attendance);
         }
         
         await _context.SaveChangesAsync();
