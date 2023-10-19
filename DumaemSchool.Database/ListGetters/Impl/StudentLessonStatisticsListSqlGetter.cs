@@ -46,7 +46,7 @@ public sealed class StudentLessonStatisticsListSqlGetter : AbstractListSqlGenera
                                         AND activity.lesson_id = ss.lesson_id
                                 LEFT JOIN public.attendance attendance 
                                     ON attendance.lesson_id = ss.lesson_id
-                                        AND attendance.lesson_id = ss.lesson_id
+                                        AND attendance.student_id = ss.student_id
                            WHERE TRUE {where}
                            ORDER BY {sort}",
             CountSql = $@"",

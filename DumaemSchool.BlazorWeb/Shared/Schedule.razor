@@ -4,13 +4,22 @@
 @inject ISender Sender;
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
-    <MudDataGrid @ref="@_mudDataGrid" ServerData="@GetData" T="SectionSchedule" Filterable="true" SortMode="@SortMode.Multiple" Groupable="false" Hideable="true">
+    <MudDataGrid RowClick="OnRowClick" @ref="@_mudDataGrid" ServerData="@GetData" T="SectionSchedule" Filterable="true" SortMode="@SortMode.Multiple" Groupable="false" Hideable="true">
         <Columns>
             <PropertyColumn Filterable="true" Property="x => (DateTimeFormatInfo.CurrentInfo.GetDayName(x.DayOfWeek))" 
                 SortBy="x => DateTimeFormatInfo.CurrentInfo.GetDayName(x.DayOfWeek)" Title="День недели" />
             <PropertyColumn Filterable="false" Property="x => x.Time" SortBy="x => x.Time" Title="Время проведения занятия" />
             <PropertyColumn Filterable="false" Property="x => x.Duration" SortBy="x => x.Duration" Title="Продолжительность занятия (мин.)" />
             <PropertyColumn Filterable="true" Property="x => x.Cabinet" SortBy="x => x.Cabinet" Title="Кабинет" />
+
+            @*             <TemplateColumn Sortable="false" Filterable="false">
+                <CellTemplate>
+                    <MudStack Row>
+                        // На будущее
+                        <MudButton Style="margin-left: 53%" Disabled="@(context.Item.IsDeleted)" Size="@Size.Small" Variant="@MudBlazor.Variant.Filled" OnClick="@(async() => await FireTeacher(context.Item.Id))" Color="@Color.Error">Уволить</MudButton>
+                    </MudStack>
+                </CellTemplate>
+            </TemplateColumn> *@
         </Columns>
 
     </MudDataGrid>
@@ -18,18 +27,34 @@
 
 
 @code {
-    [Parameter] public int SectionId { get; set; }
+    [Parameter] public int? SectionId { get; set; }
 
     private MudDataGrid<SectionSchedule> _mudDataGrid = null!;
+    
+    [Parameter]
+    public bool IsForLesson { get; set; }
+    
+    [CascadingParameter]
+    public MudDialogInstance? MudDialog { get; set; }
 
     private async Task<GridData<SectionSchedule>> GetData(GridState<SectionSchedule> state)
     {
         var filters = new List<FilterDefinition>();
-        filters.Add(new FilterDefinition { FieldName = nameof(SectionSchedule.SectionId), Value = SectionId, Operand = FilterOperand.Equal });
+        if (SectionId is not null)
+        {
+            filters.Add(new FilterDefinition { FieldName = nameof(SectionSchedule.SectionId), Value = SectionId, Operand = FilterOperand.Equal });
+        }
 
         var result = await Sender.Send(new SectionScheduleQuery(FilterConverter.GenerateParamsFromGrid(state, filters)));
 
         return new GridData<SectionSchedule> { Items = result.Items, TotalItems = result.TotalItemsCount };
     }
-
+    
+    private void OnRowClick(DataGridRowClickEventArgs<SectionSchedule> args)
+    {
+        if (!IsForLesson)
+            return;
+        
+        MudDialog?.Close(DialogResult.Ok(args.Item));
+    }
 }

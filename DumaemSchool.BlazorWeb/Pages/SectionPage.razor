@@ -146,12 +146,12 @@
 
     private async Task<bool> IsSuccessAddDialogResult()
     {
-        var options = new MudBlazor.DialogOptions { CloseOnEscapeKey = true };
+        var options = new DialogOptions { CloseOnEscapeKey = true };
         var parameters = new DialogParameters
-        {
-            ["DialogContent"] = "Вы уверены, что хотите записать данного преподавателя за этим кружком?",
-            ["Color"] = MudBlazor.Color.Primary
-        };
+            {
+                ["DialogContent"] = "Вы уверены, что хотите записать данного преподавателя за этим кружком?",
+                ["Color"] = MudBlazor.Color.Primary
+            };
 
         var dialog = await DialogService.ShowAsync<DialogWindow>("Подтверждение закрепления за кружком", parameters, options);
 

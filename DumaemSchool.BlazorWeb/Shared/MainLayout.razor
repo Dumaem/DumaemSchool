@@ -1,4 +1,6 @@
-﻿@inherits LayoutComponentBase
+@using DumaemSchool.Auth.Models;
+@using Microsoft.AspNetCore.Identity;
+@inherits LayoutComponentBase
 
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
 @inject NavigationManager NavigationManager;
@@ -6,9 +8,9 @@
 <PageTitle>DumaemSchool.BlazorWeb</PageTitle>
 
 
-<MudThemeProvider Theme="@_theme" />
-<MudDialogProvider />
-<MudSnackbarProvider />
+<MudThemeProvider Theme="@_theme"/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
 
 <MudLayout>
     <MudAppBar Elevation="1">
@@ -45,12 +47,20 @@
                             <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.Insights" Color="Color.Inherit" />
                         </MudTooltip>
                         <MudTooltip Text="Профиль">
-                        <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.AccountCircle" OnClick="@GoToTeacherPage" Color="Color.Inherit" />
+                            <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.AccountCircle" OnClick="@GoToTeacherPage" Color="Color.Inherit"/>
                         </MudTooltip>
+                        <MudButton Href="/lesson" Color="Color.Inherit" EndIcon="@Icons.Material.Filled.AddComment">
+                            Создать занятие
+                        </MudButton>
+                    </AuthorizeView>
+                    <AuthorizeView Roles="@Role.DeputyDirector">
+                        <MudButton Href="/lesson" Color="Color.Inherit" EndIcon="@Icons.Material.Filled.AddComment">
+                            Создать замену
+                        </MudButton>
                     </AuthorizeView>
 
                     <MudTooltip Text="Выход из системы">
-                        <MudIconButton Class="ml-5" Size="Size.Medium" OnClick="@Logout" Icon="@Icons.Material.Filled.ExitToApp" Color="Color.Inherit" />
+                        <MudIconButton Class="ml-5" Size="Size.Medium" OnClick="@Logout" Icon="@Icons.Material.Filled.ExitToApp" Color="Color.Inherit"/>
                     </MudTooltip>
                 </div>
             </Authorized>
@@ -64,6 +74,7 @@
 @code
 {
     private int? TeacherId { get; set; }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender)
@@ -86,16 +97,16 @@
     }
 
     private readonly MudTheme _theme = new()
+    {
+        Palette = new PaletteLight
         {
-            Palette = new PaletteLight
-            {
-                Primary = "#5D9C59",
-                Secondary = "#C7E8CA",
-                AppbarBackground = "#5D9C59",
-                AppbarText = "#FFFFFF",
-                TableHover = "#C7E8CA"
-            }
-        };
+            Primary = "#5D9C59",
+            Secondary = "#C7E8CA",
+            AppbarBackground = "#5D9C59",
+            AppbarText = "#FFFFFF",
+            TableHover = "#C7E8CA"
+        }
+    };
 
     private void Logout()
     {

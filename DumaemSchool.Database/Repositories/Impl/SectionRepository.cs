@@ -182,7 +182,7 @@ public sealed class SectionRepository : ISectionRepository
             Section = sectionDb, TeacherId = section.TeacherId
         };
         
-        var schedules = section.Schedules.Select(x => new Entities.Schedule
+        var schedules = section.Schedules.Select(x => new Schedule
         {
             Section = sectionDb, 
             Cabinet = x.Cabinet, 
