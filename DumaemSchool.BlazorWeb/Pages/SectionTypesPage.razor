@@ -1,59 +1,58 @@
 ﻿@page "/section-types"
-
-@using DumaemSchool.Core.DataManipulation;
-@using DumaemSchool.Core.Models
-@using MediatR;
-@using DataGridEditMode = Radzen.DataGridEditMode
-@using Variant = Radzen.Variant
-@using DumaemSchool.BlazorWeb.Shared.Dialogs
 @using DumaemSchool.Core.Commands.SectionType
 @using DumaemSchool.Core.Queries.Section
 
 @inject ISender Sender;
 @inject IDialogService DialogService
 
-<MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
-    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mb-4" Text="Добавить вид кружка"
-                  Click="@InsertRow" Disabled=@(sectionTypeToInsert != null || sectionTypeToUpdate != null)/>
-    <RadzenDataGrid @ref="sectionTypesGrid" AllowAlternatingRows="false" AllowFiltering="false" AllowPaging="true" PageSize="8"
-                    AllowSorting="true" EditMode="DataGridEditMode.Single" Data="@sectionTypes" TItem="SectionType"
-                    RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow" Sort="@Reset"
-                    Page="@Reset" Filter="@Reset" ColumnWidth="200px">
-        <Columns>
-            <RadzenDataGridColumn TItem="SectionType" Property="Name" Title="Название вида кружка">
-                <EditTemplate Context="sectionType">
-                    <RadzenTextBox @bind-Value="sectionType.Name" Style="width:100%; display: block" Name="Name"/>
-                    <RadzenRequiredValidator Text="Название вида кружка обязательно!" Component="Name" Popup="true"/>
-                </EditTemplate>
-            </RadzenDataGridColumn>
+<PageTitle>Виды кружков</PageTitle>
 
-            <RadzenDataGridColumn TItem="SectionType" Context="sectionType" Filterable="false" Sortable="false"
-                                  TextAlign="TextAlign.Right" Width="156px">
-                <Template Context="sectionType">
-                    <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat"
-                                  Size="ButtonSize.Medium" Click="@(() => EditRow(sectionType))"
-                                  @onclick:stopPropagation="true"/>
 
-                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat"
-                                  Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1"
-                                  Click="@(() => DeleteRow(sectionType))" @onclick:stopPropagation="true"/>
-                </Template>
+<AuthorizeView Roles="@Role.DeputyDirector" Context="Authorized">
+    <MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
+        <RadzenButton Icon="add_circle_outline" class="mb-4" Text="Добавить вид кружка"
+                      style='background-color: #5D9C59'
+                      Click="@InsertRow" Disabled=@(sectionTypeToInsert != null || sectionTypeToUpdate != null) col/>
+        <RadzenDataGrid EmptyText="Список видов кружков пуст" @ref="sectionTypesGrid" AllowAlternatingRows="true" AllowFiltering="false" AllowPaging="true" PageSize="8"
+                        AllowSorting="true" EditMode="Radzen.DataGridEditMode.Single" Data="@sectionTypes" TItem="SectionType"
+                        RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow" Sort="@Reset"
+                        Page="@Reset" Filter="@Reset" ColumnWidth="200px">
+            <Columns>
+                <RadzenDataGridColumn TItem="SectionType" Property="Name" Title="Название вида кружка">
+                    <EditTemplate Context="sectionType">
+                        <RadzenTextBox @bind-Value="sectionType.Name" Style="width:100%; display: block" Name="Name"/>
+                        <RadzenRequiredValidator Text="Название вида кружка обязательно!" Component="Name" Popup="true"/>
+                    </EditTemplate>
+                </RadzenDataGridColumn>
 
-                <EditTemplate Context="sectionType">
-                    <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat"
-                                  Size="ButtonSize.Medium" Click="@(() => SaveRow(sectionType))"/>
+                <RadzenDataGridColumn TItem="SectionType" Context="sectionType" Filterable="false" Sortable="false"
+                                      TextAlign="TextAlign.Right" Width="156px">
+                    <Template Context="sectionType">
+                        <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Radzen.Variant.Flat"
+                                      Size="ButtonSize.Medium" Click="@(() => EditRow(sectionType))"
+                                      @onclick:stopPropagation="true"/>
 
-                    <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat"
-                                  Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(() => CancelEdit(sectionType))"/>
+                        <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Radzen.Variant.Flat"
+                                      Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1"
+                                      Click="@(() => DeleteRow(sectionType))" @onclick:stopPropagation="true"/>
+                    </Template>
 
-                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat"
-                                  Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1"
-                                  Click="@(() => DeleteRow(sectionType))"/>
-                </EditTemplate>
-            </RadzenDataGridColumn>
-        </Columns>
-    </RadzenDataGrid>
-</MudContainer>
+                    <EditTemplate Context="sectionType">
+                        <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Radzen.Variant.Flat"
+                                      Size="ButtonSize.Medium" Click="@(() => SaveRow(sectionType))"/>
+
+                        <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Radzen.Variant.Flat"
+                                      Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(() => CancelEdit(sectionType))"/>
+
+                        <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Radzen.Variant.Flat"
+                                      Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1"
+                                      Click="@(() => DeleteRow(sectionType))"/>
+                    </EditTemplate>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </MudContainer>
+</AuthorizeView>
 
 @code {
     RadzenDataGrid<SectionType> sectionTypesGrid = null!;
@@ -151,7 +150,7 @@
 
     private async Task<bool> IsSuccessDeleteDialogResult()
     {
-        var options = new MudBlazor.DialogOptions { CloseOnEscapeKey = true };
+        var options = new DialogOptions { CloseOnEscapeKey = true };
         var parameters = new DialogParameters
         {
             ["DialogContent"] = "Вы уверены, что хотите удалить данный вид кружка?"
@@ -162,4 +161,5 @@
 
         return !result.Canceled;
     }
+
 }

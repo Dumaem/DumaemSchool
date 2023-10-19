@@ -1,39 +1,69 @@
-﻿@inherits LayoutComponentBase
+@using DumaemSchool.Auth.Models;
+@using Microsoft.AspNetCore.Identity;
+@inherits LayoutComponentBase
+
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
 @inject NavigationManager NavigationManager;
 
 <PageTitle>DumaemSchool.BlazorWeb</PageTitle>
 
 
-<MudThemeProvider Theme="@_theme" />
-<MudDialogProvider />
-<MudSnackbarProvider />
+<MudThemeProvider Theme="@_theme"/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
 
 <MudLayout>
     <MudAppBar Elevation="1">
-        <MudText Typo="Typo.h5" Class="ml-3" Style="font-family: 'Century Gothic'">dumaem</MudText>
+        <a href="/">
+            <MudText Typo="Typo.h5" Class="ml-3" Style="font-family: 'Century Gothic'; color: white">dumaem</MudText>
+        </a>
         <MudSpacer />
-        <AuthorizeView>
-            <div class="d-flex justify-content-end rounded-3 mr-5">
-                <MudTooltip Text="Кружки">
-                    <MudIconButton Href="/sections" Size="Size.Medium" Icon="@Icons.Material.Filled.TheaterComedy" Color="Color.Inherit" />
-                </MudTooltip>
-                <MudTooltip Text="Виды кружков">
-                    <MudIconButton Href="/section-types" Size="Size.Medium" Icon="@Icons.Material.Filled.Category" Color="Color.Inherit"/>
-                </MudTooltip>
-                <MudTooltip Text="Учителя">
-                    <MudIconButton Href="/teachers" Size="Size.Medium" Icon="@Icons.Material.Filled.People" Color="Color.Inherit" />
-                </MudTooltip>
-                <MudTooltip Text="Расписание">
-                    <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.EditCalendar" Color="Color.Inherit" />
-                </MudTooltip>
-                <MudTooltip Text="Статистика">
-                    <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.Insights" Color="Color.Inherit" />
-                </MudTooltip>
-                <MudTooltip Text="Профиль">
-                    <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" />
-                </MudTooltip>
-            </div>
+        <AuthorizeView Context="Authorized">
+            <Authorized>
+                <div class="d-flex justify-content-end rounded-3 mr-5">
+                    <AuthorizeView Roles="@Role.DeputyDirector">
+                        <MudTooltip Text="Кружки">
+                            <MudIconButton Href="/sections" Size="Size.Medium" Icon="@Icons.Material.Filled.TheaterComedy" Color="Color.Inherit" />
+                        </MudTooltip>
+                        <MudTooltip Text="Виды кружков">
+                            <MudIconButton Href="/section-types" Size="Size.Medium" Icon="@Icons.Material.Filled.Category" Color="Color.Inherit"/>
+                        </MudTooltip>
+                        <MudTooltip Text="Учителя">
+                            <MudIconButton Href="/teachers" Size="Size.Medium" Icon="@Icons.Material.Filled.People" Color="Color.Inherit" />
+                        </MudTooltip>
+                        <MudTooltip Text="Статистика">
+                            <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.Insights" Color="Color.Inherit" />
+                        </MudTooltip>
+                    </AuthorizeView>
+
+                    <AuthorizeView Roles="@Role.Teacher">
+                        <MudTooltip Text="Кружки преподавателя">
+                            <MudIconButton Href="/sections" Size="Size.Medium" Icon="@Icons.Material.Filled.TheaterComedy" Color="Color.Inherit" />
+                        </MudTooltip>
+                        <MudTooltip Text="Расписание">
+                            <MudIconButton Href="/lessons" Size="Size.Medium" Icon="@Icons.Material.Filled.EditCalendar" Color="Color.Inherit" />
+                        </MudTooltip>
+                        <MudTooltip Text="Статистика по занятиям">
+                            <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.Insights" Color="Color.Inherit" />
+                        </MudTooltip>
+                        <MudTooltip Text="Профиль">
+                            <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.AccountCircle" OnClick="@GoToTeacherPage" Color="Color.Inherit"/>
+                        </MudTooltip>
+                        <MudButton Href="/lesson" Color="Color.Inherit" EndIcon="@Icons.Material.Filled.AddComment">
+                            Создать занятие
+                        </MudButton>
+                    </AuthorizeView>
+                    <AuthorizeView Roles="@Role.DeputyDirector">
+                        <MudButton Href="/lesson" Color="Color.Inherit" EndIcon="@Icons.Material.Filled.AddComment">
+                            Создать замену
+                        </MudButton>
+                    </AuthorizeView>
+
+                    <MudTooltip Text="Выход из системы">
+                        <MudIconButton Class="ml-5" Size="Size.Medium" OnClick="@Logout" Icon="@Icons.Material.Filled.ExitToApp" Color="Color.Inherit"/>
+                    </MudTooltip>
+                </div>
+            </Authorized>
         </AuthorizeView>
     </MudAppBar>
     <MudMainContent>
@@ -43,21 +73,29 @@
 
 @code
 {
+    private int? TeacherId { get; set; }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if(!firstRender)
+        if (!firstRender)
         {
             return;
         }
 
-        var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User.Identity;
+        var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
 
-        if (userIdentity is not null && !userIdentity.IsAuthenticated)
+        if (userIdentity.Identity is not null && !userIdentity.Identity.IsAuthenticated)
         {
             NavigationManager.NavigateTo("/login");
+            return;
+        }
+
+        if (userIdentity.IsInRole(Role.Teacher))
+        {
+            TeacherId = int.Parse(userIdentity.Claims.First(x => x.Type == UserClaims.TeacherId).Value);
         }
     }
-    
+
     private readonly MudTheme _theme = new()
     {
         Palette = new PaletteLight
@@ -69,4 +107,14 @@
             TableHover = "#C7E8CA"
         }
     };
+
+    private void Logout()
+    {
+        NavigationManager.NavigateTo("/logout", true);
+    }
+
+    private void GoToTeacherPage()
+    {
+        NavigationManager.NavigateTo($"/teacher/{TeacherId}");
+    }
 }

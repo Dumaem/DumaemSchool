@@ -60,6 +60,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IListSqlGenerator<SectionSchedule>, SectionScheduleListSqlGetter>();
         services.AddSingleton<IListSqlGenerator<StudentLessonStatistics>, StudentLessonStatisticsListSqlGetter>();
         services.AddSingleton<IListSqlGenerator<StudentToAddToSection>, SectionStudentsToAddListSqlGetter>();
+        services.AddSingleton<IListSqlGenerator<LessonForScheduler>, TeacherLessonScheduleListSqlGetter>();
         services.AddSingleton<IEntityMapping<TeacherDto>, TeacherDtoEntityMapping>();
         services.AddSingleton<IEntityMapping<SectionType>, SectionTypeEntityMapping>();
         services.AddSingleton<IEntityMapping<SectionInfo>, SectionInfoEntityMapping>();
@@ -67,6 +68,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IEntityMapping<SectionSchedule>, SectionScheduleEntityMapping>();
         services.AddSingleton<IEntityMapping<StudentLessonStatistics>, StudentLessonStatisticsEnityMapping>();
         services.AddSingleton<IEntityMapping<StudentToAddToSection>, StudentToAddToSectionEntityMapping>();
+        services.AddSingleton<IEntityMapping<LessonForScheduler>, LessonForSchedulerEntityMapping>();
 
         return services;
     }

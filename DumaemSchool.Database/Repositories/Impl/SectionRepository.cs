@@ -3,16 +3,16 @@ using DumaemSchool.Core.DataManipulation;
 using DumaemSchool.Core.Models;
 using DumaemSchool.Core.OutputModels;
 using DumaemSchool.Database.ListGetters;
-using LanguageExt;
-using LanguageExt.ClassInstances;
 using Microsoft.EntityFrameworkCore;
-using System.Xml.Linq;
+using DumaemSchool.Database.Mappers;
+using Section = DumaemSchool.Core.Models.Section;
 using SectionStudent = DumaemSchool.Core.OutputModels.SectionStudent;
 
 namespace DumaemSchool.Database.Repositories.Impl;
 
 public sealed class SectionRepository : ISectionRepository
 {
+    private readonly DatabaseMapper _mapper;
     private readonly ApplicationContext _context;
     private readonly IListSqlGenerator<SectionInfo> _sectionInfoSqlGenerator;
     private readonly IListSqlGenerator<SectionStudent> _sectionStudentSqlGenerator;
@@ -25,6 +25,7 @@ public sealed class SectionRepository : ISectionRepository
         IListSqlGenerator<SectionSchedule> sectionScheduleSqlGenerator,
         IListSqlGenerator<StudentToAddToSection> studentToAddSqlGenerator)
     {
+        _mapper = new DatabaseMapper();
         _sectionInfoSqlGenerator = sectionInfoSqlGenerator;
         _context = context;
         _sectionStudentSqlGenerator = sectionStudentSqlGenerator;
@@ -39,11 +40,12 @@ public sealed class SectionRepository : ISectionRepository
         var result = (await connection
             .QueryAsync<SectionInfo>(listQuery.SelectSql, listQuery.Parameters)
             ).AsList();
+        var count = await connection.ExecuteScalarAsync<int>(listQuery.CountSql, listQuery.Parameters);
 
         return new ListDataResult<SectionInfo>
         {
             Items = result,
-            TotalItemsCount = result.Count
+            TotalItemsCount = count
         };
     }
 
@@ -153,12 +155,48 @@ public sealed class SectionRepository : ISectionRepository
         return true;
     }
 
-    public async Task<TeacherDto> GetTeacherFromSection(int sectionId)
+    public async Task<TeacherDto?> GetTeacherFromSection(int sectionId)
     {
+        var section = await _context.Sections.FindAsync(sectionId);
+
+        if(section is null)
+        {
+            return null;
+        }    
         var teacher = (await _context.SectionTeachers.Include(x => x.Teacher).FirstOrDefaultAsync(x => x.IsActual == true 
         && x.SectionId == sectionId))!.Teacher;
         return new TeacherDto { Id = teacher.Id, Name = teacher.Name };
     }
 
 
+
+    public async Task<Section> CreateSection(SectionWithSchedule section)
+    {
+        var sectionDb = new Entities.Section
+        {
+            GroupName = section.GroupName, SectionTypeId = section.SectionTypeId
+        };
+
+        var sectionTeacher = new SectionTeacher
+        {
+            Section = sectionDb, TeacherId = section.TeacherId
+        };
+        
+        var schedules = section.Schedules.Select(x => new Schedule
+        {
+            Section = sectionDb, 
+            Cabinet = x.Cabinet, 
+            Duration = x.Duration, 
+            Time = x.Time, 
+            DayOfWeek = (int)x.DayOfWeek
+        });
+    
+        await _context.Sections.AddAsync(sectionDb);
+        await _context.SectionTeachers.AddAsync(sectionTeacher);
+        await _context.Schedules.AddRangeAsync(schedules);
+
+        await _context.SaveChangesAsync();
+
+        return _mapper.Map(sectionDb);
+    }
 }

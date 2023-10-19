@@ -1,59 +1,57 @@
 ﻿@page "/teacher/{id:int}"
-@using DumaemSchool.Auth.Models;
-@using DumaemSchool.Core.Models;
-@using MediatR;
-@using Microsoft.AspNetCore.Identity;
 @using DumaemSchool.Core.Commands.Teacher
 @using DumaemSchool.Core.Queries.Teacher
 
 @inject ISender Sender;
 @inject NavigationManager NavigationManager;
-@inject UserManager<SchoolUser> UserManager
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
 
 
-@if (currentTeacher is null)
+<PageTitle>Учитель</PageTitle>
+
+@if (_currentTeacher is null)
 {
     return;
 }
 
 <MudContainer Style="margin-left: 0%;margin-top: 2%; width:30%">
-    <MudText Typo="Typo.h4">Информация о учителе:</MudText>
+    <MudText Typo="Typo.h4">Информация об учителе:</MudText>
     <MudSpacer></MudSpacer>
 
     <AuthorizeView Roles="@Role.DeputyDirector">
         <Authorized>
             <MudStack>
-                <MudTextField Immediate @bind-Value="currentTeacher.Name"></MudTextField>
-                 <MudButton Disabled="@(!TeacherNameChanged)" Variant="@MudBlazor.Variant.Filled"
-                            OnClick="@(() => EditTeacher(currentTeacher))" Color="@Color.Primary">Изменить</MudButton>
+                <MudTextField Immediate @bind-Value="_currentTeacher.Name"></MudTextField>
+                 <MudButton Disabled="@(!TeacherNameChanged)" Variant="@Variant.Filled"
+                            OnClick="@(() => EditTeacher(_currentTeacher))" Color="@Color.Primary">Изменить</MudButton>
              </MudStack>
         </Authorized>
     </AuthorizeView>
 
-
-
     <AuthorizeView Roles="@Role.Teacher">
         <Authorized>
-            <MudText Style="margin-top: 2%" Typo="Typo.h5">@currentTeacher.Name</MudText>
+            <MudText Style="margin-top: 2%" Typo="Typo.h5">@_currentTeacher.Name</MudText>
         </Authorized>
     </AuthorizeView>
 
 </MudContainer>
 
-<Sections TeacherId="Id"></Sections>
+<Sections TeacherId="Id" IsForLesson="false"></Sections>
 
  @code {
 
     [Parameter]
     public int Id { get; set; }
 
-    private string? savedTeacherName;
-    private Teacher? currentTeacher;
+    private string? _savedTeacherName;
+    private Teacher? _currentTeacher;
 
-    private bool TeacherNameChanged => currentTeacher?.Name != savedTeacherName;
+    private bool TeacherNameChanged => _currentTeacher?.Name != _savedTeacherName;
+
 
     protected override async Task OnInitializedAsync()
     {
+        await CheckAccessToWatchPage();
         await GetTeacherData();
     }
 
@@ -62,8 +60,25 @@
         var result = await Sender.Send(new TeacherInfoQuery(Id));
         if (result is not null)
         {
-            currentTeacher = result;
-            savedTeacherName = currentTeacher.Name;
+            _currentTeacher = result;
+            _savedTeacherName = _currentTeacher.Name;
+        }
+    }
+
+    private async Task CheckAccessToWatchPage()
+    {
+        var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+
+        if (userIdentity.IsInRole(Role.DeputyDirector))
+        {
+            return;
+        }
+
+        var teacherId = int.Parse(userIdentity.Claims.First(x => x.Type == UserClaims.TeacherId).Value);
+
+        if(!((teacherId) == Id))
+        {
+            NavigationManager.NavigateTo($"teacher/{teacherId}", true);
         }
     }
 

@@ -1,5 +1,11 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
+:root {
+    --rz-primary: #5D9C59;
+    --rz-secondary: #C7E8CA;
+    --rz-primary-lighter: #C7E8CA
+}
+
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }

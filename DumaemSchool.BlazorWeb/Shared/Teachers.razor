@@ -1,0 +1,180 @@
+﻿@using DumaemSchool.Core.Commands.Teacher
+@using DumaemSchool.Core.Queries.Teacher
+
+@inject ISender Sender;
+@inject NavigationManager NavigationManager;
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar;
+
+<AuthorizeView Roles="@Role.DeputyDirector" Context="authorized">
+    <MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
+        @if (!IsForLesson)
+        {
+            <MudButton Variant="Variant.Filled" OnClick="@CreateTeacher" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AddCircleOutline">
+                Создать нового учителя
+            </MudButton>
+        }
+        <div class="d-flex flex-wrap mt-4">
+            <MudSwitch CheckedChanged="@(EventCallback.Factory.Create<bool>(this, OnShowDeletedChange))" Color="Color.Primary">Отображать уволенных</MudSwitch>
+        </div>
+
+        <MudDataGrid Striped="true" RowClick="OnRowClick" RowStyleFunc="RowStyleFunc" @ref="@_mudDataGrid" ServerData="@GetData" T="TeacherDto" Filterable="true" SortMode="@SortMode.Multiple" Groupable="false" Hideable="true">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Список учителей</MudText>
+                <MudSpacer/>
+                <MudTextField ValueChanged="@(EventCallback.Factory.Create<string>(this, OnSearch))" Placeholder="Поиск" Adornment="Adornment.Start" Immediate="true"
+                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0">
+                </MudTextField>
+            </ToolBarContent>
+
+
+            <Columns>
+                <PropertyColumn Filterable="false" Property="x => x.Name" SortBy="x => x.Name" Title="ФИО"/>
+                <PropertyColumn Filterable="false" Property="x => x.SectionsCount" SortBy="x => x.SectionsCount" Title="Кол-во проводимых кружков"/>
+
+                @if (!IsForLesson)
+                {
+                    <TemplateColumn Sortable="false" Filterable="false">
+                        <CellTemplate>
+                            <MudStack Row>
+                                <MudIconButton Style="margin-left: 53%" Disabled="@(context.Item.IsDeleted)" Size="@Size.Small" Variant="@Variant.Filled" OnClick="@(async () => await FireTeacher(context.Item.Id))" Color="@Color.Error" Icon="@Icons.Material.Filled.Delete"/>
+                                <MudIconButton Style="margin-left: 5%" Size="@Size.Small" Variant="@Variant.Filled" OnClick="@(() => GoToTeacherDetailed(context.Item.Id))" Color="@Color.Primary" Icon="@Icons.Material.Filled.ArrowForward"/>
+                            </MudStack>
+                        </CellTemplate>
+                    </TemplateColumn>
+                }
+            </Columns>
+
+            <PagerContent>
+                <MudDataGridPager T="TeacherDto" InfoFormat="{first_item}-{last_item} из {all_items}" RowsPerPageString="Отображать строк:"/>
+            </PagerContent>
+        </MudDataGrid>
+    </MudContainer>
+</AuthorizeView>
+
+@code {
+
+    [Parameter]
+    public bool IsForLesson { get; set; }
+
+    [CascadingParameter]
+    public MudDialogInstance? MudDialog { get; set; }
+
+    private string _searchString = "";
+
+    private bool _showDeletedTeachers;
+
+    private MudDataGrid<TeacherDto> _mudDataGrid = null!;
+
+
+    private void OnSearch(string text)
+    {
+        _searchString = text;
+        _mudDataGrid.ReloadServerData();
+    }
+
+    private async Task FireTeacher(int teacherId)
+    {
+        bool isAgreedToFire = await IsSuccessFireDialogResult();
+
+        if (!isAgreedToFire)
+        {
+            return;
+        }
+
+        var fireTeacherCommand = new FireTeacherCommand(teacherId);
+        var res = await Sender.Send(fireTeacherCommand);
+
+        if (res)
+        {
+            Snackbar.Add("Учитель успешно уволен", Severity.Success);
+            await _mudDataGrid.ReloadServerData();
+        }
+    }
+
+    private async Task<bool> IsSuccessFireDialogResult()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var parameters = new DialogParameters
+        {
+            ["DialogContent"] = "Вы уверены, что хотите уволить данного учителя?",
+            ["Color"] = Color.Error
+        };
+        var dialog = await DialogService.ShowAsync<DialogWindow>("Подтверждение увольнения", parameters, options);
+
+        var result = await dialog.Result;
+
+        return !result.Canceled;
+    }
+
+    private void GoToTeacherDetailed(int teacherId)
+    {
+        NavigationManager.NavigateTo($"/teacher/{teacherId}");
+    }
+
+    private void OnShowDeletedChange(bool state)
+    {
+        _showDeletedTeachers = state;
+        _mudDataGrid.ReloadServerData();
+    }
+
+    private string RowStyleFunc(TeacherDto teacher, int index)
+    {
+        if (teacher.IsDeleted)
+        {
+            return "background-color: #cf8282";
+        }
+        return "";
+    }
+
+    private async Task<GridData<TeacherDto>> GetData(GridState<TeacherDto> state)
+    {
+        var filters = new List<FilterDefinition>();
+        if (!_showDeletedTeachers)
+        {
+            filters.Add(new FilterDefinition() { FieldName = "IsDeleted", Value = false, Operand = FilterOperand.Equal });
+        }
+        filters.Add(new FilterDefinition { FieldName = "Name", Value = _searchString, Operand = FilterOperand.Contains });
+
+        var result = await Sender.Send(new TeachersQuery(new ListParam()
+        {
+            Pagination = new PaginationInfo { ItemCount = state.PageSize, PageNumber = state.Page },
+            Sorting = state.SortDefinitions.Select(x => new SortingDefinition()
+            {
+                FieldName = x.SortBy,
+                Asc = !x.Descending
+            }).ToArray(),
+            Filters = filters.ToArray()
+        }));
+
+        return new GridData<TeacherDto> { Items = result.Items, TotalItems = result.TotalItemsCount };
+    }
+
+    private void OnRowClick(DataGridRowClickEventArgs<TeacherDto> args)
+    {
+        if (!IsForLesson)
+            return;
+
+        MudDialog?.Close(DialogResult.Ok(args.Item));
+    }
+
+    private async Task CreateTeacher()
+    {
+        var options = new DialogOptions
+        {
+            CloseButton = true, DisableBackdropClick = true,
+            MaxWidth = MaxWidth.Medium, FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<TeacherCreateWindow>("Новый учитель", options);
+
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            Snackbar.Add("Учитель успешно добавлен!", Severity.Success);
+            await _mudDataGrid.ReloadServerData();
+        }
+    }
+
+}

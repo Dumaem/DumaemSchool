@@ -1,0 +1,80 @@
+﻿@page "/lessons"
+@using DumaemSchool.Core.Queries.Lesson;
+@using System.Globalization;
+
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
+@inject ISender Sender;
+@inject NavigationManager NavigationManager;
+
+
+@attribute [Authorize(Roles = Role.Teacher)]
+
+<PageTitle>Расписание занятий</PageTitle>
+
+<RadzenScheduler  @ref=@scheduler Style="height: 768px; mt-5%; ml-3%; mr-3%"
+                 TItem="LessonForScheduler" Data="@teachersLessons" StartProperty="LessonStart" EndProperty="LessonEnd" SelectedIndex="1"
+                 TextProperty="SectionGroupName" TodayText="На сегодняшний день" AppointmentSelect=@OnLessonSelect AppointmentRender=@OnLessonRender>
+    <RadzenDayView StartTime="@startTime" EndTime="@endTime" TimeFormat="H:mm" Text="День" />
+    <RadzenWeekView StartTime="@startTime" EndTime="@endTime" TimeFormat="H:mm" Text="Неделя" />
+    <RadzenMonthView  Text="Месяц" />
+</RadzenScheduler>
+
+
+
+@code {
+    public static TimeSpan startTime = new TimeSpan(8, 0, 0);
+    public static TimeSpan endTime = new TimeSpan(23, 0, 0);
+    private int _teacherId;
+    RadzenScheduler<LessonForScheduler>? scheduler;
+    Dictionary<DateTime, string> events = new Dictionary<DateTime, string>();
+
+    List<LessonForScheduler> teachersLessons = new List<LessonForScheduler>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetCurrentTeacherId();
+        await GetData();
+    }
+
+    void OnLessonSelect(SchedulerAppointmentSelectEventArgs<LessonForScheduler> args)
+    {
+        NavigationManager.NavigateTo($"lesson/{args.Data.LessonId}", true);
+    }
+
+    void OnLessonRender(SchedulerAppointmentRenderEventArgs<LessonForScheduler> args)
+    {
+        args.Attributes["style"] = "background: #5D9C59";
+
+
+        if (args.Data.IsReplacement)
+        {
+            args.Attributes["style"] = "background: orange";
+        }
+
+        if (args.Data.IsCancelled)
+        {
+            args.Attributes["style"] = "background: red";
+
+        }
+    }
+
+    private async Task<List<LessonForScheduler>> GetData()
+    {
+        return teachersLessons = (await Sender.Send(new TeacherLessonScheduleQuery(new ListParam
+            {
+                Filters = new[]
+                                    {
+                                    new FilterDefinition { Value = _teacherId, Operand = FilterOperand.Equal,
+                                        FieldName = nameof(LessonForScheduler.TeacherId) }
+                                }
+            }))).Items.ToList();
+    }
+
+    private async Task GetCurrentTeacherId()
+    {
+        var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+        _teacherId = (int.Parse(userIdentity.Claims.First(x => x.Type == UserClaims.TeacherId).Value));
+
+    }
+
+}
