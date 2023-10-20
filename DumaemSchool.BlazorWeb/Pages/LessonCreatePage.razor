@@ -52,7 +52,7 @@
         <MudButton Class="ml-3" Disabled="@(_selectedSection.Id == 0)" Style="width: 10vw" Variant="Variant.Filled" OnClick="@ShowSchedule" Color="Color.Primary">Выбрать расписание</MudButton>
     </div>
     <MudContainer Class="pa-0 ma-0 mt-5" MaxWidth="MaxWidth.False">
-        <MudDatePicker MinDate="@(DateTime.Now - TimeSpan.FromDays(1))" @bind-Date="_selectedDate" Disabled="@(_selectedSectionSchedule.Count <= 0)" PickerVariant="PickerVariant.Dialog" Variant="Variant.Outlined" Label="Дата проведения"
+        <MudDatePicker Date="_selectedDate" MinDate="@(DateTime.Now - TimeSpan.FromDays(1))" Disabled="@(_selectedSectionSchedule.Count <= 0)" PickerVariant="PickerVariant.Dialog" Variant="Variant.Outlined" Label="Дата проведения"
                        IsDateDisabledFunc="@((DateTime dt) => dt.DayOfWeek != _selectedSectionSchedule.First().DayOfWeek)"/>
     </MudContainer>
     <AuthorizeView Roles="@Role.DeputyDirector">
@@ -209,7 +209,7 @@
             return;
         }
 
-        if (_newTeacher.Id == 0)
+        if (!isConducted && _newTeacher. Id == 0)
         {
             _teacherId = _teacherForReplace.Id;
         }
