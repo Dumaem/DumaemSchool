@@ -18,6 +18,8 @@ public sealed class SectionStudentStatisticsListSqlGetter : AbstractListSqlGener
         var sectionIdFilterDefinition =
             param.Filters.First(x => x.FieldName == nameof(SectionStudentStatistics.SectionId));
         var sectionIdFilter = SqlUtility.GetFilterToSql(sectionIdFilterDefinition, parameters, PropertyToSqlMapping)!;
+        var filters = param.Filters.Where(x => x.FieldName != "SectionId").ToArray();
+        var where = GetWhereExpression(filters, parameters); 
 
         return new ListQuery
         {
@@ -53,7 +55,8 @@ public sealed class SectionStudentStatisticsListSqlGetter : AbstractListSqlGener
                                    ss.positive_activity PositiveMarksCount,
                                    ss.negative_activity NegativeMarksCount
                             FROM student_statistics ss
-                                     JOIN public.student s ON s.id = ss.student_id",
+                                     JOIN public.student s ON s.id = ss.student_id
+                            WHERE TRUE {where}",
             CountSql = "",
             Parameters = parameters
         };
