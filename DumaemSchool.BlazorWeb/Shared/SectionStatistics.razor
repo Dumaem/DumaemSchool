@@ -27,7 +27,7 @@
             <Columns>
                 <PropertyColumn Filterable="true" Property="x => x.StudentName" SortBy="x => x.StudentName" Title="ФИО ученика">
                     <FooterTemplate>
-                        <MudText>Итого</MudText>
+                        <MudText><b>Итого</b></MudText>
                     </FooterTemplate>
                 </PropertyColumn>
                 <PropertyColumn Filterable="true" Property="x => x.FactVisitedLessonsCount" SortBy="x => x.FactVisitedLessonsCount" Title="Посещенное количество занятий" AggregateDefinition="_sumAggregator"/>
@@ -43,13 +43,20 @@
 
     [Parameter]
     public int? SectionId { get; set; }
-
+    
+    private int? teacherId = null;
     private MudDataGrid<SectionStudentStatistics> _mudDataGrid = null!;
     private bool _isInitialized;
     private SectionInfo _section = new();
 
     protected override async Task OnInitializedAsync()
     {
+        var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+
+        if (userIdentity.IsInRole(Role.Teacher))
+        {
+            teacherId = int.Parse(userIdentity.Claims.First(x => x.Type == UserClaims.TeacherId).Value);
+        }
         var sectionInfoQuery = new SectionsInfoQuery(new ListParam
         {
             Filters = new[]
@@ -81,13 +88,6 @@
 
     private async Task ShowSections()
     {
-        int? teacherId = null;
-        var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
-
-        if (userIdentity.IsInRole(Role.Teacher))
-        {
-            teacherId = int.Parse(userIdentity.Claims.First(x => x.Type == UserClaims.TeacherId).Value);
-        }
         var options = new DialogOptions
         {
             CloseOnEscapeKey = true, DisableBackdropClick = true, FullWidth = true,
