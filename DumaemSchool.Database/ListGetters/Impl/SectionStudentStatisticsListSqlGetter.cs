@@ -47,6 +47,7 @@ public sealed class SectionStudentStatisticsListSqlGetter : AbstractListSqlGener
                                                                               AND attendance.lesson_id = l.id
                                                        WHERE {sectionIdFilter.SqlText}
                                                          AND ss.date_added <= l.date
+                                                         AND l.is_conducted
                                                        GROUP BY ss.student_id)
                             SELECT ss.student_id StudentId,
                                    s.name StudentName,
