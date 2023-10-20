@@ -26,13 +26,14 @@
                         @if (_isCodeSent)
                         {
                             <MudTextField Label="Код" Class="mt-3" Required="true" MaxLength="4"
+                                          RequiredError="Обязательное поле"
                                           @bind-Value="_restorationCode" InputType="InputType.Text"
                                           Mask="@(new PatternMask("0000"))"/>
                         }
                         else
                         {
                             <MudTextField Label="Почта" Class="mt-3" Required="true"
-                                          @bind-Value="Model.Email"
+                                          @bind-Value="Model.Email" RequiredError="Обязательное поле"
                                           InputType="InputType.Email" Immediate For="@(() => Model.Email)"
                                           Validation="@(new EmailAddressAttribute { ErrorMessage = "Введенная почта не корректна" })"/>
                         }
