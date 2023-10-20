@@ -32,7 +32,7 @@
         <MudDataGrid Class="mt-5" ReadOnly="false" EditMode="DataGridEditMode.Cell" @ref="@_mudDataGrid" ServerData="@GetData" T="StudentLessonStatistics" Filterable="true" SortMode="@SortMode.Multiple"
                      Groupable="false" Hideable="true">
             <Columns>
-                <PropertyColumn Filterable="true" Property="x => x.StudentName" SortBy="x => x.StudentName" Title="ФИО учащегося"/>
+                <PropertyColumn IsEditable="false" Filterable="true" Property="x => x.StudentName" SortBy="x => x.StudentName" Title="ФИО учащегося"/>
                 <PropertyColumn IsEditable="true" Filterable="true" Property="x => x.WasAttended" SortBy="x => x.WasAttended" Title="Присутствовал ли ученик на уроке">
                     <EditTemplate>
                         <MudCheckBox T="bool" @bind-Checked:get=context.Item.WasAttended @bind-Checked:set=@(x => ChangeAttendance(x, context.Item))
