@@ -9,14 +9,14 @@
                                  SearchFunc="@SearchDaysOfWeek" Variant="Variant.Outlined">
                 </MudAutocomplete>
 
-                <MudTimePicker Label="Время проведения занятия" Class="mt-3" Required="true"
+                <MudTimePicker Editable="true" Label="Время проведения занятия" Class="mt-3" Required="true"
                                @bind-Time="_newSchedule.Time" Variant="Variant.Outlined" PickerVariant="PickerVariant.Dialog"/>
 
-                <MudNumericField Label="Продолжительность занятия (мин.)" Class="mt-3" Required="true" FullWidth="true"
+                <MudNumericField Min="45" Label="Продолжительность занятия (мин.)" Class="mt-3" Required="true" FullWidth="true"
                                  @bind-Value="_newSchedule.Duration" Variant="Variant.Outlined" Step="10"
                                  Immediate For="@(() => _newSchedule.Duration)"/>
 
-                <MudNumericField Label="Кабинет" Class="mt-3" Required="true" FullWidth="true"
+                <MudNumericField Min="1" Label="Кабинет" Class="mt-3" Required="true" FullWidth="true"
                                  @bind-Value="_newSchedule.Cabinet" Variant="Variant.Outlined"
                                  Immediate For="@(() => _newSchedule.Cabinet)"/>
             </MudStack>
