@@ -20,11 +20,15 @@
                 <MudText Typo="Typo.h6">Статистика</MudText>
             </ToolBarContent>
             <Columns>
-                <PropertyColumn Filterable="true" Property="x => x.StudentName" SortBy="x => x.StudentName" Title="ФИО ученика"/>
-                <PropertyColumn Filterable="true" Property="x => x.FactVisitedLessonsCount" SortBy="x => x.FactVisitedLessonsCount" Title="Посещенное количество занятий"/>
-                <PropertyColumn Filterable="true" Property="x => x.PlanVisitedLessonsCount" SortBy="x => x.PlanVisitedLessonsCount" Title="Плановое количество занятий"/>
-                <PropertyColumn Filterable="true" Property="x => x.PositiveMarksCount" SortBy="x => x.PositiveMarksCount" Title="Количество положительных оценок"/>
-                <PropertyColumn Filterable="true" Property="x => x.NegativeMarksCount" SortBy="x => x.NegativeMarksCount" Title="Количество отрицательных оценок"/>
+                <PropertyColumn Filterable="true" Property="x => x.StudentName" SortBy="x => x.StudentName" Title="ФИО ученика">
+                    <FooterTemplate>
+                        <MudText>Итого</MudText>
+                    </FooterTemplate>
+                </PropertyColumn>
+                <PropertyColumn Filterable="true" Property="x => x.FactVisitedLessonsCount" SortBy="x => x.FactVisitedLessonsCount" Title="Посещенное количество занятий" AggregateDefinition="_factVisitedLessonsCount"/>
+                <PropertyColumn Filterable="true" Property="x => x.PlanVisitedLessonsCount" SortBy="x => x.PlanVisitedLessonsCount" Title="Плановое количество занятий" AggregateDefinition="_planVisitedLessonsCount"/>
+                <PropertyColumn Filterable="true" Property="x => x.PositiveMarksCount" SortBy="x => x.PositiveMarksCount" Title="Количество положительных оценок" AggregateDefinition="_positiveMarksCount"/>
+                <PropertyColumn Filterable="true" Property="x => x.NegativeMarksCount" SortBy="x => x.NegativeMarksCount" Title="Количество отрицательных оценок" AggregateDefinition="_negativeMarksCount"/>
             </Columns>
         </MudDataGrid>
     }
@@ -101,5 +105,25 @@
         }
         await _mudDataGrid.ReloadServerData();
     }
-
+    
+    AggregateDefinition<SectionStudentStatistics> _factVisitedLessonsCount = new()
+    {
+        Type = AggregateType.Sum,
+        DisplayFormat = "{value}"
+    };
+    AggregateDefinition<SectionStudentStatistics> _planVisitedLessonsCount = new()
+    {
+        Type = AggregateType.Sum,
+        DisplayFormat = "{value}"
+    };
+    AggregateDefinition<SectionStudentStatistics> _positiveMarksCount = new()
+    {
+        Type = AggregateType.Sum,
+        DisplayFormat = "{value}"
+    };
+    AggregateDefinition<SectionStudentStatistics> _negativeMarksCount = new()
+    {
+        Type = AggregateType.Sum,
+        DisplayFormat = "{value}"
+    };
 }
