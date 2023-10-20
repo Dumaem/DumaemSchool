@@ -15,13 +15,13 @@
     <Authorized>
         <MudContainer Class="d-inline-flex justify-content-between mt-3 mb-3 align-items-center">
             <MudTooltip Text="Статистика">
-                <MudIconButton Variant="MudBlazor.Variant.Filled" Color="Color.Primary" Icon="@Icons.Material.Filled.Insights"/>
+                <MudIconButton Href="@($"/section-statistics/{Id}")" Variant="Variant.Filled" Color="Color.Primary" Icon="@Icons.Material.Filled.Insights"/>
             </MudTooltip>
-            <MudAutocomplete Variant="MudBlazor.Variant.Outlined" Class="ml-4 align-content-center" T="TeacherDto" Label="Преподаватель кружка"
+            <MudAutocomplete Variant="Variant.Outlined" Class="ml-4 align-content-center" T="TeacherDto" Label="Преподаватель кружка"
                              @bind-Value="_selectedTeacher" ToStringFunc="@(e => e == null ? null : $"{e.Name}")"
                              SearchFunc="@SearchTeachersToSelect" CoerceText="true"/>
             <MudButton Class="ml-4" Disabled="@(_oldTeacherId == _selectedTeacher?.Id)" OnClick="@AddTeacherToSection"
-                       Variant="MudBlazor.Variant.Filled" Color="Color.Primary">
+                       Variant="Variant.Filled" Color="Color.Primary">
                 Сохранить
             </MudButton>
         </MudContainer>
@@ -150,7 +150,7 @@
         var parameters = new DialogParameters
             {
                 ["DialogContent"] = "Вы уверены, что хотите записать данного преподавателя за этим кружком?",
-                ["Color"] = MudBlazor.Color.Primary
+                ["Color"] = Color.Primary
             };
 
         var dialog = await DialogService.ShowAsync<DialogWindow>("Подтверждение закрепления за кружком", parameters, options);

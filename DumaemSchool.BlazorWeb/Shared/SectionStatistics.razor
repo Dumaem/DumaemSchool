@@ -1,0 +1,105 @@
+﻿@using DumaemSchool.Core.Queries.Statistics
+@using DumaemSchool.Core.Queries.Section
+
+@inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
+@inject IDialogService DialogService;
+@inject ISender Sender;
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" style="height:70vh; margin-top: 2%">
+    <div class="d-flex justify-content-md-between align-items-middle mt-5">
+        <MudContainer Class="ma-0 pa-0" MaxWidth="MaxWidth.False">
+            <MudTextField InputType="InputType.Text" Variant="Variant.Outlined" T="string" ReadOnly="true" Label="Кружок" @bind-Value="@(_section.GroupName)"/>
+        </MudContainer>
+        <MudButton Class="ml-3" Style="width: 10vw" Variant="Variant.Filled" OnClick="@ShowSections" Color="Color.Primary">Выбрать кружок</MudButton>
+    </div>
+    <MudTextField Class="mt-5" T="string" @bind-Value="_section.TeacherName" Label="Преподаватель" ReadOnly="true" Variant="Variant.Outlined"/>
+    @if (_isInitialized)
+    {
+        <MudDataGrid Class="mt-5" @ref="_mudDataGrid" T="SectionStudentStatistics" ServerData="GetData" Striped="true">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Статистика</MudText>
+            </ToolBarContent>
+            <Columns>
+                <PropertyColumn Filterable="true" Property="x => x.StudentName" SortBy="x => x.StudentName" Title="ФИО ученика"/>
+                <PropertyColumn Filterable="true" Property="x => x.FactVisitedLessonsCount" SortBy="x => x.FactVisitedLessonsCount" Title="Посещенное количество занятий"/>
+                <PropertyColumn Filterable="true" Property="x => x.PlanVisitedLessonsCount" SortBy="x => x.PlanVisitedLessonsCount" Title="Плановое количество занятий"/>
+                <PropertyColumn Filterable="true" Property="x => x.PositiveMarksCount" SortBy="x => x.PositiveMarksCount" Title="Количество положительных оценок"/>
+                <PropertyColumn Filterable="true" Property="x => x.NegativeMarksCount" SortBy="x => x.NegativeMarksCount" Title="Количество отрицательных оценок"/>
+            </Columns>
+        </MudDataGrid>
+    }
+</MudContainer>
+
+@code {
+
+    [Parameter]
+    public int? SectionId { get; set; }
+
+    private MudDataGrid<SectionStudentStatistics> _mudDataGrid = null!;
+    private bool _isInitialized;
+    private SectionInfo _section = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var sectionInfoQuery = new SectionsInfoQuery(new ListParam
+        {
+            Filters = new[]
+            {
+                new FilterDefinition { FieldName = nameof(SectionInfo.Id), Operand = FilterOperand.Equal, Value = SectionId }
+            }
+        });
+
+        var section = (await Sender.Send(sectionInfoQuery)).Items.FirstOrDefault();
+        if (section is not null)
+        {
+            _section = section;
+        }
+        _isInitialized = true;
+        await base.OnInitializedAsync();
+    }
+
+    private async Task<GridData<SectionStudentStatistics>> GetData(GridState<SectionStudentStatistics> state)
+    {
+        if (SectionId is null)
+        {
+            return new GridData<SectionStudentStatistics>();
+        }
+        var filters = new List<FilterDefinition> { new() { FieldName = nameof(SectionStudentStatistics.SectionId), Value = SectionId, Operand = FilterOperand.Equal } };
+        var result = await Sender.Send(new SectionStudentsStatisticsQuery(FilterConverter.GenerateParamsFromGrid(state, filters)));
+
+        return new GridData<SectionStudentStatistics> { Items = result.Items, TotalItems = result.TotalItemsCount };
+    }
+
+    private async Task ShowSections()
+    {
+        int? teacherId = null;
+        var userIdentity = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+
+        if (userIdentity.IsInRole(Role.Teacher))
+        {
+            teacherId = int.Parse(userIdentity.Claims.First(x => x.Type == UserClaims.TeacherId).Value);
+        }
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true, DisableBackdropClick = true, FullWidth = true,
+            CloseButton = true, MaxWidth = MaxWidth.Large
+        };
+        var parameters = new DialogParameters
+        {
+            ["IsForLesson"] = true,
+            ["TeacherId"] = teacherId
+        };
+
+        var dialog = await DialogService.ShowAsync<Sections>("Выбор кружка", parameters, options);
+
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            _section = (SectionInfo)result.Data;
+            SectionId = _section.Id;
+        }
+        await _mudDataGrid.ReloadServerData();
+    }
+
+}

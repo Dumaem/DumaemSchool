@@ -36,7 +36,7 @@ public sealed class SectionInfoListSqlGenerator : AbstractListSqlGenerator<Secti
                                           ON steacher.teacher_id = t.id
                                       LEFT JOIN public.schedule schedule 
                                           ON s.id = schedule.section_id
-                                   WHERE TRUE {where}
+                                   WHERE NOT s.is_deleted {where}
                                    GROUP BY 1, 2, 3, 4, 5
                                    {havingString}
                                    ORDER BY {sort})
@@ -54,7 +54,7 @@ public sealed class SectionInfoListSqlGenerator : AbstractListSqlGenerator<Secti
                                  ON steacher.teacher_id = t.id
                              LEFT JOIN public.schedule schedule 
                                  ON s.id = schedule.section_id
-                         WHERE TRUE {where}
+                         WHERE NOT s.is_deleted {where}
                          GROUP BY 1, 2, 3, 4, 5
                          {havingString}
                          ORDER BY {sort}

@@ -82,20 +82,8 @@ public sealed class SectionRepository : ISectionRepository
         };
     }
 
-    public async Task<ListDataResult<SectionStudentStatistics>> ListSectionStudentsStatistics(int sectionId)
+    public async Task<ListDataResult<SectionStudentStatistics>> ListSectionStudentsStatistics(ListParam param)
     {
-        var param = new ListParam
-        {
-            Filters = new[]
-            {
-                new FilterDefinition
-                {
-                    FieldName = nameof(SectionStudentStatistics.SectionId), Operand = FilterOperand.Equal,
-                    Value = sectionId
-                }
-            }
-        };
-
         var listQuery = _sectionStudentStatisticsSqlGenerator.GetListSql(param);
         var connection = _context.Database.GetDbConnection();
         var result = (await connection

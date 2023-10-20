@@ -1,0 +1,15 @@
+﻿@page "/section-statistics/{id:int?}"
+
+<SectionStatistics SectionId="Id"></SectionStatistics>
+
+@code{
+    [Parameter]
+    public int? Id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        Id ??= -1;
+    }
+
+}

@@ -19,6 +19,6 @@ public sealed class
     public async Task<ListDataResult<SectionStudentStatistics>> Handle(SectionStudentsStatisticsQuery request,
         CancellationToken cancellationToken)
     {
-        return await _repository.ListSectionStudentsStatistics(request.SectionId);
+        return await _repository.ListSectionStudentsStatistics(request.Param);
     }
 }
