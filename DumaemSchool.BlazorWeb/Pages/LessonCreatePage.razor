@@ -209,7 +209,7 @@
             return;
         }
 
-        if (_newTeacher.Id == 0)
+        if (!isConducted && _newTeacher.Id == 0)
         {
             _teacherId = _teacherForReplace.Id;
         }
