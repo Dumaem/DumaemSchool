@@ -35,7 +35,7 @@
                 <PropertyColumn Filterable="true" Property="x => x.StudentName" SortBy="x => x.StudentName" Title="ФИО учащегося"/>
                 <PropertyColumn IsEditable="true" Filterable="true" Property="x => x.WasAttended" SortBy="x => x.WasAttended" Title="Отсутствовал ли ученик на уроке">
                     <EditTemplate>
-                        <MudCheckBox T="bool" @bind-Checked:get=context.Item.WasAttended @bind-Checked:set=@(x => ChangeAttendance(x, context.Item))
+                        <MudCheckBox T="bool" @bind-Checked:get=!context.Item.WasAttended @bind-Checked:set=@(x => ChangeAttendance(x, context.Item))
                                      Color="Color.Primary">
                         </MudCheckBox>
                     </EditTemplate>

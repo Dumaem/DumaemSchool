@@ -96,7 +96,7 @@ public sealed class SectionRepository : ISectionRepository
             }
         };
 
-        var listQuery = _sectionScheduleSqlGenerator.GetListSql(param);
+        var listQuery = _sectionStudentStatisticsSqlGenerator.GetListSql(param);
         var connection = _context.Database.GetDbConnection();
         var result = (await connection
                 .QueryAsync<SectionStudentStatistics>(listQuery.SelectSql, listQuery.Parameters)

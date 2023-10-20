@@ -17,7 +17,7 @@ public sealed class SectionStudentStatisticsListSqlGetter : AbstractListSqlGener
         var parameters = new DynamicParameters();
         var sectionIdFilterDefinition =
             param.Filters.First(x => x.FieldName == nameof(SectionStudentStatistics.SectionId));
-        var sectionIdFilter = SqlUtility.GetFilterToSql(sectionIdFilterDefinition, parameters)!;
+        var sectionIdFilter = SqlUtility.GetFilterToSql(sectionIdFilterDefinition, parameters, PropertyToSqlMapping)!;
 
         return new ListQuery
         {
@@ -46,12 +46,12 @@ public sealed class SectionStudentStatisticsListSqlGetter : AbstractListSqlGener
                                                        WHERE {sectionIdFilter.SqlText}
                                                          AND ss.date_added <= l.date
                                                        GROUP BY ss.student_id)
-                            SELECT ss.student_id,
-                                   s.name,
-                                   ss.lessons_to_visit,
-                                   ss.lessons_to_visit - ss.attendance visited_lessons,
-                                   ss.positive_activity,
-                                   ss.negative_activity
+                            SELECT ss.student_id StudentId,
+                                   s.name StudentName,
+                                   ss.lessons_to_visit PlanVisitedLessonsCount,
+                                   ss.lessons_to_visit - ss.attendance FactVisitedLessonsCount,
+                                   ss.positive_activity PositiveMarksCount,
+                                   ss.negative_activity NegativeMarksCount
                             FROM student_statistics ss
                                      JOIN public.student s ON s.id = ss.student_id",
             CountSql = "",

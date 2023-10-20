@@ -7,11 +7,12 @@ public sealed class SectionStudentStatisticsEntityMapping : AbstractEntityMappin
 {
     public SectionStudentStatisticsEntityMapping()
     {
-        Map(nameof(SectionStudentStatistics.StudentId), "ss.student_id");
+        Map(nameof(SectionStudentStatistics.StudentId), "ss.student_id", true);
+        Map(nameof(SectionStudentStatistics.SectionId), "ss.section_id");
         Map(nameof(SectionStudentStatistics.StudentName), "s.name");
         Map(nameof(SectionStudentStatistics.PlanVisitedLessonsCount), "ss.lessons_to_visit");
         Map(nameof(SectionStudentStatistics.FactVisitedLessonsCount), "ss.lessons_to_visit - ss.attendance");
         Map(nameof(SectionStudentStatistics.PositiveMarksCount), "ss.positive_activity");
-        Map(nameof(SectionStudentStatistics.PositiveMarksCount), "ss.negative_activity");
+        Map(nameof(SectionStudentStatistics.NegativeMarksCount), "ss.negative_activity");
     }
 }

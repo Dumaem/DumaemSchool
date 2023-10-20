@@ -5,7 +5,7 @@ public sealed class SectionStudentStatistics
     public int Id { get; set; }
     
     public int SectionId { get; set; }
-    public string SectionName { get; set; }
+    public string SectionName { get; set; } = null!;
     
     public int StudentId { get; set; }
     public string StudentName { get; set; } = null!;
