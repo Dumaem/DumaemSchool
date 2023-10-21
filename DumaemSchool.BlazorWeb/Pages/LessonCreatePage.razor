@@ -199,26 +199,26 @@
             Snackbar.Add("Занятие на этот день уже создано!", Severity.Error);
             return;
         }
-
-        var checkLessonTeacherCommand = new CheckTeacherAvailabilityToSectionCommand(_newTeacher.Id, _selectedSectionSchedule);
-        var checkTeacherResult = await Sender.Send(checkLessonTeacherCommand);
-
-        if (!checkTeacherResult)
+        
+        if (_isReplace)
         {
-            Snackbar.Add("У этого учителя уже есть занятие на это время!", Severity.Error);
-            return;
-        }
+            _teacherId = _newTeacher.Id == 0 ? _teacherForReplace.Id : _newTeacher.Id;
+            
+            var checkLessonTeacherCommand = new CheckTeacherAvailabilityToSectionCommand(_teacherId, _selectedSectionSchedule);
+            var checkTeacherResult = await Sender.Send(checkLessonTeacherCommand);
 
-        if (!isConducted && _newTeacher.Id == 0)
-        {
-            _teacherId = _teacherForReplace.Id;
+            if (!checkTeacherResult)
+            {
+                Snackbar.Add("У этого учителя уже есть занятие на это время!", Severity.Error);
+                return;
+            }
         }
             
         var newLesson = new Lesson
         {
             ScheduleId = _selectedSectionSchedule.First().Id,
             Date = DateOnly.FromDateTime(_selectedDate ?? DateTime.Now),
-            TeacherId = _teacherForReplace.Id == 0 ? _teacherId : _newTeacher.Id,
+            TeacherId = _teacherId,
             IsConducted = isConducted
         };
 
