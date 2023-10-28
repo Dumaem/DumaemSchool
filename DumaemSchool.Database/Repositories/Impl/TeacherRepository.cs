@@ -43,6 +43,7 @@ public sealed class TeacherRepository : ITeacherRepository
         var teacherDb = _mapper.Map(teacher);
         await _context.Teachers.AddAsync(teacherDb);
         await _context.SaveChangesAsync();
+        _context.ChangeTracker.Clear();
         return _mapper.Map(teacherDb);
     }
 
@@ -64,6 +65,7 @@ public sealed class TeacherRepository : ITeacherRepository
         teacherDb.Name = name;
         _context.Update(teacherDb);
         await _context.SaveChangesAsync();
+        _context.ChangeTracker.Clear();
         return true;
     }
 
@@ -78,6 +80,7 @@ public sealed class TeacherRepository : ITeacherRepository
         teacher.DateDeleted = deleteDate;
         _context.Teachers.Update(teacher);
         await _context.SaveChangesAsync();
+        _context.ChangeTracker.Clear();
         return true;
     }
 

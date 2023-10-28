@@ -43,6 +43,7 @@ public sealed class SectionTypeRepository : ISectionTypeRepository
         var sectionType = new SectionType { Name = name };
         await _context.AddAsync(sectionType);
         await _context.SaveChangesAsync();
+        _context.ChangeTracker.Clear();
         return sectionType.Id;
     }
 
@@ -55,6 +56,7 @@ public sealed class SectionTypeRepository : ISectionTypeRepository
         sectionType.Name = name;
         _context.Update(sectionType);
         await _context.SaveChangesAsync();
+        _context.ChangeTracker.Clear();
         return true;
     }
 
@@ -77,6 +79,7 @@ public sealed class SectionTypeRepository : ISectionTypeRepository
         sectionType.DateDeleted = deleteDate;
         _context.SectionTypes.Update(sectionType);
         await _context.SaveChangesAsync();
+        _context.ChangeTracker.Clear();
         return true;
     }
 }

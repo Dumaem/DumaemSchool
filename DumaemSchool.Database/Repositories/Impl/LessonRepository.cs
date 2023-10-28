@@ -52,6 +52,7 @@ public sealed class LessonRepository : ILessonRepository
         var lessonDb = _mapper.Map(lesson);
         await _context.Lessons.AddAsync(lessonDb);
         await _context.SaveChangesAsync();
+        _context.ChangeTracker.Clear();
         return _mapper.Map(lessonDb);
     }
 
