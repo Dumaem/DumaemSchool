@@ -5,6 +5,7 @@
 @inject ISender Sender;
 @inject NavigationManager NavigationManager;
 @inject Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthenticationStateProvider;
+@attribute [Authorize]
 
 
 <PageTitle>Учитель</PageTitle>
@@ -18,6 +19,7 @@
     <MudText Typo="Typo.h4">Информация об учителе:</MudText>
     <MudSpacer></MudSpacer>
 
+
     <AuthorizeView Roles="@Role.DeputyDirector">
         <Authorized>
             <MudStack>
@@ -30,9 +32,15 @@
 
     <AuthorizeView Roles="@Role.Teacher">
         <Authorized>
-            <MudText Style="margin-top: 2%" Typo="Typo.h5">@_currentTeacher.Name</MudText>
-        </Authorized>
+            <MudChip Icon="@Icons.Material.Filled.Person" Color="Color.Primary" >ФИО: @_currentTeacher.Name</MudChip>
+         </Authorized>
     </AuthorizeView>
+
+    <br></br>
+
+             <MudChip Icon="@Icons.Material.Filled.Email" Color="Color.Primary" >Почта: @_currentTeacher.Email</MudChip>
+
+
 
 </MudContainer>
 
