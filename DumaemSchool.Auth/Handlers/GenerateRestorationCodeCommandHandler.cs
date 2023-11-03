@@ -40,6 +40,7 @@ internal sealed class
         };
         await _context.AddAsync(model, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
+        _context.ChangeTracker.Clear();
 
         var notification = new RestorationRequestedNotification(request.Email, code);
         await _publisher.Publish(notification, cancellationToken);

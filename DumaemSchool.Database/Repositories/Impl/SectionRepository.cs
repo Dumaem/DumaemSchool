@@ -123,6 +123,7 @@ public sealed class SectionRepository : ISectionRepository
         sectionStudent.IsActual = false;
         _context.SectionStudents.Update(sectionStudent);
         await _context.SaveChangesAsync();
+        _context.ChangeTracker.Clear();
         return true;
     }
 
@@ -142,6 +143,7 @@ public sealed class SectionRepository : ISectionRepository
 
         await _context.SectionStudents.AddAsync(sectionStudent);
         await _context.SaveChangesAsync();
+        _context.ChangeTracker.Clear();
         return true;
     }
 
@@ -216,6 +218,7 @@ public sealed class SectionRepository : ISectionRepository
         await _context.Schedules.AddRangeAsync(schedules);
 
         await _context.SaveChangesAsync();
+        _context.ChangeTracker.Clear();
 
         return _mapper.Map(sectionDb);
     }

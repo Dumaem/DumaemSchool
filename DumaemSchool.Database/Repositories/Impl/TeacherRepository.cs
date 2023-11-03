@@ -43,6 +43,7 @@ public sealed class TeacherRepository : ITeacherRepository
         var teacherDb = _mapper.Map(teacher);
         await _context.Teachers.AddAsync(teacherDb);
         await _context.SaveChangesAsync();
+        _context.ChangeTracker.Clear();
         return _mapper.Map(teacherDb);
     }
 
@@ -52,7 +53,9 @@ public sealed class TeacherRepository : ITeacherRepository
         if (teacherDb is null)
             return null;
 
-        return _mapper.Map(teacherDb);
+        var teacher = _mapper.Map(teacherDb);
+        teacher.Email = _context.Database.GetDbConnection().ExecuteScalar<string>(@"SELECT u.""Email"" FROM identity.""AspNetUsers"" u JOIN identity.""AspNetUserClaims"" uc ON u.""Id"" = uc.""UserId"" WHERE uc.""ClaimValue"" = @teacherId", new { teacherId = teacherId.ToString() });
+        return teacher;
     }
 
     public async Task<bool> UpdateTeacherNameAsync(int teacherId, string name)
@@ -64,6 +67,7 @@ public sealed class TeacherRepository : ITeacherRepository
         teacherDb.Name = name;
         _context.Update(teacherDb);
         await _context.SaveChangesAsync();
+        _context.ChangeTracker.Clear();
         return true;
     }
 
@@ -78,6 +82,7 @@ public sealed class TeacherRepository : ITeacherRepository
         teacher.DateDeleted = deleteDate;
         _context.Teachers.Update(teacher);
         await _context.SaveChangesAsync();
+        _context.ChangeTracker.Clear();
         return true;
     }
 

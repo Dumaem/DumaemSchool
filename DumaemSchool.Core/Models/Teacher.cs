@@ -6,6 +6,8 @@ public sealed class Teacher
 
     public string Name { get; set; } = null!;
 
+    public string Email { get; set; } = null!;
+
     public bool IsDeleted { get; set; }
 
     /// <summary>
