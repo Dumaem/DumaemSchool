@@ -36,40 +36,40 @@
                 <RowTemplate>
                     <MudTd>
                         <MudText>@(DateTimeFormatInfo.CurrentInfo.GetDayName(context.DayOfWeek))</MudText>
-                    </MudTd>
-                    <MudTd>
-                        <MudText>@context.Time</MudText>
-                    </MudTd>
-                    <MudTd>
-                        <MudText>@context.Duration </MudText>
-                    </MudTd>
-                    <MudTd>
-                        <MudText>@context.Cabinet</MudText>
-                    </MudTd>
-                </RowTemplate>
-            </MudTable>
-        </MudContainer>
-        <MudButton Class="ml-3" Disabled="@(_selectedSection.Id == 0)" Style="width: 10vw" Variant="Variant.Filled" OnClick="@ShowSchedule" Color="Color.Primary">Выбрать расписание</MudButton>
-    </div>
-    <MudContainer Class="pa-0 ma-0 mt-5" MaxWidth="MaxWidth.False">
-        <MudDatePicker Date="_selectedDate" MinDate="@(DateTime.Now - TimeSpan.FromDays(1))" Disabled="@(_selectedSectionSchedule.Count <= 0)" PickerVariant="PickerVariant.Dialog" Variant="Variant.Outlined" Label="Дата проведения"
-                       IsDateDisabledFunc="@((DateTime dt) => dt.DayOfWeek != _selectedSectionSchedule.First().DayOfWeek)"/>
-    </MudContainer>
-    <AuthorizeView Roles="@Role.DeputyDirector">
-        <div class="d-flex justify-content-md-between align-items-middle mt-5">
-            <MudContainer Class="ma-0 pa-0" MaxWidth="MaxWidth.False">
-                <MudTextField InputType="InputType.Text" Variant="Variant.Outlined" T="string" ReadOnly="true" Label="Заменяющий учитель" @bind-Value="@(_newTeacher.Name)"/>
+                            </MudTd>
+                            <MudTd>
+                                <MudText>@context.Time</MudText>
+                            </MudTd>
+                            <MudTd>
+                                <MudText>@context.Duration </MudText>
+                            </MudTd>
+                            <MudTd>
+                                <MudText>@context.Cabinet</MudText>
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudContainer>
+                <MudButton Class="ml-3" Disabled="@(_selectedSection.Id == 0)" Style="width: 10vw" Variant="Variant.Filled" OnClick="@ShowSchedule" Color="Color.Primary">Выбрать расписание</MudButton>
+            </div>
+            <MudContainer Class="pa-0 ma-0 mt-5" MaxWidth="MaxWidth.False">
+                <MudDatePicker Date="_selectedDate" MinDate="@(DateTime.Now - TimeSpan.FromDays(1))" Disabled="@(_selectedSectionSchedule.Count <= 0)" PickerVariant="PickerVariant.Dialog" Variant="Variant.Outlined" Label="Дата проведения"
+                               IsDateDisabledFunc="@((DateTime dt) => dt.DayOfWeek != _selectedSectionSchedule.First().DayOfWeek)"/>
             </MudContainer>
-            <MudButton Disabled="@(!(_teacherForReplace.Id != 0 && _selectedSection.Id != 0 && _selectedSectionSchedule.Count > 0 && _selectedDate is not null))" Class="ml-3" Style="width: 10vw" Variant="Variant.Filled" OnClick="@(() => ShowTeachers(true))" Color="Color.Primary">Выбрать учителя</MudButton>
-        </div>
-    </AuthorizeView>
-    <div class="d-flex flex-row mt-5">
-        <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="CanCreate" OnClick="@(async () => await CreateLesson(true))">Создать занятие</MudButton>
-        <MudButton Class="ml-5" Color="Color.Error" Variant="Variant.Filled" Disabled="CanRevoke" OnClick="@(async () => await CreateLesson(false))">Отменить занятие</MudButton>
-    </div>
-</MudContainer>
+            <AuthorizeView Roles="@Role.DeputyDirector">
+                <div class="d-flex justify-content-md-between align-items-middle mt-5">
+                    <MudContainer Class="ma-0 pa-0" MaxWidth="MaxWidth.False">
+                        <MudTextField InputType="InputType.Text" Variant="Variant.Outlined" T="string" ReadOnly="true" Label="Заменяющий учитель" @bind-Value="@(_newTeacher.Name)"/>
+                    </MudContainer>
+                    <MudButton Disabled="@(!(_teacherForReplace.Id != 0 && _selectedSection.Id != 0 && _selectedSectionSchedule.Count > 0 && _selectedDate is not null))" Class="ml-3" Style="width: 10vw" Variant="Variant.Filled" OnClick="@(() => ShowTeachers(true))" Color="Color.Primary">Выбрать учителя</MudButton>
+                </div>
+            </AuthorizeView>
+            <div class="d-flex flex-row mt-5">
+                <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="CanCreate" OnClick="@(async () => await CreateLesson(true))">Создать занятие</MudButton>
+                <MudButton Class="ml-5" Color="Color.Error" Variant="Variant.Filled" Disabled="CanRevoke" OnClick="@(async () => await CreateLesson(false))">Отменить занятие</MudButton>
+            </div>
+        </MudContainer>
 
-@code {
+    @code {
     private bool _isReplace;
     private SectionInfo _selectedSection = new();
     private List<SectionSchedule> _selectedSectionSchedule = new();
@@ -80,10 +80,10 @@
     //Если же занятие создается учителем, то выбранный кружок, расписание для него,дата проведения не должны быть пустыми
     private bool CanCreate => _isReplace ? !(_selectedSection.Id != 0 && _selectedSectionSchedule.Count > 0 && _selectedDate is not null
                                              && _teacherForReplace.Id != 0 && _newTeacher.Id != 0) : !(_selectedSection.Id != 0 && _selectedSectionSchedule.Count > 0 && _selectedDate is not null);
-        
+
     private bool CanRevoke => _isReplace ? !(_selectedSection.Id != 0 && _selectedSectionSchedule.Count > 0 && _selectedDate is not null
                                              && _teacherForReplace.Id != 0) : !(_selectedSection.Id != 0 && _selectedSectionSchedule.Count > 0 && _selectedDate is not null);
-    
+
     private int _teacherId;
     private TeacherDto _teacherForReplace = new();
     private TeacherDto _newTeacher = new();
@@ -91,15 +91,18 @@
     private async Task ShowSections()
     {
         var options = new DialogOptions
-        {
-            CloseOnEscapeKey = true, DisableBackdropClick = true, FullWidth = true,
-            CloseButton = true, MaxWidth = MaxWidth.Large
-        };
+            {
+                CloseOnEscapeKey = true,
+                DisableBackdropClick = true,
+                FullWidth = true,
+                CloseButton = true,
+                MaxWidth = MaxWidth.Large
+            };
         var parameters = new DialogParameters
-        {
-            ["IsForLesson"] = true,
-            ["TeacherId"] = _teacherForReplace.Id == 0 ? _teacherId : _teacherForReplace.Id
-        };
+            {
+                ["IsForLesson"] = true,
+                ["TeacherId"] = _teacherForReplace.Id == 0 ? _teacherId : _teacherForReplace.Id
+            };
 
         var dialog = await DialogService.ShowAsync<Sections>("Выбор кружка", parameters, options);
 
@@ -129,15 +132,18 @@
     private async Task ShowSchedule()
     {
         var options = new DialogOptions
-        {
-            CloseOnEscapeKey = true, DisableBackdropClick = true, FullWidth = true,
-            CloseButton = true, MaxWidth = MaxWidth.Large
-        };
+            {
+                CloseOnEscapeKey = true,
+                DisableBackdropClick = true,
+                FullWidth = true,
+                CloseButton = true,
+                MaxWidth = MaxWidth.Large
+            };
         var parameters = new DialogParameters
-        {
-            ["IsForLesson"] = true,
-            ["SectionId"] = _selectedSection.Id
-        };
+            {
+                ["IsForLesson"] = true,
+                ["SectionId"] = _selectedSection.Id
+            };
 
         var dialog = await DialogService.ShowAsync<Schedule>("Выбор из расписания", parameters, options);
 
@@ -155,14 +161,17 @@
     private async Task ShowTeachers(bool isForNew)
     {
         var options = new DialogOptions
-        {
-            CloseOnEscapeKey = true, DisableBackdropClick = true, FullWidth = true,
-            CloseButton = true, MaxWidth = MaxWidth.Large
-        };
+            {
+                CloseOnEscapeKey = true,
+                DisableBackdropClick = true,
+                FullWidth = true,
+                CloseButton = true,
+                MaxWidth = MaxWidth.Large
+            };
         var parameters = new DialogParameters
-        {
-            ["IsForLesson"] = true,
-        };
+            {
+                ["IsForLesson"] = true,
+            };
 
         var dialog = await DialogService.ShowAsync<Teachers>("Выбор Преподавателя", parameters, options);
 
@@ -171,7 +180,7 @@
         if (result.Canceled)
             return;
 
-    //Если открыто окно для выбора учетеля (которого заменяют)
+        //Если открыто окно для выбора учетеля (которого заменяют)
         if (!isForNew)
         {
             _teacherForReplace = (TeacherDto)result.Data;
@@ -199,42 +208,43 @@
             Snackbar.Add("Занятие на этот день уже создано!", Severity.Error);
             return;
         }
-        
+
         if (_isReplace)
         {
             _teacherId = _newTeacher.Id == 0 ? _teacherForReplace.Id : _newTeacher.Id;
-            
+
             var checkLessonTeacherCommand = new CheckTeacherAvailabilityToSectionCommand(_teacherId, _selectedSectionSchedule);
             var checkTeacherResult = await Sender.Send(checkLessonTeacherCommand);
 
-        if (!checkTeacherResult)
-        {
-            Snackbar.Add("У этого учителя уже есть занятие на это время!", Severity.Error);
-            return;
-        }
+            if (!checkTeacherResult)
+            {
+                Snackbar.Add("У этого учителя уже есть занятие на это время!", Severity.Error);
+                return;
+            }
 
-        if (!isConducted && _newTeacher. Id == 0)
-        {
-            _teacherId = _teacherForReplace.Id;
-        }
-            
-        var newLesson = new Lesson
-        {
-            ScheduleId = _selectedSectionSchedule.First().Id,
-            Date = DateOnly.FromDateTime(_selectedDate ?? DateTime.Now),
-            TeacherId = _teacherId,
-            IsConducted = isConducted
-        };
+            if (!isConducted && _newTeacher.Id == 0)
+            {
+                _teacherId = _teacherForReplace.Id;
+            }
 
-        var createLessonCommand = new CreateLessonCommand(newLesson);
-        var result = await Sender.Send(createLessonCommand);
+            var newLesson = new Lesson
+                {
+                    ScheduleId = _selectedSectionSchedule.First().Id,
+                    Date = DateOnly.FromDateTime(_selectedDate ?? DateTime.Now),
+                    TeacherId = _teacherId,
+                    IsConducted = isConducted
+                };
 
-        if (result.IsSuccess)
-        {
-            Snackbar.Add(isConducted ? "Занятие успешно создано!" : "Занятие успешно отменено!",
-                isConducted ? Severity.Success : Severity.Normal);
+            var createLessonCommand = new CreateLessonCommand(newLesson);
+            var result = await Sender.Send(createLessonCommand);
+
+            if (result.IsSuccess)
+            {
+                Snackbar.Add(isConducted ? "Занятие успешно создано!" : "Занятие успешно отменено!",
+                    isConducted ? Severity.Success : Severity.Normal);
+            }
+            RefreshData();
         }
-        RefreshData();
     }
 
 
@@ -246,5 +256,4 @@
         _teacherForReplace = new TeacherDto();
         _newTeacher = new TeacherDto();
     }
-
-}
+    }
