@@ -131,7 +131,7 @@
                 var nominalValue = x.Average(z => z.FactVisitedLessonsCount);
                 var fact = x.Sum(z => z.FactVisitedLessonsCount);
                 var plan = x.Sum(z => z.PlanVisitedLessonsCount);
-                var percent = fact * 1.0 / plan * 100;
+                var percent = Math.Round(fact * 1.0 / plan * 100, 2);
 
                 return $"Среднее значение: {nominalValue} | {percent}%";
             }
